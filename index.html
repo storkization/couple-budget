@@ -289,8 +289,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="sum-cell hdr t-color">합계</div>
       </div>
       <div class="sum-row">
-        <div class="sum-cell label">💚 수입</div>
-        <div class="sum-cell sum-inc" id="d-inc">0</div><div class="sum-cell sum-inc" id="k-inc">0</div><div class="sum-cell sum-inc" id="t-inc">0</div>
+        <div class="sum-cell label">🎯 예산</div>
+        <div class="sum-cell sum-inc" id="d-bud">-</div>
+        <div class="sum-cell sum-inc" id="k-bud">-</div>
+        <div class="sum-cell sum-inc" id="t-bud">-</div>
       </div>
       <div class="sum-row">
         <div class="sum-cell label">🌹 지출</div>
@@ -298,15 +300,56 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       </div>
       <div class="sum-row">
         <div class="sum-cell label">✨ 잔액</div>
-        <div class="sum-cell sum-bal" id="d-bal">0</div><div class="sum-cell sum-bal" id="k-bal">0</div><div class="sum-cell sum-bal" id="t-bal">0</div>
+        <div class="sum-cell sum-bal" id="d-bal">-</div><div class="sum-cell sum-bal" id="k-bal">-</div><div class="sum-cell sum-bal" id="t-bal">-</div>
       </div>
     </div>
+
+    <!-- 예산 설정 카드 (도훈/경은 개별) -->
     <div class="budget-card">
-      <div class="budget-top"><span class="budget-label">🎯 이번 달 예산</span><span class="budget-info" id="budget-info">미설정</span></div>
-      <div class="budget-bar-bg"><div class="budget-bar-fill safe" id="budget-bar" style="width:0%"></div></div>
-      <div class="budget-row">
-        <input class="budget-input" type="number" id="budget-input" placeholder="예산 입력 (원)">
-        <button class="budget-set-btn" id="budget-set-btn">설정</button>
+      <div style="font-size:13px;font-weight:700;color:var(--brown2);margin-bottom:12px">🎯 이번 달 예산 설정</div>
+
+      <!-- 도훈 예산 바 -->
+      <div style="margin-bottom:10px">
+        <div class="budget-top">
+          <span class="budget-label" style="color:var(--dohun)">💙 도훈</span>
+          <span class="budget-info" id="d-budget-info">미설정</span>
+        </div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill safe" id="d-budget-bar" style="width:0%"></div></div>
+        <div class="budget-row" style="margin-top:6px">
+          <input class="budget-input" type="number" id="d-budget-input" placeholder="도훈 예산 (원)" inputmode="numeric">
+          <button class="budget-set-btn" id="d-budget-set-btn" style="background:var(--dohun)">설정</button>
+        </div>
+      </div>
+
+      <!-- 경은 예산 바 -->
+      <div style="margin-bottom:10px">
+        <div class="budget-top">
+          <span class="budget-label" style="color:var(--kyungeun)">🩷 경은</span>
+          <span class="budget-info" id="k-budget-info">미설정</span>
+        </div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill safe" id="k-budget-bar" style="width:0%"></div></div>
+        <div class="budget-row" style="margin-top:6px">
+          <input class="budget-input" type="number" id="k-budget-input" placeholder="경은 예산 (원)" inputmode="numeric">
+          <button class="budget-set-btn" id="k-budget-set-btn" style="background:var(--kyungeun)">설정</button>
+        </div>
+      </div>
+
+      <!-- 합계 바 -->
+      <div style="border-top:1px solid var(--border);padding-top:10px">
+        <div class="budget-top">
+          <span class="budget-label">📊 합계</span>
+          <span class="budget-info" id="t-budget-info">미설정</span>
+        </div>
+        <div class="budget-bar-bg" style="height:10px">
+          <div class="budget-bar-fill safe" id="t-budget-bar" style="width:0%"></div>
+        </div>
+        <!-- 바로미터 눈금 -->
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span style="font-size:9px;color:var(--brown3)">0%</span>
+          <span style="font-size:9px;color:var(--green)">50%</span>
+          <span style="font-size:9px;color:var(--gold)">80%</span>
+          <span style="font-size:9px;color:var(--rose)">100%</span>
+        </div>
       </div>
     </div>
     <div class="section-head">이번 달 내역</div>
@@ -759,7 +802,7 @@ onAuthStateChanged(auth, user => {
 function startSync(){
   if(unsubTx) unsubTx(); if(unsubEv) unsubEv();
   unsubTx = onSnapshot(txCol, snap=>{ txs=snap.docs.map(d=>({id:d.id,...d.data()})); renderAll(); });
-  unsubEv = onSnapshot(evCol, snap=>{ evts=snap.docs.map(d=>({id:d.id,...d.data()})); rCal(); if(selDay) rCalDay(selDay); });
+  unsubEv = onSnapshot(evCol, snap=>{ evts=snap.docs.map(d=>({id:d.id,...d.data()})); rCal(); });
 }
 
 // ── MONTH ──
@@ -769,32 +812,73 @@ $('next-btn').addEventListener('click',()=>{ cMonth++; if(cMonth>11){cMonth=0;cY
 function refreshCalIfOpen(){ if(!$('page-cal').classList.contains('hidden')){ rCal(); rCalSummary(); } }
 const mTx = () => txs.filter(t=>{ const d=new Date(t.date); return d.getFullYear()===cYear&&d.getMonth()===cMonth; });
 
-// ── BUDGET ──
-$('budget-set-btn').addEventListener('click',()=>{
-  const v=parseInt($('budget-input').value);
+// ── BUDGET (도훈/경은 개별) ──
+function getBudget(who){ return parseInt(localStorage.getItem(`b_${who}_${cYear}_${cMonth}`)||'0'); }
+function setBudget(who, v){ localStorage.setItem(`b_${who}_${cYear}_${cMonth}`, v); }
+
+function updateBudgetBar(barId, infoId, expense, budget){
+  if(budget > 0){
+    const pct = Math.min(100, Math.round(expense / budget * 100));
+    $(infoId).textContent = `${fmtFull(expense)} / ${fmtFull(budget)} (${pct}%)`;
+    $(barId).style.width = pct + '%';
+    $(barId).className = 'budget-bar-fill ' + (pct>=100?'over':pct>=80?'warn':'safe');
+  } else {
+    $(infoId).textContent = '미설정';
+    $(barId).style.width = '0%';
+    $(barId).className = 'budget-bar-fill safe';
+  }
+}
+
+$('d-budget-set-btn').addEventListener('click',()=>{
+  const v = parseInt($('d-budget-input').value);
   if(!v||v<=0) return toast('올바른 금액을 입력해주세요');
-  localStorage.setItem(`b_${cYear}_${cMonth}`,v);
-  renderSummary(); toast('✅ 예산 설정됐어요!');
+  setBudget('dohun', v); renderSummary(); toast('💙 도훈 예산 설정됐어요!');
+});
+$('k-budget-set-btn').addEventListener('click',()=>{
+  const v = parseInt($('k-budget-input').value);
+  if(!v||v<=0) return toast('올바른 금액을 입력해주세요');
+  setBudget('kyungeun', v); renderSummary(); toast('🩷 경은 예산 설정됐어요!');
 });
 
 // ── SUMMARY ──
 function renderSummary(){
-  const mt=mTx();
-  const calc=(who,type)=>mt.filter(t=>t.who===who&&t.type===type).reduce((s,t)=>s+Number(t.amount),0);
-  const dI=calc('dohun','income'),kI=calc('kyungeun','income');
-  const dE=calc('dohun','expense'),kE=calc('kyungeun','expense');
-  $('d-inc').textContent=fmt(dI);$('k-inc').textContent=fmt(kI);$('t-inc').textContent=fmt(dI+kI);
-  $('d-exp').textContent=fmt(dE);$('k-exp').textContent=fmt(kE);$('t-exp').textContent=fmt(dE+kE);
-  const setbal=(id,v)=>{$(id).textContent=fmt(v);$(id).style.color=v>=0?'var(--green)':'var(--rose)';};
-  setbal('d-bal',dI-dE);setbal('k-bal',kI-kE);setbal('t-bal',dI+kI-dE-kE);
-  const budget=parseInt(localStorage.getItem(`b_${cYear}_${cMonth}`)||'0'),tE=dE+kE;
-  if(budget>0){
-    const pct=Math.min(100,Math.round(tE/budget*100));
-    $('budget-info').textContent=`${fmtFull(tE)} / ${fmtFull(budget)} (${pct}%)`;
-    $('budget-bar').style.width=pct+'%';
-    $('budget-bar').className='budget-bar-fill '+(pct>=100?'over':pct>=80?'warn':'safe');
-    $('budget-input').value=budget;
-  } else { $('budget-info').textContent='미설정';$('budget-bar').style.width='0%'; }
+  const mt = mTx();
+  const calc = (who, type) => mt.filter(t=>t.who===who&&t.type===type).reduce((s,t)=>s+Number(t.amount),0);
+  const dE = calc('dohun','expense'), kE = calc('kyungeun','expense');
+
+  // 예산 불러오기
+  const dB = getBudget('dohun'), kB = getBudget('kyungeun');
+  const tB = dB + kB;
+
+  // 요약 테이블 업데이트
+  $('d-exp').textContent = fmt(dE); $('k-exp').textContent = fmt(kE); $('t-exp').textContent = fmt(dE+kE);
+
+  // 예산 셀
+  $('d-bud').textContent = dB > 0 ? fmt(dB) : '-';
+  $('k-bud').textContent = kB > 0 ? fmt(kB) : '-';
+  $('t-bud').textContent = tB > 0 ? fmt(tB) : '-';
+
+  // 잔액 = 예산 - 지출 (예산 미설정 시 '-')
+  const setbal = (id, budget, exp) => {
+    if(budget > 0){
+      const v = budget - exp;
+      $(id).textContent = fmt(v);
+      $(id).style.color = v >= 0 ? 'var(--green)' : 'var(--rose)';
+    } else {
+      $(id).textContent = '-';
+      $(id).style.color = 'var(--brown3)';
+    }
+  };
+  setbal('d-bal', dB, dE); setbal('k-bal', kB, kE); setbal('t-bal', tB, dE+kE);
+
+  // 예산 입력창에 기존값 표시
+  if(dB > 0) $('d-budget-input').value = dB;
+  if(kB > 0) $('k-budget-input').value = kB;
+
+  // 바로미터 업데이트
+  updateBudgetBar('d-budget-bar', 'd-budget-info', dE, dB);
+  updateBudgetBar('k-budget-bar', 'k-budget-info', kE, kB);
+  updateBudgetBar('t-budget-bar', 't-budget-info', dE+kE, tB);
 }
 
 // ── TX HTML ──
