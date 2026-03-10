@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>도훈 & 경은 가계부 ❤️</title>
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="우리 가계부">
+<link rel="apple-touch-icon" href="pic/icon192.png">
+<meta name="theme-color" content="#e8785a">
 <style>
 :root{
   --bg:#f7f3ef;--surface:#fff;
@@ -398,12 +405,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         </div>
       </div>
       <div class="cal-card"><div class="cal-grid" id="cal-grid"></div></div>
-      <div id="cal-day-section" class="cal-day-section hidden">
-        <div class="cal-day-title" id="cal-label">날짜 선택</div>
-        <div id="cal-tx-list"></div>
-        <div id="cal-event-list"></div>
-        <button class="add-event-btn" id="add-event-btn">📅 일정 추가하기</button>
-      </div>
     </div>
   </div>
 
@@ -497,21 +498,86 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
   </div>
 </div>
 
-<!-- EVENT MODAL -->
+<!-- DAY DETAIL MODAL (날짜 클릭 시) -->
+<div class="modal-overlay" id="day-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="day-modal-title">3월 10일</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="day-add-event-btn" style="background:var(--gold-light);border:none;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;font-family:inherit">+ 일정</button>
+        <button class="modal-close" id="day-modal-close">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <!-- 거래 내역 -->
+      <div id="day-tx-section">
+        <div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:7px">💳 거래 내역</div>
+        <div id="day-tx-list"></div>
+      </div>
+      <!-- 일정 -->
+      <div id="day-ev-section" style="margin-top:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:7px">📅 일정</div>
+        <div id="day-ev-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL (세분화) -->
 <div class="modal-overlay" id="event-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-header"><h3>📅 일정 추가</h3><button class="modal-close" id="event-close">✕</button></div>
     <div class="modal-body">
-      <div style="margin-bottom:10px">
-        <label class="form-label">📝 일정 내용</label>
-        <input class="form-input" type="text" id="event-desc" placeholder="예: 송도 안경점 방문">
+
+      <!-- 일정 제목 -->
+      <div style="margin-bottom:12px">
+        <label class="form-label">📝 일정 제목</label>
+        <input class="form-input" type="text" id="event-desc" placeholder="예: 병원 예약, 영화 보기...">
       </div>
-      <div style="margin-bottom:10px">
-        <label class="form-label">📅 날짜</label>
-        <input class="form-input" type="date" id="event-date">
+
+      <!-- 날짜 + 시간 -->
+      <div class="row2" style="margin-bottom:12px">
+        <div>
+          <label class="form-label">📅 날짜</label>
+          <input class="form-input" type="date" id="event-date">
+        </div>
+        <div>
+          <label class="form-label">⏰ 시간 (선택)</label>
+          <input class="form-input" type="time" id="event-time" placeholder="없음">
+        </div>
       </div>
-      <div style="margin-bottom:16px">
+
+      <!-- 종일 여부 -->
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--brown2)">
+          <input type="checkbox" id="event-allday" style="width:16px;height:16px;accent-color:var(--rose);cursor:pointer" checked>
+          하루 종일
+        </label>
+      </div>
+
+      <!-- 장소 -->
+      <div style="margin-bottom:12px">
+        <label class="form-label">📍 장소 (선택)</label>
+        <input class="form-input" type="text" id="event-place" placeholder="예: 스타벅스 홍대점, 집">
+      </div>
+
+      <!-- 카테고리 태그 -->
+      <div style="margin-bottom:12px">
+        <label class="form-label">🏷️ 종류</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="event-type-chips">
+          <button class="cat-chip active" data-et="일반">📌 일반</button>
+          <button class="cat-chip" data-et="데이트">💑 데이트</button>
+          <button class="cat-chip" data-et="약속">🤝 약속</button>
+          <button class="cat-chip" data-et="의료">💊 의료</button>
+          <button class="cat-chip" data-et="여행">✈️ 여행</button>
+          <button class="cat-chip" data-et="기념일">🎉 기념일</button>
+        </div>
+      </div>
+
+      <!-- 누구 -->
+      <div style="margin-bottom:12px">
         <label class="form-label">👤 누구의 일정?</label>
         <div class="who-toggle">
           <button class="who-btn dohun" id="ev-who-d">💙 도훈</button>
@@ -519,6 +585,13 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <button class="who-btn together active" id="ev-who-both">💑 함께</button>
         </div>
       </div>
+
+      <!-- 메모 -->
+      <div style="margin-bottom:16px">
+        <label class="form-label">💬 메모 (선택)</label>
+        <textarea class="form-textarea" id="event-memo" placeholder="추가 메모..."></textarea>
+      </div>
+
       <button class="submit-btn" id="event-save-btn">일정 저장</button>
     </div>
   </div>
@@ -638,10 +711,19 @@ function loadSavedPhotos() {
 }
 
 // ── AUTH ──
+const ALLOWED_EMAILS = ['dbke0610@gmail.com', 'ventisummer@gmail.com'];
+
 $('login-btn').addEventListener('click', async () => {
   $('login-spinner').classList.add('show');
   try {
-    await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, provider);
+    // 허용된 이메일이 아니면 즉시 로그아웃
+    if(!ALLOWED_EMAILS.includes(result.user.email)) {
+      await signOut(auth);
+      $('login-spinner').classList.remove('show');
+      toast('❌ 접근 권한이 없어요');
+      return;
+    }
   } catch(e) {
     $('login-spinner').classList.remove('show');
     if(e.code==='auth/popup-blocked') toast('❗ 팝업을 허용해 주세요');
@@ -653,9 +735,13 @@ $('logout-btn').addEventListener('click', () => signOut(auth));
 onAuthStateChanged(auth, user => {
   $('login-spinner').classList.remove('show');
   if(user){
+    // 혹시 몰라 onAuthStateChanged에서도 한번 더 체크
+    if(!ALLOWED_EMAILS.includes(user.email)) {
+      signOut(auth); return;
+    }
     $('login-screen').classList.add('hidden');
     $('app-screen').classList.remove('hidden');
-    const isK = user.email?.includes('kyungeun')||user.displayName?.includes('경은');
+    const isK = user.email === 'ventisummer@gmail.com';
     cWho = isK?'kyungeun':'dohun';
     const av = $('user-avatar');
     av.textContent = isK?'경':'도'; av.className=`uav ${isK?'uav-k':'uav-d'}`;
@@ -912,8 +998,9 @@ function rCalSummary(){
 function rCal(){
   rCalSummary();
   const fd=new Date(cYear,cMonth,1).getDay(),dim=new Date(cYear,cMonth+1,0).getDate(),today=new Date();
-  const dExp={},hasEv={};
+  const dExp={},hasEv={},hasTx={};
   mTx().filter(t=>t.type==='expense').forEach(t=>{const d=new Date(t.date).getDate();dExp[d]=(dExp[d]||0)+Number(t.amount);});
+  mTx().forEach(t=>{hasTx[new Date(t.date).getDate()]=true;});
   evts.filter(e=>{const d=new Date(e.date);return d.getFullYear()===cYear&&d.getMonth()===cMonth;}).forEach(e=>{hasEv[new Date(e.date).getDate()]=true;});
   let h=['일','월','화','수','목','금','토'].map(d=>`<div class="cal-day-label">${d}</div>`).join('');
   for(let i=0;i<fd;i++) h+=`<div class="cal-day other-month"></div>`;
@@ -922,41 +1009,96 @@ function rCal(){
     const cls=['cal-day',iT?'today':'',hasEv[d]?'has-event':''].filter(Boolean).join(' ');
     h+=`<div class="${cls}" data-day="${d}"><span>${d}</span>${dExp[d]?`<span class="cal-day-exp">${fmtS(dExp[d])}</span>`:''}</div>`;
   }
-  const grid=$('cal-grid');grid.innerHTML=h;
-  grid.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>{selDay=parseInt(el.dataset.day);rCalDay(selDay);}));
-  if(selDay) rCalDay(selDay);
-}
-function rCalDay(d){
-  const ds=`${cYear}-${String(cMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  const dt=txs.filter(t=>t.date===ds),devts=evts.filter(e=>e.date===ds);
-  $('cal-day-section').classList.remove('hidden');
-  $('cal-label').textContent=`${cMonth+1}월 ${d}일`;
-  const txList=$('cal-tx-list');
-  txList.innerHTML=dt.length?dt.map(tx=>txH(tx)).join(''):'';
-  txList.querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>openDetail(el.dataset.id)));
-  const evList=$('cal-event-list');
-  if(devts.length){
-    evList.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--brown3);margin:10px 0 6px">📅 일정</div>'+devts.map(ev=>`
-      <div class="event-item">
-        <span class="event-title">${ev.desc}</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span class="event-who-badge ${ev.who==='dohun'?'d':ev.who==='kyungeun'?'k':'both'}">${ev.who==='dohun'?'도훈':ev.who==='kyungeun'?'경은':'함께'}</span>
-          <span class="event-del" data-id="${ev.id}">✕</span>
-        </div>
-      </div>`).join('');
-    evList.querySelectorAll('.event-del').forEach(btn=>btn.addEventListener('click',async e=>{
-      e.stopPropagation();if(!confirm('일정을 삭제할까요?'))return;
-      await deleteDoc(doc(db,'events',btn.dataset.id));toast('🗑️ 일정 삭제됐어요');
-    }));
-  } else { evList.innerHTML=''; }
-  $('add-event-btn').onclick=()=>openEventModal(ds);
+  const grid=$('cal-grid'); grid.innerHTML=h;
+  // 날짜 클릭 → 바로 day-modal 팝업
+  grid.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>{
+    selDay=parseInt(el.dataset.day); openDayModal(selDay);
+  }));
 }
 
-// ── EVENT MODAL ──
+// ── DAY MODAL (날짜 탭 시 팝업) ──
+function openDayModal(d){
+  const ds=`${cYear}-${String(cMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const days=['일','월','화','수','목','금','토'];
+  const dateObj=new Date(ds+'T00:00:00');
+  $('day-modal-title').textContent=`${cMonth+1}월 ${d}일 (${days[dateObj.getDay()]})`;
+
+  const dt=txs.filter(t=>t.date===ds);
+  const devts=evts.filter(e=>e.date===ds);
+
+  // 거래 내역
+  const txSec=$('day-tx-section');
+  if(dt.length){
+    txSec.style.display='block';
+    $('day-tx-list').innerHTML=dt.map(tx=>txH(tx)).join('');
+    $('day-tx-list').querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>{closeM('day-modal');openDetail(el.dataset.id);}));
+  } else { txSec.style.display='none'; }
+
+  // 일정 목록
+  const evSec=$('day-ev-section');
+  if(devts.length){
+    evSec.style.display='block';
+    $('day-ev-list').innerHTML=devts.map(ev=>{
+      const typeEmoji={일반:'📌',데이트:'💑',약속:'🤝',의료:'💊',여행:'✈️',기념일:'🎉'}[ev.evType||'일반']||'📌';
+      const timeStr=ev.time&&ev.time!==''?` · ⏰ ${ev.time}`:'';
+      const placeStr=ev.place?` · 📍 ${ev.place}`:'';
+      return `<div class="event-item" style="flex-direction:column;align-items:flex-start;gap:5px">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+          <span class="event-title">${typeEmoji} ${ev.desc}</span>
+          <div style="display:flex;align-items:center;gap:5px">
+            <span class="event-who-badge ${ev.who==='dohun'?'d':ev.who==='kyungeun'?'k':'both'}">${ev.who==='dohun'?'도훈':ev.who==='kyungeun'?'경은':'함께'}</span>
+            <span class="event-del" data-id="${ev.id}" style="cursor:pointer;font-size:13px;color:var(--brown3)">✕</span>
+          </div>
+        </div>
+        ${timeStr||placeStr?`<div style="font-size:11px;color:var(--brown3)">${timeStr}${placeStr}</div>`:''}
+        ${ev.memo?`<div style="font-size:11px;color:var(--brown3)">💬 ${ev.memo}</div>`:''}
+      </div>`;
+    }).join('');
+    $('day-ev-list').querySelectorAll('.event-del').forEach(btn=>btn.addEventListener('click',async e=>{
+      e.stopPropagation(); if(!confirm('일정을 삭제할까요?')) return;
+      await deleteDoc(doc(db,'events',btn.dataset.id)); toast('🗑️ 삭제됐어요');
+      openDayModal(d); rCal();
+    }));
+  } else { evSec.style.display='none'; }
+
+  // 내역도 일정도 없으면 빈 메시지
+  if(!dt.length && !devts.length){
+    txSec.style.display='block';
+    $('day-tx-list').innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:13px">📭 내역이 없어요</div>`;
+  }
+
+  // + 일정 버튼
+  $('day-add-event-btn').onclick=()=>{ closeM('day-modal'); openEventModal(ds); };
+  $('day-modal').classList.add('open');
+}
+$('day-modal-close').addEventListener('click',()=>closeM('day-modal'));
+$('day-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('day-modal');});
+
+// ── EVENT MODAL (세분화) ──
+let evType='일반';
 function openEventModal(dateStr){
-  $('event-desc').value='';$('event-date').value=dateStr;evWho='both';syncEvWho();
+  $('event-desc').value=''; $('event-date').value=dateStr;
+  $('event-time').value=''; $('event-place').value=''; $('event-memo').value='';
+  $('event-allday').checked=true; $('event-time').disabled=true; $('event-time').style.opacity='0.4';
+  evWho='both'; syncEvWho();
+  evType='일반'; syncEvType();
   $('event-modal').classList.add('open');
 }
+// 종일 체크박스 토글
+$('event-allday').addEventListener('change',()=>{
+  const allday=$('event-allday').checked;
+  $('event-time').disabled=allday; $('event-time').style.opacity=allday?'0.4':'1';
+  if(allday) $('event-time').value='';
+});
+// 종류 칩
+function syncEvType(){
+  document.querySelectorAll('#event-type-chips .cat-chip').forEach(b=>{
+    b.classList.toggle('active', b.dataset.et===evType);
+  });
+}
+document.querySelectorAll('#event-type-chips .cat-chip').forEach(b=>{
+  b.addEventListener('click',()=>{ evType=b.dataset.et; syncEvType(); });
+});
 function syncEvWho(){
   ['d','k','both'].forEach(w=>$(`ev-who-${w}`).classList.remove('active'));
   $(`ev-who-${evWho}`).classList.add('active');
@@ -967,12 +1109,17 @@ $('ev-who-both').addEventListener('click',()=>{evWho='both';syncEvWho();});
 $('event-close').addEventListener('click',()=>closeM('event-modal'));
 $('event-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('event-modal');});
 $('event-save-btn').addEventListener('click',async()=>{
-  const desc=$('event-desc').value.trim(),date=$('event-date').value;
-  if(!desc)return toast('일정 내용을 입력해주세요');if(!date)return toast('날짜를 선택해주세요');
+  const desc=$('event-desc').value.trim(), date=$('event-date').value;
+  if(!desc) return toast('일정 제목을 입력해주세요');
+  if(!date) return toast('날짜를 선택해주세요');
+  const allday=$('event-allday').checked;
+  const time=allday?'':$('event-time').value;
+  const place=$('event-place').value.trim();
+  const memo=$('event-memo').value.trim();
   const wm={d:'dohun',k:'kyungeun',both:'both'};
-  await addDoc(evCol,{desc,date,who:wm[evWho],createdAt:new Date().toISOString()});
-  closeM('event-modal');toast('📅 일정 추가됐어요!');
-  selDay=parseInt(date.split('-')[2]);rCal();rCalDay(selDay);
+  await addDoc(evCol,{desc,date,time,place,memo,evType,who:wm[evWho],allday,createdAt:new Date().toISOString()});
+  closeM('event-modal'); toast('📅 일정 추가됐어요!');
+  selDay=parseInt(date.split('-')[2]); rCal();
 });
 
 // ── PAGE NAV ──
