@@ -645,7 +645,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyAiwlmOmYCrPvIMcL-DUkfxkuTM5REky3Q",
@@ -756,22 +756,43 @@ function loadSavedPhotos() {
 // ── AUTH ──
 const ALLOWED_EMAILS = ['dbke0610@gmail.com', 'ventisummer@gmail.com'];
 
+// 리다이렉트 후 돌아왔을 때 결과 처리
+getRedirectResult(auth).then(result => {
+  if(!result) return;
+  if(!ALLOWED_EMAILS.includes(result.user.email)){
+    signOut(auth);
+    setTimeout(()=>toast('❌ 접근 권한이 없어요'), 500);
+  }
+}).catch(e => {
+  if(e.code !== 'auth/null-provider') toast('로그인 오류: ' + e.code);
+});
+
 $('login-btn').addEventListener('click', async () => {
   $('login-spinner').classList.add('show');
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   try {
-    const result = await signInWithPopup(auth, provider);
-    // 허용된 이메일이 아니면 즉시 로그아웃
-    if(!ALLOWED_EMAILS.includes(result.user.email)) {
-      await signOut(auth);
-      $('login-spinner').classList.remove('show');
-      toast('❌ 접근 권한이 없어요');
-      return;
+    if(isSafari || isMobile){
+      // 사파리/모바일: 리다이렉트 방식 (팝업 차단 없음)
+      await signInWithRedirect(auth, provider);
+    } else {
+      // PC 크롬 등: 팝업 방식
+      const result = await signInWithPopup(auth, provider);
+      if(!ALLOWED_EMAILS.includes(result.user.email)){
+        await signOut(auth);
+        $('login-spinner').classList.remove('show');
+        toast('❌ 접근 권한이 없어요');
+      }
     }
   } catch(e) {
     $('login-spinner').classList.remove('show');
-    if(e.code==='auth/popup-blocked') toast('❗ 팝업을 허용해 주세요');
-    else if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request') toast('로그인이 취소됐어요');
-    else toast('로그인 오류: '+e.code);
+    if(e.code==='auth/popup-blocked'){
+      await signInWithRedirect(auth, provider);
+    } else if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
+      toast('로그인이 취소됐어요');
+    } else {
+      toast('로그인 오류: '+e.code);
+    }
   }
 });
 $('logout-btn').addEventListener('click', () => signOut(auth));
