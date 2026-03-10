@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우리 가계부 💑</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6f1;
+    --rose: #e8937a;
+    --rose-dark: #c9705a;
+    --rose-light: #f5c4b8;
+    --sage: #8aab96;
+    --sage-light: #c8ddd0;
+    --brown: #5c3d2e;
+    --brown-light: #8b6555;
+    --gold: #d4a84b;
+    --shadow: rgba(92, 61, 46, 0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Gowun Dodum', sans-serif; background: var(--cream); color: var(--brown); min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background: linear-gradient(135deg, #faf6f1 0%, #f5e6df 100%);
+  }
+  .couple-photo-wrap {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 4px solid var(--rose-light);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+  .couple-photo {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+  .login-title { font-family: 'Nanum Myeongjo', serif; font-size: 28px; color: var(--brown); margin-bottom: 8px; }
+  .login-sub { font-size: 14px; color: var(--brown-light); margin-bottom: 40px; }
+  .google-btn {
+    display: flex; align-items: center; gap: 12px;
+    background: white; border: 2px solid var(--rose-light);
+    border-radius: 16px; padding: 14px 24px;
+    font-family: 'Gowun Dodum', sans-serif; font-size: 15px;
+    color: var(--brown); cursor: pointer;
+    box-shadow: 0 4px 16px var(--shadow);
+    transition: all 0.2s;
+  }
+  .google-btn:hover { border-color: var(--rose); transform: translateY(-2px); }
+  .google-btn img { width: 22px; height: 22px; }
+
+  /* HEADER */
+  header { background: linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%); padding: 28px 20px 20px; text-align: center; position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+  header h1 { font-family: 'Nanum Myeongjo', serif; font-size: 26px; color: white; letter-spacing: 2px; position: relative; z-index: 1; }
+  .header-user { color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 4px; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 11px; padding: 3px 8px; border-radius: 8px; cursor: pointer; font-family: 'Gowun Dodum', sans-serif; }
+
+  /* MONTH NAV */
+  .month-nav { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px 20px; background: white; border-bottom: 1px solid rgba(92,61,46,0.08); }
+  .month-nav button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--rose); padding: 4px 8px; border-radius: 8px; }
+  .month-nav span { font-family: 'Nanum Myeongjo', serif; font-size: 18px; font-weight: 700; color: var(--brown); min-width: 100px; text-align: center; }
+
+  /* SUMMARY */
+  .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 16px; }
+  .card { background: white; border-radius: 16px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 12px var(--shadow); }
+  .card .label { font-size: 11px; color: var(--brown-light); margin-bottom: 6px; }
+  .card .amount { font-family: 'Nanum Myeongjo', serif; font-size: 16px; font-weight: 700; }
+  .card.income .amount { color: var(--sage); }
+  .card.expense .amount { color: var(--rose); }
+  .card.balance .amount { color: var(--gold); }
+
+  /* BUDGET */
+  .budget-section { margin: 0 16px 16px; background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 12px var(--shadow); }
+  .budget-section .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .budget-section .top span { font-size: 13px; color: var(--brown-light); }
+  .budget-section .top strong { font-size: 14px; color: var(--brown); }
+  .progress-bar { background: var(--sage-light); border-radius: 99px; height: 10px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--sage), var(--rose)); transition: width 0.5s ease; }
+  .budget-edit { margin-top: 10px; display: flex; gap: 8px; }
+  .budget-edit input { flex: 1; border: 1.5px solid var(--sage-light); border-radius: 10px; padding: 7px 12px; font-family: 'Gowun Dodum', sans-serif; font-size: 13px; color: var(--brown); background: var(--cream); outline: none; }
+  .budget-edit input:focus { border-color: var(--rose); }
+  .budget-edit button { background: var(--sage); color: white; border: none; border-radius: 10px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: 'Gowun Dodum', sans-serif; }
+
+  /* TABS */
+  .type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+  .type-btn { flex: 1; padding: 10px; border-radius: 12px; border: 2px solid transparent; font-family: 'Gowun Dodum', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; font-weight: bold; }
+  .type-btn.expense { background: var(--rose-light); color: var(--rose-dark); }
+  .type-btn.expense.active { background: var(--rose); color: white; border-color: var(--rose-dark); }
+  .type-btn.income { background: var(--sage-light); color: var(--sage); }
+  .type-btn.income.active { background: var(--sage); color: white; border-color: #5a8a6a; }
+
+  /* FORM */
+  .add-form { margin: 0 16px 16px; background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 12px var(--shadow); }
+  .add-form h3 { font-family: 'Nanum Myeongjo', serif; font-size: 15px; margin-bottom: 14px; color: var(--brown); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group label { display: block; font-size: 11px; color: var(--brown-light); margin-bottom: 5px; }
+  .form-group input, .form-group select { width: 100%; border: 1.5px solid rgba(92,61,46,0.15); border-radius: 10px; padding: 9px 12px; font-family: 'Gowun Dodum', sans-serif; font-size: 13px; color: var(--brown); background: var(--cream); outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--rose); }
+  .submit-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--rose), var(--rose-dark)); color: white; border: none; border-radius: 12px; font-family: 'Gowun Dodum', sans-serif; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 4px; letter-spacing: 1px; }
+
+  /* LIST */
+  .transaction-list { padding: 0 16px 100px; }
+  .date-group { margin-bottom: 16px; }
+  .date-label { font-size: 12px; color: var(--brown-light); margin-bottom: 8px; padding-left: 4px; }
+  .transaction-item { background: white; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; box-shadow: 0 2px 8px var(--shadow); }
+  .tx-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .tx-icon.expense { background: var(--rose-light); }
+  .tx-icon.income { background: var(--sage-light); }
+  .tx-info { flex: 1; }
+  .tx-info .tx-desc { font-size: 14px; color: var(--brown); font-weight: bold; }
+  .tx-info .tx-cat { font-size: 11px; color: var(--brown-light); margin-top: 2px; }
+  .tx-amount { font-family: 'Nanum Myeongjo', serif; font-size: 15px; font-weight: 700; text-align: right; }
+  .tx-amount.expense { color: var(--rose); }
+  .tx-amount.income { color: var(--sage); }
+  .tx-delete { background: none; border: none; color: rgba(92,61,46,0.3); font-size: 16px; cursor: pointer; padding: 4px; }
+
+  /* CHART */
+  .chart-section { padding: 0 16px 100px; }
+  .chart-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 12px var(--shadow); }
+  .chart-card h3 { font-family: 'Nanum Myeongjo', serif; font-size: 15px; margin-bottom: 14px; color: var(--brown); }
+  .cat-bar-item { margin-bottom: 12px; }
+  .cat-bar-top { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+  .cat-bar-track { background: var(--cream); border-radius: 99px; height: 8px; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose-light), var(--rose)); }
+
+  /* BOTTOM NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid rgba(92,61,46,0.08); display: flex; padding: 10px 0 20px; z-index: 100; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; cursor: pointer; padding: 6px; font-family: 'Gowun Dodum', sans-serif; }
+  .nav-btn .nav-icon { font-size: 22px; }
+  .nav-btn .nav-label { font-size: 10px; color: var(--brown-light); }
+  .nav-btn.active .nav-label { color: var(--rose); font-weight: bold; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--brown-light); }
+  .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="couple-photo-wrap">
+    <img src="introcouple.jpg" class="couple-photo" alt="우리">
+  </div>
+  <h2 class="login-title">우리 가계부</h2>
+  <p class="login-sub">구글 계정으로 로그인하세요</p>
+  <button class="google-btn" id="login-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+    Google로 로그인
+  </button>
+</div>
+
+<!-- APP -->
+<div id="app-screen" class="hidden">
+  <header>
+    <h1>💑 우리 가계부</h1>
+    <div class="header-user">
+      <span id="user-name">로딩중...</span>
+      <button class="logout-btn" id="logout-btn">로그아웃</button>
+    </div>
+  </header>
+
+  <div class="month-nav">
+    <button onclick="window.changeMonth(-1)">‹</button>
+    <span id="month-label"></span>
+    <button onclick="window.changeMonth(1)">›</button>
+  </div>
+
+  <div id="page-home">
+    <div class="summary">
+      <div class="card income"><div class="label">💚 수입</div><div class="amount" id="total-income">0원</div></div>
+      <div class="card expense"><div class="label">🌹 지출</div><div class="amount" id="total-expense">0원</div></div>
+      <div class="card balance"><div class="label">✨ 잔액</div><div class="amount" id="total-balance">0원</div></div>
+    </div>
+    <div class="budget-section">
+      <div class="top"><span>이번 달 예산</span><strong id="budget-display">미설정</strong></div>
+      <div class="progress-bar"><div class="progress-fill" id="budget-fill" style="width:0%"></div></div>
+      <div class="budget-edit">
+        <input type="number" id="budget-input" placeholder="예산 입력 (원)">
+        <button onclick="window.setBudget()">설정</button>
+      </div>
+    </div>
+    <div class="transaction-list" id="tx-list"></div>
+  </div>
+
+  <div id="page-add" class="hidden">
+    <div style="padding: 16px 16px 0;">
+      <div class="type-toggle">
+        <button class="type-btn expense active" id="btn-expense" onclick="window.setType('expense')">💸 지출</button>
+        <button class="type-btn income" id="btn-income" onclick="window.setType('income')">💰 수입</button>
+      </div>
+    </div>
+    <div class="add-form">
+      <h3>내역 추가</h3>
+      <div class="form-row">
+        <div class="form-group"><label>금액 (원)</label><input type="number" id="inp-amount" placeholder="10000"></div>
+        <div class="form-group"><label>날짜</label><input type="date" id="inp-date"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label>내용</label><input type="text" id="inp-desc" placeholder="예: 스타벅스 커피"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>카테고리</label>
+          <select id="inp-category">
+            <option value="식비">🍚 식비</option>
+            <option value="카페/간식">☕ 카페/간식</option>
+            <option value="교통">🚌 교통</option>
+            <option value="쇼핑">🛍️ 쇼핑</option>
+            <option value="데이트">💑 데이트</option>
+            <option value="문화/여가">🎬 문화/여가</option>
+            <option value="의료/건강">💊 의료/건강</option>
+            <option value="월급/용돈">💵 월급/용돈</option>
+            <option value="기타">📦 기타</option>
+          </select>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="window.addTransaction()">+ 추가하기</button>
+    </div>
+  </div>
+
+  <div id="page-chart" class="hidden">
+    <div class="chart-section">
+      <div class="chart-card"><h3>카테고리별 지출</h3><div id="cat-chart"></div></div>
+      <div class="chart-card"><h3>월별 요약</h3><div id="monthly-chart"></div></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-home" onclick="window.showPage('home')"><span class="nav-icon">🏠</span><span class="nav-label">홈</span></button>
+    <button class="nav-btn" id="nav-add" onclick="window.showPage('add')"><span class="nav-icon">➕</span><span class="nav-label">추가</span></button>
+    <button class="nav-btn" id="nav-chart" onclick="window.showPage('chart')"><span class="nav-icon">📊</span><span class="nav-label">통계</span></button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAiwlmOmYCrPvIMcL-DUkfxkuTM5REky3Q",
+  authDomain: "draftpj-23a75.firebaseapp.com",
+  projectId: "draftpj-23a75",
+  storageBucket: "draftpj-23a75.firebasestorage.app",
+  messagingSenderId: "209227761377",
+  appId: "1:209227761377:web:d09607ee8076e1fec999a0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+const txCol = collection(db, 'transactions');
+
+let currentType = 'expense';
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+let localTxs = [];
+let unsubscribe = null;
+
+const CATEGORIES = {
+  '식비':'🍚','카페/간식':'☕','교통':'🚌','쇼핑':'🛍️',
+  '데이트':'💑','문화/여가':'🎬','의료/건강':'💊','월급/용돈':'💵','기타':'📦'
+};
+
+// AUTH
+document.getElementById("login-btn").onclick = async () => {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isInApp = /KAKAOTALK|Instagram|FBAN|Line/i.test(navigator.userAgent);
+  if (isMobile || isInApp) {
+    await signInWithRedirect(auth, provider);
+  } else {
+    await signInWithPopup(auth, provider);
+  }
+};
+getRedirectResult(auth).catch(() => {});
+
+
+document.getElementById('logout-btn').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app-screen').classList.remove('hidden');
+    document.getElementById('user-name').textContent = user.displayName || user.email;
+    startSync();
+    updateMonthLabel();
+  } else {
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('app-screen').classList.add('hidden');
+    if (unsubscribe) unsubscribe();
+  }
+});
+
+function startSync() {
+  if (unsubscribe) unsubscribe();
+  unsubscribe = onSnapshot(txCol, (snapshot) => {
+    localTxs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAll();
+  });
+}
+
+// MONTH
+function updateMonthLabel() {
+  document.getElementById('month-label').textContent = `${currentYear}년 ${currentMonth+1}월`;
+}
+window.changeMonth = function(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+  updateMonthLabel(); renderAll();
+};
+
+function getMonthTx() {
+  return localTxs.filter(tx => {
+    const d = new Date(tx.date);
+    return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+  });
+}
+
+// SUMMARY
+function renderSummary() {
+  const txs = getMonthTx();
+  const income  = txs.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+  const expense = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+  document.getElementById('total-income').textContent  = fmt(income);
+  document.getElementById('total-expense').textContent = fmt(expense);
+  document.getElementById('total-balance').textContent = fmt(income-expense);
+  const budget = parseInt(localStorage.getItem(`budget_${currentYear}_${currentMonth}`)||'0');
+  if (budget > 0) {
+    const pct = Math.min(100, Math.round(expense/budget*100));
+    document.getElementById('budget-display').textContent = `${fmt(budget)} (${pct}% 사용)`;
+    document.getElementById('budget-fill').style.width = pct+'%';
+    document.getElementById('budget-input').value = budget;
+  } else {
+    document.getElementById('budget-display').textContent = '미설정';
+    document.getElementById('budget-fill').style.width = '0%';
+  }
+}
+window.setBudget = function() {
+  const v = parseInt(document.getElementById('budget-input').value);
+  if (!v||v<=0) return alert('올바른 금액을 입력해주세요');
+  localStorage.setItem(`budget_${currentYear}_${currentMonth}`, v);
+  renderSummary();
+};
+
+// LIST
+function renderTxList() {
+  const txs = getMonthTx().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const container = document.getElementById('tx-list');
+  if (!txs.length) { container.innerHTML=`<div class="empty-state"><div class="emoji">📭</div><p>이번 달 내역이 없어요</p></div>`; return; }
+  const grouped = {};
+  txs.forEach(tx => { if(!grouped[tx.date]) grouped[tx.date]=[]; grouped[tx.date].push(tx); });
+  container.innerHTML = Object.entries(grouped).map(([date,items])=>`
+    <div class="date-group">
+      <div class="date-label">${formatDate(date)}</div>
+      ${items.map(tx=>`
+        <div class="transaction-item">
+          <div class="tx-icon ${tx.type}">${CATEGORIES[tx.category]||'📦'}</div>
+          <div class="tx-info"><div class="tx-desc">${tx.desc}</div><div class="tx-cat">${tx.category}</div></div>
+          <div class="tx-amount ${tx.type}">${tx.type==='expense'?'-':'+'}${fmt(Number(tx.amount))}</div>
+          <button class="tx-delete" onclick="window.deleteTx('${tx.id}')">✕</button>
+        </div>`).join('')}
+    </div>`).join('');
+}
+window.deleteTx = async function(id) {
+  if (!confirm('삭제할까요?')) return;
+  await deleteDoc(doc(db,'transactions',id));
+};
+
+// ADD
+window.setType = function(type) {
+  currentType = type;
+  document.getElementById('btn-expense').classList.toggle('active', type==='expense');
+  document.getElementById('btn-income').classList.toggle('active', type==='income');
+};
+window.addTransaction = async function() {
+  const amount   = parseInt(document.getElementById('inp-amount').value);
+  const date     = document.getElementById('inp-date').value;
+  const desc     = document.getElementById('inp-desc').value.trim();
+  const category = document.getElementById('inp-category').value;
+  if (!amount||amount<=0) return alert('금액을 입력해주세요');
+  if (!date) return alert('날짜를 선택해주세요');
+  if (!desc) return alert('내용을 입력해주세요');
+  await addDoc(txCol, {type:currentType, amount, date, desc, category});
+  document.getElementById('inp-amount').value='';
+  document.getElementById('inp-desc').value='';
+  alert('✅ 추가됐어요!');
+  window.showPage('home');
+};
+
+// CHART
+function renderChart() {
+  const txs = getMonthTx().filter(t=>t.type==='expense');
+  const cats = {};
+  txs.forEach(t=>{ cats[t.category]=(cats[t.category]||0)+Number(t.amount); });
+  const total = Object.values(cats).reduce((s,v)=>s+v,0);
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('cat-chart').innerHTML = sorted.length===0
+    ? `<div class="empty-state"><div class="emoji">📊</div><p>데이터가 없어요</p></div>`
+    : sorted.map(([cat,amt])=>`
+        <div class="cat-bar-item">
+          <div class="cat-bar-top"><span>${CATEGORIES[cat]||''} ${cat}</span><span>${fmt(amt)} (${total?Math.round(amt/total*100):0}%)</span></div>
+          <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${total?amt/total*100:0}%"></div></div>
+        </div>`).join('');
+  const months=[];
+  for(let i=3;i>=0;i--){
+    let m=currentMonth-i,y=currentYear;
+    if(m<0){m+=12;y--;}
+    const exp=localTxs.filter(tx=>{const d=new Date(tx.date);return d.getFullYear()===y&&d.getMonth()===m&&tx.type==='expense';}).reduce((s,t)=>s+Number(t.amount),0);
+    months.push({label:`${m+1}월`,exp});
+  }
+  const maxExp=Math.max(...months.map(m=>m.exp),1);
+  document.getElementById('monthly-chart').innerHTML=`
+    <div style="display:flex;align-items:flex-end;gap:8px;height:80px;margin-top:8px;">
+      ${months.map(m=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:100%;height:${Math.round(m.exp/maxExp*60)+4}px;background:linear-gradient(to top,var(--rose),var(--rose-light));border-radius:6px;"></div><div style="font-size:11px;color:var(--brown-light)">${m.label}</div></div>`).join('')}
+    </div>
+    ${months.map(m=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--cream)"><span>${m.label}</span><span style="color:var(--rose)">${fmt(m.exp)}</span></div>`).join('')}`;
+}
+
+// PAGE NAV
+window.showPage = function(page) {
+  ['home','add','chart'].forEach(p=>{
+    document.getElementById(`page-${p}`).classList.toggle('hidden',p!==page);
+    document.getElementById(`nav-${p}`).classList.toggle('active',p===page);
+  });
+  if(page==='chart') renderChart();
+  if(page==='add') document.getElementById('inp-date').value=new Date().toISOString().split('T')[0];
+};
+
+function fmt(n){return Number(n).toLocaleString('ko-KR')+'원';}
+function formatDate(dateStr){const d=new Date(dateStr);const days=['일','월','화','수','목','금','토'];return `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;}
+function renderAll(){renderSummary();renderTxList();}
+</script>
+</body>
+</html>
