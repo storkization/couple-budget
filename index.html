@@ -891,7 +891,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
@@ -916,7 +916,7 @@ const photosDoc = doc(db,'config','photos'); // 사진 URL 저장용
 
 // ── STATE ──
 let cType='expense', cWho='dohun', cYear=new Date().getFullYear(), cMonth=new Date().getMonth();
-let txs=[], evts=[], unsubTx=null, unsubEv=null;
+let txs=[], evts=[], unsubTx=null, unsubEv=null, unsubBudget=null, unsubAppCfg=null, unsubPhotos=null, unsubChallenge=null;
 let editId=null, eType='expense', eWho='dohun', eCat='';
 let aCat='', selDay=null, evWho='both';
 let statFilter='all';
@@ -936,15 +936,27 @@ const DEFAULT_CATS = {
   ]
 };
 
-// localStorage에 저장/불러오기
+// ── CATS: Firestore 기반 (기기 간 공유) ──
 function loadCats() {
   try {
-    const s = localStorage.getItem('custom_cats');
+    const s = localStorage.getItem('custom_cats'); // fallback용
     return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_CATS));
   } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_CATS)); }
 }
-function saveCats(cats) { localStorage.setItem('custom_cats', JSON.stringify(cats)); }
+function saveCats(cats) {
+  localStorage.setItem('custom_cats', JSON.stringify(cats)); // 로컬 캐시
+  setDoc(doc(db,'config','cats'),{data:JSON.stringify(cats)}).catch(()=>{});
+}
 let CATS = loadCats();
+async function loadCatsFromFirestore(){
+  try {
+    const snap=await getDoc(doc(db,'config','cats'));
+    if(snap.exists()&&snap.data().data){
+      CATS=JSON.parse(snap.data().data);
+      localStorage.setItem('custom_cats',snap.data().data);
+    }
+  } catch(e){}
+}
 
 const allItems = () => [...CATS.expense, ...CATS.income].flatMap(g => g.items);
 const getE = k => (allItems().find(c=>c.k===k)||{e:'📦'}).e;
@@ -1067,15 +1079,15 @@ window.deletePhoto = async (idx) => {
   } catch(e) { toast('삭제 실패: ' + e.message); }
 };
 
-async function loadSavedPhotos() {
-  try {
-    const snap = await getDoc(photosDoc);
-    if(!snap.exists()) return;
-    const data = snap.data();
-    for(let i = 0; i < 4; i++){
-      if(data[`slot_${i}`]) renderPhotoSlot(i, data[`slot_${i}`]);
+function loadSavedPhotos() {
+  if(unsubPhotos) unsubPhotos();
+  unsubPhotos = onSnapshot(photosDoc, snap=>{
+    for(let i=0;i<4;i++){
+      const url = snap.exists() ? snap.data()[`slot_${i}`] : null;
+      if(url) renderPhotoSlot(i, url);
+      else renderEmptySlot(i);
     }
-  } catch(e) { console.error('사진 불러오기 실패', e); }
+  }, e=>console.error('사진 동기화 실패',e));
 }
 
 // ── AUTH ──
@@ -1142,21 +1154,56 @@ onAuthStateChanged(auth, user => {
     $('login-screen').classList.remove('hidden');
     $('app-screen').classList.add('hidden');
     if(unsubTx) unsubTx(); if(unsubEv) unsubEv();
+    if(unsubBudget) unsubBudget(); if(unsubAppCfg) unsubAppCfg();
+    if(unsubPhotos) unsubPhotos(); if(unsubChallenge) unsubChallenge();
   }
 });
 
-function startSync(){
-  if(unsubTx) unsubTx(); if(unsubEv) unsubEv();
+async function startSync(){
+  // 기존 리스너 전부 해제
+  if(unsubTx) unsubTx();
+  if(unsubEv) unsubEv();
+  if(unsubBudget) unsubBudget();
+  if(unsubAppCfg) unsubAppCfg();
+  if(unsubPhotos) unsubPhotos();
+  if(unsubChallenge) unsubChallenge();
+
+  // 카테고리는 1회 로드 (잘 안 바뀌는 데이터)
+  await loadCatsFromFirestore();
+
+  // ── 예산: 실시간 ──
+  unsubBudget = onSnapshot(doc(db,'config','budget'), snap=>{
+    if(snap.exists()) _budgetCache={..._budgetCache,...snap.data()};
+    renderSummary();
+  }, ()=>{});
+
+  // ── 기념일 설정: 실시간 ──
+  unsubAppCfg = onSnapshot(doc(db,'config','app'), snap=>{
+    if(snap.exists()) _appConfig={..._appConfig,...snap.data()};
+    updateCalClock();
+  }, ()=>{});
+
+  // ── 사진: 실시간 ──
+  loadSavedPhotos();
+
+  // ── 챌린지: 실시간 ──
+  startChallengeSync();
+
+  // ── 거래내역: 실시간 ──
   unsubTx = onSnapshot(txCol, snap=>{
     txs=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderAll();
-    // 거래 수정/삭제 후 day-modal 재오픈 대기 중이면 여기서 처리
     if(_pendingReopenDay){
       const day=_pendingReopenDay; _pendingReopenDay=null;
       setTimeout(()=>openDayModal(day),100);
     }
   });
-  unsubEv = onSnapshot(evCol, snap=>{ evts=snap.docs.map(d=>({id:d.id,...d.data()})); rCal(); });
+
+  // ── 일정: 실시간 ──
+  unsubEv = onSnapshot(evCol, snap=>{
+    evts=snap.docs.map(d=>({id:d.id,...d.data()}));
+    rCal();
+  });
 }
 
 // ── MONTH ──
@@ -1169,9 +1216,24 @@ $('next-btn').addEventListener('click',()=>{ cMonth++; if(cMonth>11){cMonth=0;cY
 function refreshCalIfOpen(){ if(!$('page-cal').classList.contains('hidden')){ rCal(); rCalSummary(); } }
 const mTx = () => txs.filter(t=>{ const d=new Date(t.date); return d.getFullYear()===cYear&&d.getMonth()===cMonth; });
 
-// ── BUDGET (도훈/경은 개별) ──
-function getBudget(who){ return parseInt(localStorage.getItem(`b_${who}_${cYear}_${cMonth}`)||'0'); }
-function setBudget(who, v){ localStorage.setItem(`b_${who}_${cYear}_${cMonth}`, v); }
+// ── BUDGET - Firestore 기반 (기기 간 공유) ──
+let _budgetCache = {}; // {dohun_2025_2: 300000, ...}
+
+function _budgetKey(who){ return `${who}_${cYear}_${cMonth}`; }
+function getBudget(who){ return _budgetCache[_budgetKey(who)] || 0; }
+
+async function setBudgetFS(who, v){
+  const key=_budgetKey(who);
+  _budgetCache[key]=v;
+  await setDoc(doc(db,'config','budget'),{[key]:v},{merge:true});
+}
+
+async function loadBudgetsFromFirestore(){
+  try{
+    const snap=await getDoc(doc(db,'config','budget'));
+    if(snap.exists()) _budgetCache={..._budgetCache,...snap.data()};
+  }catch(e){}
+}
 
 function updateBudgetBar(barId, infoId, expense, budget, who){
   const sfx = who==='d'?'-d': who==='k'?'-k':'';
@@ -1196,15 +1258,15 @@ function updateBudgetBar(barId, infoId, expense, budget, who){
   });
 });
 
-$('d-budget-set-btn').addEventListener('click',()=>{
+$('d-budget-set-btn').addEventListener('click',async()=>{
   const v = parseInput($('d-budget-input').value);
   if(!v||v<=0) return toast('올바른 금액을 입력해주세요');
-  setBudget('dohun', v); renderSummary(); toast('💙 도훈 예산 설정됐어요!');
+  await setBudgetFS('dohun', v); renderSummary(); toast('💙 도훈 예산 설정됐어요!');
 });
-$('k-budget-set-btn').addEventListener('click',()=>{
+$('k-budget-set-btn').addEventListener('click',async()=>{
   const v = parseInput($('k-budget-input').value);
   if(!v||v<=0) return toast('올바른 금액을 입력해주세요');
-  setBudget('kyungeun', v); renderSummary(); toast('🩷 경은 예산 설정됐어요!');
+  await setBudgetFS('kyungeun', v); renderSummary(); toast('🩷 경은 예산 설정됐어요!');
 });
 
 // ── SUMMARY ──
@@ -1821,7 +1883,7 @@ function updateCalClock(){
   if($('cal-today-time')) $('cal-today-time').textContent=`🕐 ${h}:${m}:${s}`;
   // 기념일 카운터
   if($('cal-anniv-text')){
-    const anniversaryDate=localStorage.getItem('anniversary_date')||'2025-01-04';
+    const anniversaryDate=_appConfig.anniversary_date||'2025-01-04';
     const start=new Date(anniversaryDate+'T00:00:00');
     const diff=Math.floor((now-start)/(1000*60*60*24))+1;
     const [ay,am,ad]=anniversaryDate.split('-');
@@ -1864,7 +1926,8 @@ $('nav-challenge').addEventListener('click',()=>showPage('challenge'));
 $('nav-settings').addEventListener('click',()=>showPage('settings'));
 
 // ── CHALLENGE ──
-let chTab='dohun'; // 현재 선택 탭
+let chTab='dohun';
+let _challengeAll=[]; // onSnapshot으로 채워지는 실시간 캐시
 
 const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'👫',저축:'🏦',생활:'🏠',기타:'📌'};
 const CH_MONTH=()=>`${cYear}-${String(cMonth+1).padStart(2,'0')}`;
@@ -1881,11 +1944,18 @@ document.querySelectorAll('.ch-tab').forEach(btn=>btn.addEventListener('click',(
   rChallenge();
 }));
 
+function startChallengeSync(){
+  if(unsubChallenge) unsubChallenge();
+  unsubChallenge = onSnapshot(collection(db,'challenges'), snap=>{
+    _challengeAll=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // 챌린지 탭이 열려있을 때만 즉시 렌더
+    if(!$('page-challenge').classList.contains('hidden')) rChallenge();
+  }, ()=>{});
+}
+
 async function rChallenge(){
   if($('ch-month-label')) $('ch-month-label').textContent=`${cYear}년 ${cMonth+1}월`;
-  const snap=await getDocs(collection(db,'challenges'));
-  const all=snap.docs.map(d=>({id:d.id,...d.data()}))
-    .filter(c=>c.month===CH_MONTH());
+  const all=_challengeAll.filter(c=>c.month===CH_MONTH());
 
   // 전체 달성률
   const totalDone=all.filter(c=>c.done).length;
@@ -1905,9 +1975,13 @@ async function rChallenge(){
   $('ch-person-done').textContent=pDone;
   $('ch-person-remain').textContent=filtered.length-pDone;
 
-  // 보상/패널티 불러오기
-  const rpKey=`ch_rp_${CH_MONTH()}_${chTab}`;
-  const rp=JSON.parse(localStorage.getItem(rpKey)||'{"reward":"","penalty":""}');
+  // 보상/패널티 Firestore에서 불러오기
+  const rpDocId=`rp_${CH_MONTH()}_${chTab}`;
+  let rp={reward:'',penalty:''};
+  try{
+    const rpSnap=await getDoc(doc(db,'config',rpDocId));
+    if(rpSnap.exists()) rp={...rp,...rpSnap.data()};
+  }catch(e){}
   $('ch-reward-text').textContent=rp.reward||'미설정';
   $('ch-penalty-text').textContent=rp.penalty||'미설정';
   $('ch-reward-input').value=rp.reward||'';
@@ -1931,11 +2005,11 @@ async function rChallenge(){
   $('ch-list').querySelectorAll('.ch-check').forEach(el=>el.addEventListener('click',async()=>{
     const done=el.dataset.done==='true';
     await updateDoc(doc(db,'challenges',el.dataset.id),{done:!done});
-    toast(done?'↩️ 취소':'✅ 완료!'); rChallenge();
+    toast(done?'↩️ 취소':'✅ 완료!');
   }));
   $('ch-list').querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{
     if(!confirm('삭제할까요?')) return;
-    await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제'); rChallenge();
+    await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제');
   }));
 }
 
@@ -1958,17 +2032,16 @@ function renderChItems(items){
 function setupRPEdit(type){
   const txtEl=$(`ch-${type}-text`), inputEl=$(`ch-${type}-input`), editBtn=$(`ch-${type}-edit`);
   let editing=false;
-  editBtn.addEventListener('click',()=>{
+  editBtn.addEventListener('click',async()=>{
     editing=!editing;
     txtEl.style.display=editing?'none':'block';
     inputEl.style.display=editing?'block':'none';
     editBtn.textContent=editing?'💾 저장':'✏️ 수정';
     if(!editing){
-      const rpKey=`ch_rp_${CH_MONTH()}_${chTab}`;
-      const rp=JSON.parse(localStorage.getItem(rpKey)||'{"reward":"","penalty":""}');
-      rp[type]=inputEl.value.trim();
-      localStorage.setItem(rpKey,JSON.stringify(rp));
-      txtEl.textContent=rp[type]||'미설정';
+      const val=inputEl.value.trim();
+      txtEl.textContent=val||'미설정';
+      const rpDocId=`rp_${CH_MONTH()}_${chTab}`;
+      await setDoc(doc(db,'config',rpDocId),{[type]:val},{merge:true});
       toast(type==='reward'?'🎁 보상 저장됐어요!':'💀 패널티 저장됐어요!');
     }
   });
@@ -1983,11 +2056,25 @@ $('ch-add-btn').addEventListener('click',async()=>{
     title, who:chTab, category:$('ch-category').value,
     month:CH_MONTH(), done:false, createdAt:new Date().toISOString()
   });
-  $('ch-input').value=''; toast('🏆 챌린지 추가됐어요!'); rChallenge();
+  $('ch-input').value=''; toast('🏆 챌린지 추가됐어요!');
+  // onSnapshot이 자동으로 _challengeAll 갱신 후 rChallenge() 호출
 });
 
 // ── SETTINGS ──
-function initSettings(){
+let _appConfig = {}; // Firestore config/app 캐시
+
+async function loadAppConfig(){
+  try{
+    const snap=await getDoc(doc(db,'config','app'));
+    if(snap.exists()) _appConfig={..._appConfig,...snap.data()};
+  }catch(e){}
+}
+async function saveAppConfig(patch){
+  _appConfig={..._appConfig,...patch};
+  await setDoc(doc(db,'config','app'),patch,{merge:true});
+}
+
+async function initSettings(){
   const user=auth.currentUser;
   if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
@@ -1995,24 +2082,23 @@ function initSettings(){
   $('settings-avatar').textContent=isD?'도':'경';
   $('settings-name').textContent=isD?'💙 도훈':'🩷 경은';
   $('settings-email').textContent=user.email;
-  // 기념일 날짜 불러오기
-  const saved=localStorage.getItem('anniversary_date')||'2025-01-04';
+  // _appConfig는 onSnapshot 리스너가 실시간 유지 중
+  const saved=_appConfig.anniversary_date||'2025-01-04';
   $('settings-anniversary').value=saved;
   updateAnnivPreview(saved);
 }
 function updateAnnivPreview(dateStr){
   if(!dateStr) return;
-  const start=new Date(dateStr);
+  const start=new Date(dateStr+'T00:00:00');
   const diff=Math.floor((new Date()-start)/(1000*60*60*24))+1;
   $('settings-anniv-preview').textContent=`📅 ${dateStr} 시작 · 오늘은 +${diff.toLocaleString()}일째`;
 }
-$('settings-anniv-save').addEventListener('click',()=>{
+$('settings-anniv-save').addEventListener('click',async()=>{
   const val=$('settings-anniversary').value;
   if(!val) return toast('날짜를 선택해주세요');
-  localStorage.setItem('anniversary_date',val);
+  await saveAppConfig({anniversary_date:val});
   updateAnnivPreview(val);
   toast('💕 기념일 저장됐어요!');
-  // 캘린더도 갱신
   updateCalClock();
 });
 $('settings-anniversary').addEventListener('change',()=>updateAnnivPreview($('settings-anniversary').value));
