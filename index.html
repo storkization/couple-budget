@@ -644,8 +644,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey:"AIzaSyAiwlmOmYCrPvIMcL-DUkfxkuTM5REky3Q",
@@ -659,10 +660,12 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const auth = getAuth(fbApp);
+const storage = getStorage(fbApp);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt:'select_account' });
 const txCol = collection(db,'transactions');
 const evCol = collection(db,'events');
+const photosDoc = doc(db,'config','photos'); // 사진 URL 저장용
 
 // ── STATE ──
 let cType='expense', cWho='dohun', cYear=new Date().getFullYear(), cMonth=new Date().getMonth();
@@ -733,24 +736,99 @@ function renderChips(containerId, typeKey, activeKey) {
   });
 }
 
-// ── PHOTOS ──
-window.loadPhoto = (idx, input) => {
+// ── PHOTOS (Firebase Storage 연동) ──
+window.loadPhoto = async (idx, input) => {
   if(!input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const slot = $(`ps${idx}`);
-    slot.innerHTML = `<img src="${e.target.result}"><input type="file" accept="image/*" onchange="loadPhoto(${idx},this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0">`;
-    localStorage.setItem(`photo_${idx}`, e.target.result);
-  };
-  reader.readAsDataURL(input.files[0]);
-};
-function loadSavedPhotos() {
-  for(let i=0;i<4;i++){
-    const d = localStorage.getItem(`photo_${i}`);
-    if(d){
-      $(`ps${i}`).innerHTML = `<img src="${d}"><input type="file" accept="image/*" onchange="loadPhoto(${i},this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0">`;
-    }
+  const file = input.files[0];
+  const slot = $(`ps${idx}`);
+
+  // 업로드 중 표시
+  slot.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:18px">⏳</div><div style="font-size:9px;color:var(--brown3)">업로드 중</div></div>`;
+
+  try {
+    // 파일 압축 (모바일 사진 용량 줄이기)
+    const compressed = await compressImage(file, 800);
+
+    // Firebase Storage 업로드
+    const storageRef = ref(storage, `photos/slot_${idx}`);
+    await uploadBytes(storageRef, compressed);
+    const url = await getDownloadURL(storageRef);
+
+    // Firestore에 URL 저장
+    const snap = await getDoc(photosDoc);
+    const current = snap.exists() ? snap.data() : {};
+    current[`slot_${idx}`] = url;
+    await setDoc(photosDoc, current);
+
+    // 화면 업데이트
+    renderPhotoSlot(idx, url);
+    toast('📷 사진 저장됐어요!');
+  } catch(e) {
+    console.error(e);
+    toast('사진 업로드 실패: ' + e.message);
+    renderEmptySlot(idx);
   }
+};
+
+// 이미지 압축 (canvas 사용)
+function compressImage(file, maxSize) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if(w > h && w > maxSize){ h = h * maxSize / w; w = maxSize; }
+        else if(h > maxSize){ w = w * maxSize / h; h = maxSize; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.8);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoSlot(idx, url) {
+  const slot = $(`ps${idx}`);
+  slot.innerHTML = `
+    <img src="${url}" style="width:100%;height:100%;object-fit:cover">
+    <input type="file" accept="image/*" onchange="loadPhoto(${idx},this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0">
+    <button onclick="deletePhoto(${idx})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.5);border:none;border-radius:50%;width:20px;height:20px;color:white;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1">✕</button>`;
+}
+
+function renderEmptySlot(idx) {
+  const slot = $(`ps${idx}`);
+  slot.innerHTML = `<span class="add-icon">📷</span><input type="file" accept="image/*" onchange="loadPhoto(${idx},this)">`;
+}
+
+window.deletePhoto = async (idx) => {
+  if(!confirm('사진을 삭제할까요?')) return;
+  try {
+    // Storage에서 삭제
+    const storageRef = ref(storage, `photos/slot_${idx}`);
+    await deleteObject(storageRef).catch(()=>{});
+    // Firestore 업데이트
+    const snap = await getDoc(photosDoc);
+    const current = snap.exists() ? snap.data() : {};
+    delete current[`slot_${idx}`];
+    await setDoc(photosDoc, current);
+    renderEmptySlot(idx);
+    toast('🗑️ 사진 삭제됐어요');
+  } catch(e) { toast('삭제 실패: ' + e.message); }
+};
+
+async function loadSavedPhotos() {
+  try {
+    const snap = await getDoc(photosDoc);
+    if(!snap.exists()) return;
+    const data = snap.data();
+    for(let i = 0; i < 4; i++){
+      if(data[`slot_${i}`]) renderPhotoSlot(i, data[`slot_${i}`]);
+    }
+  } catch(e) { console.error('사진 불러오기 실패', e); }
 }
 
 // ── AUTH ──
