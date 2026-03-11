@@ -1090,7 +1090,13 @@ function openDetail(id){
     </div>`;
   $('detail-modal').classList.add('open');
   $('det-edit').onclick=()=>{closeM('detail-modal');openEdit(id);};
-  $('det-del').onclick=async()=>{closeM('detail-modal');if(!confirm('삭제할까요?'))return;await deleteDoc(doc(db,'transactions',id));toast('🗑️ 삭제됐어요');};
+  $('det-del').onclick=async()=>{
+    closeM('detail-modal');
+    if(!confirm('삭제할까요?'))return;
+    await deleteDoc(doc(db,'transactions',id));
+    toast('🗑️ 삭제됐어요');
+    if(_dayModalReopenDay){ setTimeout(()=>openDayModal(_dayModalReopenDay),300); _dayModalReopenDay=null; }
+  };
 }
 const dr=(l,v)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--brown3)">${l}</span><span style="font-size:12px;font-weight:600">${v}</span></div>`;
 const closeM=id=>$(id).classList.remove('open');
@@ -1122,7 +1128,8 @@ $('edit-save-btn').addEventListener('click',async()=>{
   if(!date)return toast('날짜를 선택해주세요');
   if(!desc)return toast('내용을 입력해주세요');
   await updateDoc(doc(db,'transactions',editId),{type:eType,amount,date,desc,memo,category:eCat,who:eWho});
-  closeM('edit-modal');toast('✅ 수정됐어요!');
+  closeM('edit-modal'); toast('✅ 수정됐어요!');
+  if(_dayModalReopenDay){ setTimeout(()=>openDayModal(_dayModalReopenDay),300); _dayModalReopenDay=null; }
 });
 
 // ── ADD ──
@@ -1378,7 +1385,12 @@ function openDayModal(d){
   if(dt.length){
     txSec.style.display='block';
     $('day-tx-list').innerHTML=dt.map(tx=>txH(tx)).join('');
-    $('day-tx-list').querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>{closeM('day-modal');openDetail(el.dataset.id);}));
+    $('day-tx-list').querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>{
+      closeM('day-modal');
+      openDetail(el.dataset.id);
+      // 수정/삭제 후 day-modal 재오픈을 위해 콜백 등록
+      _dayModalReopenDay = d;
+    }));
   } else { txSec.style.display='none'; }
 
   // 일정 목록
@@ -1389,22 +1401,35 @@ function openDayModal(d){
       const typeEmoji={일반:'📌',데이트:'💑',약속:'🤝',의료:'💊',여행:'✈️',기념일:'🎉'}[ev.evType||'일반']||'📌';
       const timeStr=ev.time&&ev.time!==''?` · ⏰ ${ev.time}`:'';
       const placeStr=ev.place?` · 📍 ${ev.place}`:'';
-      return `<div class="event-item" style="flex-direction:column;align-items:flex-start;gap:5px">
+      return `<div class="event-item" style="flex-direction:column;align-items:flex-start;gap:5px" data-evid="${ev.id}">
         <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
           <span class="event-title">${typeEmoji} ${ev.desc}</span>
-          <div style="display:flex;align-items:center;gap:5px">
+          <div style="display:flex;align-items:center;gap:8px">
             <span class="event-who-badge ${ev.who==='dohun'?'d':ev.who==='kyungeun'?'k':'both'}">${ev.who==='dohun'?'도훈':ev.who==='kyungeun'?'경은':'함께'}</span>
-            <span class="event-del" data-id="${ev.id}" style="cursor:pointer;font-size:13px;color:var(--brown3)">✕</span>
+            <button class="ev-edit-btn" data-id="${ev.id}" style="background:var(--gold-light);border:none;border-radius:8px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;font-family:inherit">✏️</button>
+            <button class="ev-del-btn" data-id="${ev.id}" style="background:var(--rose-light);border:none;border-radius:8px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--rose);cursor:pointer;font-family:inherit">🗑️</button>
           </div>
         </div>
         ${timeStr||placeStr?`<div style="font-size:11px;color:var(--brown3)">${timeStr}${placeStr}</div>`:''}
         ${ev.memo?`<div style="font-size:11px;color:var(--brown3)">💬 ${ev.memo}</div>`:''}
       </div>`;
     }).join('');
-    $('day-ev-list').querySelectorAll('.event-del').forEach(btn=>btn.addEventListener('click',async e=>{
-      e.stopPropagation(); if(!confirm('일정을 삭제할까요?')) return;
-      await deleteDoc(doc(db,'events',btn.dataset.id)); toast('🗑️ 삭제됐어요');
+
+    // 삭제 버튼
+    $('day-ev-list').querySelectorAll('.ev-del-btn').forEach(btn=>btn.addEventListener('click',async e=>{
+      e.stopPropagation();
+      if(!confirm('일정을 삭제할까요?')) return;
+      await deleteDoc(doc(db,'events',btn.dataset.id));
+      toast('🗑️ 삭제됐어요');
       openDayModal(d); rCal();
+    }));
+
+    // 수정 버튼
+    $('day-ev-list').querySelectorAll('.ev-edit-btn').forEach(btn=>btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const ev=evts.find(ev=>ev.id===btn.dataset.id); if(!ev) return;
+      closeM('day-modal');
+      openEvEditModal(ev, d);
     }));
   } else { evSec.style.display='none'; }
 
@@ -1418,8 +1443,33 @@ function openDayModal(d){
   $('day-add-event-btn').onclick=()=>{ closeM('day-modal'); openEventModal(ds); };
   $('day-modal').classList.add('open');
 }
-$('day-modal-close').addEventListener('click',()=>closeM('day-modal'));
-$('day-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('day-modal');});
+$('day-modal-close').addEventListener('click',()=>{ closeM('day-modal'); _dayModalReopenDay=null; });
+$('day-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){ closeM('day-modal'); _dayModalReopenDay=null; }});
+
+// 거래 수정/삭제 후 day-modal 재오픈을 위한 변수
+let _dayModalReopenDay=null;
+
+// ── 일정 수정 MODAL ──
+let _editEvId=null;
+function openEvEditModal(ev, fromDay){
+  _editEvId=ev.id;
+  $('event-desc').value=ev.desc||'';
+  $('event-date').value=ev.date||'';
+  $('event-place').value=ev.place||'';
+  $('event-memo').value=ev.memo||'';
+  const allday=ev.allday!==false;
+  $('event-allday').checked=allday;
+  $('event-time').disabled=allday;
+  $('event-time').style.opacity=allday?'0.4':'1';
+  $('event-time').value=allday?'':ev.time||'';
+  evWho=ev.who==='dohun'?'d':ev.who==='kyungeun'?'k':'both'; syncEvWho();
+  evType=ev.evType||'일반'; syncEvType();
+  // 저장 버튼 텍스트 변경
+  $('event-save-btn').textContent='✏️ 수정하기';
+  $('event-save-btn').dataset.mode='edit';
+  $('event-save-btn').dataset.fromDay=fromDay;
+  $('event-modal').classList.add('open');
+}
 
 // ── EVENT MODAL (세분화) ──
 let evType='일반';
@@ -1453,8 +1503,13 @@ function syncEvWho(){
 $('ev-who-d').addEventListener('click',()=>{evWho='d';syncEvWho();});
 $('ev-who-k').addEventListener('click',()=>{evWho='k';syncEvWho();});
 $('ev-who-both').addEventListener('click',()=>{evWho='both';syncEvWho();});
-$('event-close').addEventListener('click',()=>closeM('event-modal'));
-$('event-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('event-modal');});
+$('event-close').addEventListener('click',()=>{ closeM('event-modal'); resetEventModal(); });
+$('event-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget){ closeM('event-modal'); resetEventModal(); }});
+function resetEventModal(){
+  _editEvId=null;
+  $('event-save-btn').textContent='📅 일정 추가';
+  $('event-save-btn').dataset.mode='add';
+}
 $('event-save-btn').addEventListener('click',async()=>{
   const desc=$('event-desc').value.trim(), date=$('event-date').value;
   if(!desc) return toast('일정 제목을 입력해주세요');
@@ -1464,9 +1519,23 @@ $('event-save-btn').addEventListener('click',async()=>{
   const place=$('event-place').value.trim();
   const memo=$('event-memo').value.trim();
   const wm={d:'dohun',k:'kyungeun',both:'both'};
-  await addDoc(evCol,{desc,date,time,place,memo,evType,who:wm[evWho],allday,createdAt:new Date().toISOString()});
-  closeM('event-modal'); toast('📅 일정 추가됐어요!');
-  selDay=parseInt(date.split('-')[2]); rCal();
+  const mode=$('event-save-btn').dataset.mode||'add';
+
+  if(mode==='edit' && _editEvId){
+    // 수정 모드
+    await updateDoc(doc(db,'events',_editEvId),{desc,date,time,place,memo,evType,who:wm[evWho],allday});
+    const fromDay=parseInt($('event-save-btn').dataset.fromDay)||parseInt(date.split('-')[2]);
+    closeM('event-modal'); resetEventModal();
+    toast('✅ 일정 수정됐어요!');
+    selDay=fromDay; rCal();
+    setTimeout(()=>openDayModal(fromDay),300);
+  } else {
+    // 추가 모드
+    await addDoc(evCol,{desc,date,time,place,memo,evType,who:wm[evWho],allday,createdAt:new Date().toISOString()});
+    closeM('event-modal'); resetEventModal();
+    toast('📅 일정 추가됐어요!');
+    selDay=parseInt(date.split('-')[2]); rCal();
+  }
 });
 
 // ── TODAY CLOCK (캘린더 탭) ──
