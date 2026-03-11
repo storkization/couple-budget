@@ -29,7 +29,7 @@
   --kyungeun:#c96ea0;--kyungeun-light:#f5d5ea;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown);min-height:100vh;overflow-x:hidden}
+body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown);min-height:100vh;overflow-x:hidden;overscroll-behavior:none;}
 .hidden{display:none!important}
 
 /* LOGIN */
@@ -1536,24 +1536,28 @@ const closeM=id=>$(id).classList.remove('open');
 function addSwipeToClose(sheetEl, overlayId){
   const handle = sheetEl.querySelector('.modal-handle');
   if(!handle) return;
-  // handle만 드래그 감지 - 배경 overlay는 고정, sheet만 이동
   handle.style.padding='16px 60px';
   handle.style.cursor='grab';
   let startY=0, curY=0, dragging=false;
-  handle.addEventListener('touchstart',e=>{
-    e.stopPropagation();
-    startY=e.touches[0].clientY; curY=startY; dragging=true;
-    sheetEl.style.transition='none';
-    sheetEl.style.willChange='transform';
+  // sheet 전체에서 터치 감지 (handle 위에서 시작한 경우만)
+  sheetEl.addEventListener('touchstart',e=>{
+    const touch = e.touches[0];
+    const handleRect = handle.getBoundingClientRect();
+    // handle 영역에서 시작한 경우만 드래그 활성화
+    if(touch.clientY < handleRect.bottom + 20) {
+      startY=touch.clientY; curY=startY; dragging=true;
+      sheetEl.style.transition='none';
+      sheetEl.style.willChange='transform';
+    }
   },{passive:true});
-  handle.addEventListener('touchmove',e=>{
+  sheetEl.addEventListener('touchmove',e=>{
     if(!dragging) return;
-    e.stopPropagation();
     curY=e.touches[0].clientY;
     const dy=Math.max(0,curY-startY);
+    if(dy>0) e.preventDefault(); // 브라우저 스크롤/PTR 차단
     sheetEl.style.transform=`translateY(${dy}px)`;
-  },{passive:true});
-  handle.addEventListener('touchend',e=>{
+  },{passive:false});
+  sheetEl.addEventListener('touchend',e=>{
     if(!dragging) return;
     dragging=false;
     sheetEl.style.willChange='';
