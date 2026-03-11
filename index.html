@@ -93,8 +93,17 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .budget-card{margin:10px 16px 6px;background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm)}
 .budget-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .budget-label{font-size:12px;color:var(--brown2);font-weight:600}.budget-info{font-size:12px;font-weight:700}
-.budget-bar-bg{background:var(--bg);border-radius:99px;height:7px;overflow:hidden}
+.budget-bar-bg{background:var(--bg);border-radius:99px;height:8px;overflow:hidden}
 .budget-bar-fill{height:100%;border-radius:99px;transition:width 0.5s}
+.budget-bar-fill.safe{background:var(--green)}
+.budget-bar-fill.warn{background:var(--gold)}
+.budget-bar-fill.over{background:var(--rose)}
+.budget-bar-fill.safe-d{background:#5b9bd5}
+.budget-bar-fill.warn-d{background:#e8a030}
+.budget-bar-fill.over-d{background:#c0392b}
+.budget-bar-fill.safe-k{background:#e87aab}
+.budget-bar-fill.warn-k{background:#e8a030}
+.budget-bar-fill.over-k{background:#c0392b}
 .safe{background:linear-gradient(90deg,var(--green),var(--green-dark))}
 .warn{background:linear-gradient(90deg,var(--gold),#e0a020)}
 .over{background:linear-gradient(90deg,var(--rose),var(--rose-dark))}
@@ -252,7 +261,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:10px 0 calc(16px + env(safe-area-inset-bottom,0px));z-index:100;box-shadow:0 -4px 20px rgba(61,43,31,0.08)}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;font-family:inherit}
-.nav-icon{font-size:22px;transition:transform 0.2s}.nav-lbl{font-size:10px;font-weight:600;color:var(--brown3)}
+.nav-icon{font-size:19px;transition:transform 0.2s}.nav-lbl{font-size:9px;font-weight:600;color:var(--brown3)}
 .nav-btn.active .nav-lbl{color:var(--rose)}.nav-btn.active .nav-icon{transform:scale(1.1)}
 
 /* TOAST */
@@ -341,7 +350,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <span class="budget-label" style="color:var(--dohun)">💙 도훈</span>
           <span class="budget-info" id="d-budget-info">미설정</span>
         </div>
-        <div class="budget-bar-bg"><div class="budget-bar-fill safe" id="d-budget-bar" style="width:0%"></div></div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill safe-d" id="d-budget-bar" style="width:0%"></div></div>
         <div class="budget-row" style="margin-top:6px">
           <input class="budget-input" type="text" id="d-budget-input" placeholder="도훈 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="d-budget-set-btn" style="background:var(--dohun)">설정</button>
@@ -354,7 +363,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <span class="budget-label" style="color:var(--kyungeun)">🩷 경은</span>
           <span class="budget-info" id="k-budget-info">미설정</span>
         </div>
-        <div class="budget-bar-bg"><div class="budget-bar-fill safe" id="k-budget-bar" style="width:0%"></div></div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill safe-k" id="k-budget-bar" style="width:0%"></div></div>
         <div class="budget-row" style="margin-top:6px">
           <input class="budget-input" type="text" id="k-budget-input" placeholder="경은 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="k-budget-set-btn" style="background:var(--kyungeun)">설정</button>
@@ -367,7 +376,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <span class="budget-label">📊 합계</span>
           <span class="budget-info" id="t-budget-info">미설정</span>
         </div>
-        <div class="budget-bar-bg" style="height:10px">
+        <div class="budget-bar-bg">
           <div class="budget-bar-fill safe" id="t-budget-bar" style="width:0%"></div>
         </div>
         <!-- 바로미터 눈금 -->
@@ -488,11 +497,20 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
   <!-- CALENDAR -->
   <div id="page-cal" class="hidden">
     <div class="cal-page">
-      <div id="cal-today-bar" style="background:var(--surface);border-radius:var(--r);padding:10px 16px;box-shadow:var(--shadow-sm);margin-bottom:10px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">📅</span>
-        <div>
-          <div id="cal-today-date" style="font-size:13px;font-weight:800;color:var(--brown)"></div>
-          <div id="cal-today-time" style="font-size:11px;color:var(--brown3)"></div>
+      <div id="cal-today-bar" style="background:var(--surface);border-radius:var(--r);padding:12px 16px;box-shadow:var(--shadow-sm);margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:18px">📅</span>
+          <div>
+            <div id="cal-today-date" style="font-size:13px;font-weight:800;color:var(--brown)"></div>
+            <div id="cal-today-time" style="font-size:11px;color:var(--brown3)"></div>
+          </div>
+        </div>
+        <div id="cal-anniversary-bar" style="background:linear-gradient(135deg,var(--rose-light),var(--gold-light));border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">💑</span>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:var(--brown);line-height:1.4" id="cal-anniv-text"></div>
+            <div style="font-size:10px;color:var(--brown3)" id="cal-anniv-sub"></div>
+          </div>
         </div>
       </div>
       <div class="cal-top-card">
@@ -506,12 +524,87 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
     </div>
   </div>
 
-  <!-- BOTTOM NAV (입력으로 변경) -->
+  <!-- 챌린지 탭 -->
+  <div id="page-challenge" class="hidden">
+    <div style="padding:16px">
+      <div style="font-size:16px;font-weight:800;color:var(--brown);margin-bottom:4px">🏆 이번 달 챌린지</div>
+      <div style="font-size:12px;color:var(--brown3);margin-bottom:16px">함께 목표를 세우고 달성해봐요 💪</div>
+
+      <!-- 챌린지 추가 -->
+      <div style="background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--brown2);margin-bottom:8px">✏️ 새 챌린지 추가</div>
+        <input class="form-input" type="text" id="ch-input" placeholder="예: 외식 5만원 이하, 카페 3번 이하..." style="margin-bottom:8px">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select class="form-select" id="ch-who" style="flex:1">
+            <option value="both">💑 함께</option>
+            <option value="dohun">💙 도훈</option>
+            <option value="kyungeun">🩷 경은</option>
+          </select>
+          <select class="form-select" id="ch-category" style="flex:1">
+            <option value="절약">💰 절약</option>
+            <option value="운동">🏋️ 운동</option>
+            <option value="식습관">🥗 식습관</option>
+            <option value="데이트">💑 데이트</option>
+            <option value="저축">🏦 저축</option>
+            <option value="기타">📌 기타</option>
+          </select>
+        </div>
+        <button class="submit-btn" id="ch-add-btn" style="padding:10px">+ 챌린지 추가</button>
+      </div>
+
+      <!-- 챌린지 목록 -->
+      <div id="ch-list"></div>
+    </div>
+  </div>
+
+  <!-- 설정 탭 -->
+  <div id="page-settings" class="hidden">
+    <div style="padding:16px">
+      <div style="font-size:16px;font-weight:800;color:var(--brown);margin-bottom:16px">⚙️ 설정</div>
+
+      <!-- 프로필 -->
+      <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">👤 프로필</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div id="settings-avatar" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;flex-shrink:0"></div>
+          <div>
+            <div id="settings-name" style="font-size:14px;font-weight:700;color:var(--brown)"></div>
+            <div id="settings-email" style="font-size:11px;color:var(--brown3)"></div>
+          </div>
+        </div>
+        <button id="settings-logout-btn" style="width:100%;margin-top:12px;background:var(--rose-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--rose);cursor:pointer;font-family:inherit">🚪 로그아웃</button>
+      </div>
+
+      <!-- 기념일 설정 -->
+      <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">💑 기념일</div>
+        <label class="form-label">사귀기 시작한 날</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" type="date" id="settings-anniversary" style="flex:1">
+          <button id="settings-anniv-save" style="background:var(--rose);border:none;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:inherit">저장</button>
+        </div>
+        <div id="settings-anniv-preview" style="margin-top:8px;font-size:12px;color:var(--brown3)"></div>
+      </div>
+
+      <!-- 앱 정보 -->
+      <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)">
+        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">ℹ️ 앱 정보</div>
+        <div style="font-size:13px;color:var(--brown2);line-height:1.8">
+          <div>💙 도훈 & 경은 💰 가계부</div>
+          <div style="font-size:11px;color:var(--brown3)">버전 1.0 · Made with 💕</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <button class="nav-btn active" id="nav-home"><span class="nav-icon">🏠</span><span class="nav-lbl">홈</span></button>
     <button class="nav-btn" id="nav-add"><span class="nav-icon">➕</span><span class="nav-lbl">입력</span></button>
     <button class="nav-btn" id="nav-chart"><span class="nav-icon">📊</span><span class="nav-lbl">통계</span></button>
     <button class="nav-btn" id="nav-cal"><span class="nav-icon">📅</span><span class="nav-lbl">캘린더</span></button>
+    <button class="nav-btn" id="nav-challenge"><span class="nav-icon">🏆</span><span class="nav-lbl">챌린지</span></button>
+    <button class="nav-btn" id="nav-settings"><span class="nav-icon">⚙️</span><span class="nav-lbl">설정</span></button>
   </div>
 </div>
 
@@ -739,7 +832,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
@@ -1021,16 +1114,17 @@ const mTx = () => txs.filter(t=>{ const d=new Date(t.date); return d.getFullYear
 function getBudget(who){ return parseInt(localStorage.getItem(`b_${who}_${cYear}_${cMonth}`)||'0'); }
 function setBudget(who, v){ localStorage.setItem(`b_${who}_${cYear}_${cMonth}`, v); }
 
-function updateBudgetBar(barId, infoId, expense, budget){
+function updateBudgetBar(barId, infoId, expense, budget, who){
+  const sfx = who==='d'?'-d': who==='k'?'-k':'';
   if(budget > 0){
     const pct = Math.min(100, Math.round(expense / budget * 100));
     $(infoId).textContent = `${fmtFull(expense)} / ${fmtFull(budget)} (${pct}%)`;
     $(barId).style.width = pct + '%';
-    $(barId).className = 'budget-bar-fill ' + (pct>=100?'over':pct>=80?'warn':'safe');
+    $(barId).className = 'budget-bar-fill ' + (pct>=100?'over'+sfx:pct>=80?'warn'+sfx:'safe'+sfx);
   } else {
     $(infoId).textContent = '미설정';
     $(barId).style.width = '0%';
-    $(barId).className = 'budget-bar-fill safe';
+    $(barId).className = 'budget-bar-fill safe'+sfx;
   }
 }
 
@@ -1090,9 +1184,9 @@ function renderSummary(){
   if(kB > 0) $('k-budget-input').value = kB.toLocaleString('ko-KR');
 
   // 바로미터 업데이트
-  updateBudgetBar('d-budget-bar', 'd-budget-info', dE, dB);
-  updateBudgetBar('k-budget-bar', 'k-budget-info', kE, kB);
-  updateBudgetBar('t-budget-bar', 't-budget-info', dE+kE, tB);
+  updateBudgetBar('d-budget-bar', 'd-budget-info', dE, dB, 'd');
+  updateBudgetBar('k-budget-bar', 'k-budget-info', kE, kB, 'k');
+  updateBudgetBar('t-budget-bar', 't-budget-info', dE+kE, tB, 't');
 }
 
 // ── TX HTML ──
@@ -1499,12 +1593,18 @@ function openDayModal(d){
     $('day-tx-list').innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:13px">📭 내역이 없어요</div>`;
   }
 
-  // + 일정 버튼
-  $('day-add-event-btn').onclick=()=>{ closeM('day-modal'); openEventModal(ds); };
+  // + 일정 버튼 - data-ds 속성으로 날짜 전달 (클로저 버그 방지)
+  $('day-add-event-btn').dataset.ds = ds;
   $('day-modal').classList.add('open');
 }
 $('day-modal-close').addEventListener('click',()=>{ closeM('day-modal'); _dayModalReopenDay=null; });
 $('day-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){ closeM('day-modal'); _dayModalReopenDay=null; }});
+$('day-add-event-btn').addEventListener('click',()=>{
+  const ds=$('day-add-event-btn').dataset.ds;
+  if(!ds) return;
+  closeM('day-modal');
+  setTimeout(()=>openEventModal(ds), 250);
+});
 
 // 거래 수정/삭제 후 day-modal 재오픈을 위한 변수
 let _dayModalReopenDay=null, _pendingReopenDay=null;
@@ -1656,26 +1756,114 @@ function updateCalClock(){
   const now=new Date();
   const dateStr=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
   const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0'),s=String(now.getSeconds()).padStart(2,'0');
-  if($('cal-today-date')) $('cal-today-date').textContent=`Today  ${dateStr}`;
+  if($('cal-today-date')) $('cal-today-date').textContent=`Today is  ${dateStr}`;
   if($('cal-today-time')) $('cal-today-time').textContent=`🕐 ${h}:${m}:${s}`;
+  // 기념일 카운터
+  if($('cal-anniv-text')){
+    const anniversaryDate=localStorage.getItem('anniversary_date')||'2025-01-04';
+    const start=new Date(anniversaryDate);
+    const diff=Math.floor((now-start)/(1000*60*60*24))+1;
+    const next100=Math.ceil(diff/100)*100;
+    const daysTo100=next100-diff;
+    const [ay,am,ad]=anniversaryDate.split('-');
+    $('cal-anniv-text').textContent=`${ay}년 ${parseInt(am)}월 ${parseInt(ad)}일, +${diff.toLocaleString()}일째 사랑 중 💕`;
+    $('cal-anniv-sub').textContent=daysTo100===0?`🎉 오늘이 ${next100}일째예요!`:`${next100}일까지 ${daysTo100}일 남았어요 🎯`;
+  }
 }
 setInterval(updateCalClock,1000);
 updateCalClock();
 
 // ── PAGE NAV ──
+const ALL_PAGES=['home','add','chart','cal','challenge','settings'];
 function showPage(p){
-  ['home','add','chart','cal'].forEach(pg=>{
+  ALL_PAGES.forEach(pg=>{
     $(`page-${pg}`).classList.toggle('hidden',pg!==p);
     $(`nav-${pg}`).classList.toggle('active',pg===p);
   });
   if(p==='add'){$('inp-date').value=new Date().toISOString().split('T')[0];initAdd();}
   if(p==='chart') rChart();
   if(p==='cal'){rCal();rCalSummary();}
+  if(p==='challenge') rChallenge();
+  if(p==='settings') initSettings();
 }
 $('nav-home').addEventListener('click',()=>showPage('home'));
 $('nav-add').addEventListener('click',()=>showPage('add'));
 $('nav-chart').addEventListener('click',()=>showPage('chart'));
 $('nav-cal').addEventListener('click',()=>showPage('cal'));
+$('nav-challenge').addEventListener('click',()=>showPage('challenge'));
+$('nav-settings').addEventListener('click',()=>showPage('settings'));
+
+// ── CHALLENGE ──
+async function rChallenge(){
+  const snap = await getDocs(collection(db,'challenges'));
+  const all = snap.docs.map(d=>({id:d.id,...d.data()}))
+    .filter(c=>{const[y,m]=c.month.split('-');return parseInt(y)===cYear&&parseInt(m)-1===cMonth;});
+  const whoLabel={dohun:'💙 도훈',kyungeun:'🩷 경은',both:'💑 함께'};
+  const catEmoji={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'💑',저축:'🏦',기타:'📌'};
+  $('ch-list').innerHTML = all.length ? all.map(c=>`
+    <div style="background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:10px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:22px;cursor:pointer" class="ch-check" data-id="${c.id}" data-done="${c.done||false}">${c.done?'✅':'⬜'}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:${c.done?'var(--brown3)':'var(--brown)'};text-decoration:${c.done?'line-through':'none'}">${catEmoji[c.category]||'📌'} ${c.title}</div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:2px">${whoLabel[c.who]||'💑 함께'}</div>
+      </div>
+      <button class="ch-del" data-id="${c.id}" style="background:var(--rose-light);border:none;border-radius:8px;padding:5px 8px;font-size:11px;color:var(--rose);cursor:pointer;font-family:inherit">🗑️</button>
+    </div>`).join('') :
+    `<div style="text-align:center;padding:32px 0;color:var(--brown3);font-size:13px">📭 이번 달 챌린지가 없어요<br><span style="font-size:11px">위에서 새 챌린지를 추가해보세요!</span></div>`;
+
+  $('ch-list').querySelectorAll('.ch-check').forEach(el=>el.addEventListener('click',async()=>{
+    const done=el.dataset.done==='true';
+    await updateDoc(doc(db,'challenges',el.dataset.id),{done:!done});
+    toast(done?'⬜ 취소됐어요':'✅ 완료!'); rChallenge();
+  }));
+  $('ch-list').querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{
+    if(!confirm('삭제할까요?')) return;
+    await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요'); rChallenge();
+  }));
+}
+$('ch-add-btn').addEventListener('click',async()=>{
+  const title=$('ch-input').value.trim();
+  if(!title) return toast('챌린지 내용을 입력해주세요');
+  await addDoc(collection(db,'challenges'),{
+    title, who:$('ch-who').value, category:$('ch-category').value,
+    month:`${cYear}-${String(cMonth+1).padStart(2,'0')}`, done:false, createdAt:new Date().toISOString()
+  });
+  $('ch-input').value=''; toast('🏆 챌린지 추가됐어요!'); rChallenge();
+});
+
+// ── SETTINGS ──
+function initSettings(){
+  const user=auth.currentUser;
+  if(!user) return;
+  const isD=user.email==='ventisummer@gmail.com';
+  $('settings-avatar').style.background=isD?'var(--dohun)':'var(--kyungeun)';
+  $('settings-avatar').textContent=isD?'도':'경';
+  $('settings-name').textContent=isD?'💙 도훈':'🩷 경은';
+  $('settings-email').textContent=user.email;
+  // 기념일 날짜 불러오기
+  const saved=localStorage.getItem('anniversary_date')||'2025-01-04';
+  $('settings-anniversary').value=saved;
+  updateAnnivPreview(saved);
+}
+function updateAnnivPreview(dateStr){
+  if(!dateStr) return;
+  const start=new Date(dateStr);
+  const diff=Math.floor((new Date()-start)/(1000*60*60*24))+1;
+  $('settings-anniv-preview').textContent=`📅 ${dateStr} 시작 · 오늘은 +${diff.toLocaleString()}일째`;
+}
+$('settings-anniv-save').addEventListener('click',()=>{
+  const val=$('settings-anniversary').value;
+  if(!val) return toast('날짜를 선택해주세요');
+  localStorage.setItem('anniversary_date',val);
+  updateAnnivPreview(val);
+  toast('💕 기념일 저장됐어요!');
+  // 캘린더도 갱신
+  updateCalClock();
+});
+$('settings-anniversary').addEventListener('change',()=>updateAnnivPreview($('settings-anniversary').value));
+$('settings-logout-btn').addEventListener('click',()=>{
+  if(confirm('로그아웃 할까요?')) signOut(auth);
+});
 </script>
 </body>
 </html>
