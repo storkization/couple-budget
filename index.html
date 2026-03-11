@@ -626,7 +626,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 <div class="modal-overlay" id="event-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-header"><h3>📅 일정 추가</h3><button class="modal-close" id="event-close">✕</button></div>
+    <div class="modal-header"><h3 id="event-modal-title">📅 일정 추가</h3><button class="modal-close" id="event-close">✕</button></div>
     <div class="modal-body">
 
       <!-- 일정 제목 -->
@@ -635,24 +635,58 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <input class="form-input" type="text" id="event-desc" placeholder="예: 병원 예약, 영화 보기...">
       </div>
 
-      <!-- 날짜 + 시간 -->
-      <div class="row2" style="margin-bottom:12px">
-        <div>
-          <label class="form-label">📅 날짜</label>
-          <input class="form-input" type="date" id="event-date">
-        </div>
-        <div>
-          <label class="form-label">⏰ 시간 (선택)</label>
-          <input class="form-input" type="time" id="event-time" placeholder="없음">
+      <!-- 날짜 -->
+      <div style="margin-bottom:12px">
+        <label class="form-label">📅 날짜</label>
+        <input class="form-input" type="date" id="event-date">
+      </div>
+
+      <!-- 하루종일 토글 -->
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--brown2)">
+          <input type="checkbox" id="event-allday" style="width:16px;height:16px;accent-color:var(--rose);cursor:pointer">
+          하루 종일
+        </label>
+      </div>
+
+      <!-- 시작 시간 -->
+      <div id="event-time-section" style="margin-bottom:12px">
+        <label class="form-label">⏰ 시작 시간</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="form-select" id="event-ampm-start" style="width:80px">
+            <option>오전</option><option>오후</option>
+          </select>
+          <select class="form-select" id="event-hour-start" style="width:70px">
+            ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}시</option>`).join('')}
+          </select>
+          <select class="form-select" id="event-min-start" style="width:70px">
+            <option value="00">00분</option><option value="10">10분</option><option value="15">15분</option>
+            <option value="20">20분</option><option value="30">30분</option><option value="40">40분</option>
+            <option value="45">45분</option><option value="50">50분</option>
+          </select>
         </div>
       </div>
 
-      <!-- 종일 여부 -->
-      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
-        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--brown2)">
-          <input type="checkbox" id="event-allday" style="width:16px;height:16px;accent-color:var(--rose);cursor:pointer" checked>
-          하루 종일
-        </label>
+      <!-- 종료 시간 (선택) -->
+      <div id="event-time-end-section" style="margin-bottom:12px">
+        <label class="form-label">🏁 종료 시간 <span style="font-size:10px;color:var(--brown3);font-weight:400">(선택)</span></label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="form-select" id="event-ampm-end" style="width:80px">
+            <option>오전</option><option selected>오후</option>
+          </select>
+          <select class="form-select" id="event-hour-end" style="width:70px">
+            ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}시</option>`).join('')}
+          </select>
+          <select class="form-select" id="event-min-end" style="width:70px">
+            <option value="00">00분</option><option value="10">10분</option><option value="15">15분</option>
+            <option value="20">20분</option><option value="30">30분</option><option value="40">40분</option>
+            <option value="45">45분</option><option value="50">50분</option>
+          </select>
+          <button id="event-time-end-clear" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--brown3);cursor:pointer;font-family:inherit;white-space:nowrap">✕ 없음</button>
+        </div>
+        <div id="event-time-end-none" style="display:none;font-size:11px;color:var(--brown3);margin-top:4px">
+          종료 시간 없음 <button id="event-time-end-add" style="background:none;border:none;color:var(--rose);font-size:11px;cursor:pointer;font-family:inherit;font-weight:700">+ 추가</button>
+        </div>
       </div>
 
       <!-- 장소 -->
@@ -661,16 +695,22 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <input class="form-input" type="text" id="event-place" placeholder="예: 스타벅스 홍대점, 집">
       </div>
 
-      <!-- 카테고리 태그 -->
+      <!-- 종류 -->
       <div style="margin-bottom:12px">
         <label class="form-label">🏷️ 종류</label>
         <div style="display:flex;flex-wrap:wrap;gap:6px" id="event-type-chips">
           <button class="cat-chip active" data-et="일반">📌 일반</button>
           <button class="cat-chip" data-et="데이트">💑 데이트</button>
           <button class="cat-chip" data-et="약속">🤝 약속</button>
+          <button class="cat-chip" data-et="외식">🍽️ 외식</button>
           <button class="cat-chip" data-et="의료">💊 의료</button>
+          <button class="cat-chip" data-et="운동">🏋️ 운동</button>
+          <button class="cat-chip" data-et="쇼핑">🛒 쇼핑</button>
+          <button class="cat-chip" data-et="문화">🎬 문화</button>
           <button class="cat-chip" data-et="여행">✈️ 여행</button>
+          <button class="cat-chip" data-et="가족">👨‍👩‍👧 가족</button>
           <button class="cat-chip" data-et="기념일">🎉 기념일</button>
+          <button class="cat-chip" data-et="집안일">🏠 집안일</button>
         </div>
       </div>
 
@@ -690,7 +730,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <textarea class="form-textarea" id="event-memo" placeholder="추가 메모..."></textarea>
       </div>
 
-      <button class="submit-btn" id="event-save-btn">일정 저장</button>
+      <button class="submit-btn" id="event-save-btn">📅 일정 저장</button>
     </div>
   </div>
 </div>
@@ -955,7 +995,15 @@ onAuthStateChanged(auth, user => {
 
 function startSync(){
   if(unsubTx) unsubTx(); if(unsubEv) unsubEv();
-  unsubTx = onSnapshot(txCol, snap=>{ txs=snap.docs.map(d=>({id:d.id,...d.data()})); renderAll(); });
+  unsubTx = onSnapshot(txCol, snap=>{
+    txs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAll();
+    // 거래 수정/삭제 후 day-modal 재오픈 대기 중이면 여기서 처리
+    if(_pendingReopenDay){
+      const day=_pendingReopenDay; _pendingReopenDay=null;
+      setTimeout(()=>openDayModal(day),100);
+    }
+  });
   unsubEv = onSnapshot(evCol, snap=>{ evts=snap.docs.map(d=>({id:d.id,...d.data()})); rCal(); });
 }
 
@@ -1093,9 +1141,11 @@ function openDetail(id){
   $('det-del').onclick=async()=>{
     closeM('detail-modal');
     if(!confirm('삭제할까요?'))return;
+    const reopenDay = _dayModalReopenDay;
     await deleteDoc(doc(db,'transactions',id));
     toast('🗑️ 삭제됐어요');
-    if(_dayModalReopenDay){ setTimeout(()=>openDayModal(_dayModalReopenDay),300); _dayModalReopenDay=null; }
+    _dayModalReopenDay = null;
+    if(reopenDay && !isNaN(reopenDay)) _pendingReopenDay = reopenDay;
   };
 }
 const dr=(l,v)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--brown3)">${l}</span><span style="font-size:12px;font-weight:600">${v}</span></div>`;
@@ -1127,9 +1177,12 @@ $('edit-save-btn').addEventListener('click',async()=>{
   if(!amount||amount<=0)return toast('금액을 입력해주세요');
   if(!date)return toast('날짜를 선택해주세요');
   if(!desc)return toast('내용을 입력해주세요');
+  const reopenDay = _dayModalReopenDay || parseInt(date.split('-')[2]);
   await updateDoc(doc(db,'transactions',editId),{type:eType,amount,date,desc,memo,category:eCat,who:eWho});
   closeM('edit-modal'); toast('✅ 수정됐어요!');
-  if(_dayModalReopenDay){ setTimeout(()=>openDayModal(_dayModalReopenDay),300); _dayModalReopenDay=null; }
+  _dayModalReopenDay = null;
+  // Firestore onSnapshot 콜백 후 재오픈 (데이터 업데이트 보장)
+  if(reopenDay && !isNaN(reopenDay)) _pendingReopenDay = reopenDay;
 });
 
 // ── ADD ──
@@ -1372,6 +1425,8 @@ function rCal(){
 
 // ── DAY MODAL (날짜 탭 시 팝업) ──
 function openDayModal(d){
+  d = parseInt(d);
+  if(!d || isNaN(d)) return; // null/NaN 방어
   const ds=`${cYear}-${String(cMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   const days=['일','월','화','수','목','금','토'];
   const dateObj=new Date(ds+'T00:00:00');
@@ -1397,10 +1452,15 @@ function openDayModal(d){
   const evSec=$('day-ev-section');
   if(devts.length){
     evSec.style.display='block';
+    const TYPE_EMOJI={일반:'📌',데이트:'💑',약속:'🤝',외식:'🍽️',의료:'💊',운동:'🏋️',쇼핑:'🛒',문화:'🎬',여행:'✈️',가족:'👨‍👩‍👧',기념일:'🎉',집안일:'🏠'};
+    function fmtTimeDisplay(t){ if(!t) return ''; const [h,m]=t.split(':'); const ampm=parseInt(h)>=12?'오후':'오전'; const h12=parseInt(h)%12||12; return `${ampm} ${h12}:${m}`; }
     $('day-ev-list').innerHTML=devts.map(ev=>{
-      const typeEmoji={일반:'📌',데이트:'💑',약속:'🤝',의료:'💊',여행:'✈️',기념일:'🎉'}[ev.evType||'일반']||'📌';
-      const timeStr=ev.time&&ev.time!==''?` · ⏰ ${ev.time}`:'';
-      const placeStr=ev.place?` · 📍 ${ev.place}`:'';
+      const typeEmoji=TYPE_EMOJI[ev.evType||'일반']||'📌';
+      let timeStr='';
+      if(!ev.allday && ev.time) {
+        timeStr = ev.timeEnd ? `⏰ ${fmtTimeDisplay(ev.time)} ~ ${fmtTimeDisplay(ev.timeEnd)}` : `⏰ ${fmtTimeDisplay(ev.time)}`;
+      }
+      const placeStr=ev.place?`📍 ${ev.place}`:'';
       return `<div class="event-item" style="flex-direction:column;align-items:flex-start;gap:5px" data-evid="${ev.id}">
         <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
           <span class="event-title">${typeEmoji} ${ev.desc}</span>
@@ -1410,7 +1470,7 @@ function openDayModal(d){
             <button class="ev-del-btn" data-id="${ev.id}" style="background:var(--rose-light);border:none;border-radius:8px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--rose);cursor:pointer;font-family:inherit">🗑️</button>
           </div>
         </div>
-        ${timeStr||placeStr?`<div style="font-size:11px;color:var(--brown3)">${timeStr}${placeStr}</div>`:''}
+        ${timeStr||placeStr?`<div style="font-size:11px;color:var(--brown3);display:flex;gap:8px">${timeStr?`<span>${timeStr}</span>`:''}${placeStr?`<span>${placeStr}</span>`:''}</div>`:''}
         ${ev.memo?`<div style="font-size:11px;color:var(--brown3)">💬 ${ev.memo}</div>`:''}
       </div>`;
     }).join('');
@@ -1447,46 +1507,99 @@ $('day-modal-close').addEventListener('click',()=>{ closeM('day-modal'); _dayMod
 $('day-modal').addEventListener('click',e=>{if(e.target===e.currentTarget){ closeM('day-modal'); _dayModalReopenDay=null; }});
 
 // 거래 수정/삭제 후 day-modal 재오픈을 위한 변수
-let _dayModalReopenDay=null;
+let _dayModalReopenDay=null, _pendingReopenDay=null;
 
-// ── 일정 수정 MODAL ──
+// ── EVENT MODAL ──
+let evType='일반', evEndEnabled=true;
 let _editEvId=null;
-function openEvEditModal(ev, fromDay){
-  _editEvId=ev.id;
-  $('event-desc').value=ev.desc||'';
-  $('event-date').value=ev.date||'';
-  $('event-place').value=ev.place||'';
-  $('event-memo').value=ev.memo||'';
-  const allday=ev.allday!==false;
-  $('event-allday').checked=allday;
-  $('event-time').disabled=allday;
-  $('event-time').style.opacity=allday?'0.4':'1';
-  $('event-time').value=allday?'':ev.time||'';
-  evWho=ev.who==='dohun'?'d':ev.who==='kyungeun'?'k':'both'; syncEvWho();
-  evType=ev.evType||'일반'; syncEvType();
-  // 저장 버튼 텍스트 변경
-  $('event-save-btn').textContent='✏️ 수정하기';
-  $('event-save-btn').dataset.mode='edit';
-  $('event-save-btn').dataset.fromDay=fromDay;
-  $('event-modal').classList.add('open');
+
+// 시간 헬퍼
+function getTimeVal(ampm, hour, min){
+  let h=parseInt(hour);
+  if(ampm==='오후'&&h!==12) h+=12;
+  if(ampm==='오전'&&h===12) h=0;
+  return `${String(h).padStart(2,'0')}:${min}`;
+}
+function setTimeDropdowns(ampmId, hourId, minId, timeStr){
+  if(!timeStr){ return; }
+  const [hh,mm]=timeStr.split(':');
+  let h=parseInt(hh), ampm='오전';
+  if(h>=12){ ampm='오후'; if(h>12) h-=12; }
+  if(h===0) h=12;
+  $(ampmId).value=ampm;
+  $(hourId).value=String(h);
+  // 가장 가까운 분 선택
+  const mins=['00','10','15','20','30','40','45','50'];
+  const closest=mins.reduce((a,b)=>Math.abs(parseInt(b)-parseInt(mm))<Math.abs(parseInt(a)-parseInt(mm))?b:a);
+  $(minId).value=closest;
+}
+function toggleTimeSection(allday){
+  const show=!allday;
+  $('event-time-section').style.opacity=show?'1':'0.4';
+  $('event-time-section').style.pointerEvents=show?'':'none';
+  $('event-time-end-section').style.opacity=show?'1':'0.4';
+  $('event-time-end-section').style.pointerEvents=show?'':'none';
+}
+function toggleEndTime(enabled){
+  evEndEnabled=enabled;
+  $('event-time-end-section').querySelector('div:first-child').style.display=enabled?'flex':'none';
+  $('event-time-end-none').style.display=enabled?'none':'block';
 }
 
-// ── EVENT MODAL (세분화) ──
-let evType='일반';
 function openEventModal(dateStr){
+  _editEvId=null;
+  $('event-modal-title').textContent='📅 일정 추가';
+  $('event-save-btn').textContent='📅 일정 저장';
+  $('event-save-btn').dataset.mode='add';
   $('event-desc').value=''; $('event-date').value=dateStr;
-  $('event-time').value=''; $('event-place').value=''; $('event-memo').value='';
-  $('event-allday').checked=true; $('event-time').disabled=true; $('event-time').style.opacity='0.4';
+  $('event-place').value=''; $('event-memo').value='';
+  $('event-allday').checked=false;
+  toggleTimeSection(false);
+  // 기본 시작: 오후 3시 00분
+  $('event-ampm-start').value='오후';
+  $('event-hour-start').value='3';
+  $('event-min-start').value='00';
+  // 기본 종료: 오후 5시 00분
+  $('event-ampm-end').value='오후';
+  $('event-hour-end').value='5';
+  $('event-min-end').value='00';
+  toggleEndTime(true);
   evWho='both'; syncEvWho();
   evType='일반'; syncEvType();
   $('event-modal').classList.add('open');
 }
-// 종일 체크박스 토글
-$('event-allday').addEventListener('change',()=>{
-  const allday=$('event-allday').checked;
-  $('event-time').disabled=allday; $('event-time').style.opacity=allday?'0.4':'1';
-  if(allday) $('event-time').value='';
-});
+
+function openEvEditModal(ev, fromDay){
+  _editEvId=ev.id;
+  $('event-modal-title').textContent='✏️ 일정 수정';
+  $('event-save-btn').textContent='✏️ 수정하기';
+  $('event-save-btn').dataset.mode='edit';
+  $('event-save-btn').dataset.fromDay=fromDay;
+  $('event-desc').value=ev.desc||'';
+  $('event-date').value=ev.date||'';
+  $('event-place').value=ev.place||'';
+  $('event-memo').value=ev.memo||'';
+  const allday=ev.allday===true;
+  $('event-allday').checked=allday;
+  toggleTimeSection(allday);
+  // 시작 시간
+  if(ev.time) setTimeDropdowns('event-ampm-start','event-hour-start','event-min-start',ev.time);
+  else { $('event-ampm-start').value='오후'; $('event-hour-start').value='3'; $('event-min-start').value='00'; }
+  // 종료 시간
+  if(ev.timeEnd){ setTimeDropdowns('event-ampm-end','event-hour-end','event-min-end',ev.timeEnd); toggleEndTime(true); }
+  else toggleEndTime(false);
+  evWho=ev.who==='dohun'?'d':ev.who==='kyungeun'?'k':'both'; syncEvWho();
+  evType=ev.evType||'일반'; syncEvType();
+  $('event-modal').classList.add('open');
+}
+
+// 하루종일 토글
+$('event-allday').addEventListener('change',()=>{ toggleTimeSection($('event-allday').checked); });
+
+// 종료 시간 없음/추가 버튼
+$('event-time-end-clear').addEventListener('click',()=>toggleEndTime(false));
+$('event-time-end-add').addEventListener('click',()=>toggleEndTime(true));
+
 // 종류 칩
 function syncEvType(){
   document.querySelectorAll('#event-type-chips .cat-chip').forEach(b=>{
@@ -1507,7 +1620,7 @@ $('event-close').addEventListener('click',()=>{ closeM('event-modal'); resetEven
 $('event-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget){ closeM('event-modal'); resetEventModal(); }});
 function resetEventModal(){
   _editEvId=null;
-  $('event-save-btn').textContent='📅 일정 추가';
+  $('event-save-btn').textContent='📅 일정 저장';
   $('event-save-btn').dataset.mode='add';
 }
 $('event-save-btn').addEventListener('click',async()=>{
@@ -1515,23 +1628,22 @@ $('event-save-btn').addEventListener('click',async()=>{
   if(!desc) return toast('일정 제목을 입력해주세요');
   if(!date) return toast('날짜를 선택해주세요');
   const allday=$('event-allday').checked;
-  const time=allday?'':$('event-time').value;
+  const time=allday?'':getTimeVal($('event-ampm-start').value,$('event-hour-start').value,$('event-min-start').value);
+  const timeEnd=(!allday&&evEndEnabled)?getTimeVal($('event-ampm-end').value,$('event-hour-end').value,$('event-min-end').value):'';
   const place=$('event-place').value.trim();
   const memo=$('event-memo').value.trim();
   const wm={d:'dohun',k:'kyungeun',both:'both'};
   const mode=$('event-save-btn').dataset.mode||'add';
 
   if(mode==='edit' && _editEvId){
-    // 수정 모드
-    await updateDoc(doc(db,'events',_editEvId),{desc,date,time,place,memo,evType,who:wm[evWho],allday});
+    await updateDoc(doc(db,'events',_editEvId),{desc,date,time,timeEnd,place,memo,evType,who:wm[evWho],allday});
     const fromDay=parseInt($('event-save-btn').dataset.fromDay)||parseInt(date.split('-')[2]);
     closeM('event-modal'); resetEventModal();
     toast('✅ 일정 수정됐어요!');
     selDay=fromDay; rCal();
     setTimeout(()=>openDayModal(fromDay),300);
   } else {
-    // 추가 모드
-    await addDoc(evCol,{desc,date,time,place,memo,evType,who:wm[evWho],allday,createdAt:new Date().toISOString()});
+    await addDoc(evCol,{desc,date,time,timeEnd,place,memo,evType,who:wm[evWho],allday,createdAt:new Date().toISOString()});
     closeM('event-modal'); resetEventModal();
     toast('📅 일정 추가됐어요!');
     selDay=parseInt(date.split('-')[2]); rCal();
