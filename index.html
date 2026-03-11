@@ -915,18 +915,89 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <!-- 챌린지 추가/수정 모달 -->
 <div class="modal-overlay" id="ch-modal">
-  <div class="modal-sheet">
+  <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
     <div class="modal-handle"></div>
     <div class="modal-header">
       <h3 id="ch-modal-title">🏆 챌린지 추가</h3>
       <button class="modal-close" id="ch-modal-close">✕</button>
     </div>
     <div class="modal-body">
-      <div style="margin-bottom:10px">
-        <label class="form-label">✏️ 챌린지 내용</label>
-        <input class="form-input" type="text" id="ch-modal-input" placeholder="예: 외식 5만원 이하, 카페 3번 이하...">
+
+      <!-- 챌린지 제목 -->
+      <div style="margin-bottom:12px">
+        <label class="form-label">✏️ 챌린지 이름</label>
+        <input class="form-input" type="text" id="ch-modal-input" placeholder="예: 이번 달 카페 줄이기">
       </div>
-      <div style="margin-bottom:10px">
+
+      <!-- 달성 타입 선택 -->
+      <div style="margin-bottom:12px">
+        <label class="form-label">🎯 달성 타입</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="ch-type-btns">
+          <button class="ch-type-btn active" data-type="ox" style="padding:10px 6px;border-radius:12px;border:2px solid var(--rose);background:var(--rose);color:white;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+            <div style="font-size:18px">✅</div>
+            <div>O / X</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">달성 여부</div>
+          </button>
+          <button class="ch-type-btn" data-type="count" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+            <div style="font-size:18px">🔢</div>
+            <div>횟수</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">N회 달성</div>
+          </button>
+          <button class="ch-type-btn" data-type="accumulate" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+            <div style="font-size:18px">📊</div>
+            <div>누적</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">목표량 채우기</div>
+          </button>
+          <button class="ch-type-btn" data-type="amount" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+            <div style="font-size:18px">💰</div>
+            <div>금액</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">N원 이하/이상</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- 타입별 세부 설정 -->
+      <!-- O/X: 별도 설정 없음 -->
+      <div id="ch-type-ox" style="margin-bottom:12px;background:var(--bg);border-radius:12px;padding:12px;text-align:center;color:var(--brown3);font-size:12px">
+        월말에 달성했으면 ✅, 못했으면 ❌ 체크해요
+      </div>
+
+      <!-- 횟수 -->
+      <div id="ch-type-count" style="margin-bottom:12px;display:none">
+        <label class="form-label">🎯 목표 횟수</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input class="form-input" type="number" id="ch-modal-target" placeholder="예: 3" min="1" style="flex:1;font-size:16px;font-weight:700;text-align:center">
+          <span style="font-size:14px;font-weight:700;color:var(--brown2);white-space:nowrap">회</span>
+        </div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:5px">탭할 때마다 +1씩 카운트돼요</div>
+      </div>
+
+      <!-- 누적 -->
+      <div id="ch-type-accumulate" style="margin-bottom:12px;display:none">
+        <label class="form-label">🎯 목표량</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="form-input" type="number" id="ch-modal-target-acc" placeholder="예: 30" min="1" style="flex:1;font-size:16px;font-weight:700;text-align:center">
+          <input class="form-input" type="text" id="ch-modal-unit" placeholder="단위 (예: km, L, 페이지)" style="flex:1.5">
+        </div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:5px">기록할 때마다 숫자를 직접 입력해서 쌓아요</div>
+      </div>
+
+      <!-- 금액 -->
+      <div id="ch-type-amount" style="margin-bottom:12px;display:none">
+        <label class="form-label">🎯 목표 금액</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select class="form-select" id="ch-modal-amount-dir" style="width:90px">
+            <option value="under">이하</option>
+            <option value="over">이상</option>
+          </select>
+          <input class="form-input" type="number" id="ch-modal-target-amt" placeholder="예: 50000" min="0" style="flex:1;font-size:15px;font-weight:700;text-align:center">
+          <span style="font-size:14px;font-weight:700;color:var(--brown2)">원</span>
+        </div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:5px">지출할 때마다 금액을 직접 입력해서 쌓아요</div>
+      </div>
+
+      <!-- 카테고리 -->
+      <div style="margin-bottom:12px">
         <label class="form-label">🏷️ 카테고리</label>
         <select class="form-select" id="ch-modal-category">
           <option value="절약">💰 절약</option>
@@ -938,6 +1009,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <option value="기타">📌 기타</option>
         </select>
       </div>
+
+      <!-- 보상 / 패널티 -->
       <div style="display:flex;gap:8px;margin-bottom:16px">
         <div style="flex:1;background:var(--gold-light);border-radius:12px;padding:10px;border:1px solid rgba(201,150,58,0.2)">
           <label class="form-label" style="color:#b8860b;font-size:11px">🎁 달성 시 보상</label>
@@ -948,6 +1021,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="form-input" type="text" id="ch-modal-penalty" placeholder="예: 설거지 일주일" style="font-size:12px;padding:7px 10px;background:white">
         </div>
       </div>
+
       <button class="submit-btn" id="ch-modal-save">저장하기</button>
     </div>
   </div>
@@ -1995,6 +2069,7 @@ $('nav-settings').addEventListener('click',()=>showPage('settings'));
 // ── CHALLENGE ──
 let chAddWho = 'both';
 let chEditId = null;
+let chModalType = 'ox';
 const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'👫',저축:'🏦',생활:'🏠',기타:'📌'};
 const CH_MONTH=()=>`${cYear}-${String(cMonth+1).padStart(2,'0')}`;
 
@@ -2006,70 +2081,170 @@ function startChallengeSync(){
   }, ()=>{});
 }
 
-// ── 챌린지 모달 ──
+// 타입 버튼 전환
+function setChModalType(t){
+  chModalType = t;
+  const colors = {ox:'var(--rose)', count:'var(--dohun)', accumulate:'var(--green)', amount:'var(--gold)'};
+  document.querySelectorAll('.ch-type-btn').forEach(b=>{
+    const active = b.dataset.type === t;
+    const c = colors[b.dataset.type];
+    b.style.background = active ? c : 'var(--bg)';
+    b.style.color = active ? 'white' : 'var(--brown3)';
+    b.style.borderColor = active ? c : 'var(--border)';
+  });
+  ['ox','count','accumulate','amount'].forEach(tp=>{
+    $(`ch-type-${tp}`).style.display = tp===t ? 'block' : 'none';
+  });
+}
+document.querySelectorAll('.ch-type-btn').forEach(b=>b.addEventListener('click',()=>setChModalType(b.dataset.type)));
+
+// 챌린지 모달
 function openChModal(who, editData=null){
   chAddWho = who;
   chEditId = editData ? editData.id : null;
   const whoLabel = who==='both'?'👫 함께':who==='kyungeun'?'🩷 경은':'💙 도훈';
-  $('ch-modal-title').textContent = editData ? `✏️ 챌린지 수정` : `🏆 ${whoLabel} 챌린지 추가`;
-  $('ch-modal-input').value = editData ? editData.title||'' : '';
-  $('ch-modal-category').value = editData ? editData.category||'절약' : '절약';
-  $('ch-modal-reward').value = editData ? editData.reward||'' : '';
-  $('ch-modal-penalty').value = editData ? editData.penalty||'' : '';
+  $('ch-modal-title').textContent = editData ? '✏️ 챌린지 수정' : `🏆 ${whoLabel} 챌린지 추가`;
+  $('ch-modal-input').value = editData?.title||'';
+  $('ch-modal-category').value = editData?.category||'절약';
+  $('ch-modal-reward').value = editData?.reward||'';
+  $('ch-modal-penalty').value = editData?.penalty||'';
+  const t = editData?.chType||'ox';
+  setChModalType(t);
+  if(t==='count') $('ch-modal-target').value = editData?.target||'';
+  if(t==='accumulate'){ $('ch-modal-target-acc').value = editData?.target||''; $('ch-modal-unit').value = editData?.unit||''; }
+  if(t==='amount'){ $('ch-modal-target-amt').value = editData?.target||''; $('ch-modal-amount-dir').value = editData?.amountDir||'under'; }
   $('ch-modal').classList.add('open');
   setTimeout(()=>$('ch-modal-input').focus(), 300);
 }
 $('ch-modal-close').addEventListener('click',()=>closeM('ch-modal'));
 $('ch-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeM('ch-modal'); });
+
 $('ch-modal-save').addEventListener('click',async()=>{
   const title=$('ch-modal-input').value.trim();
-  if(!title) return toast('챌린지 내용을 입력해주세요');
-  const data = {
-    title, who:chAddWho, category:$('ch-modal-category').value,
-    month:CH_MONTH(), reward:$('ch-modal-reward').value.trim(),
-    penalty:$('ch-modal-penalty').value.trim()
-  };
+  if(!title) return toast('챌린지 이름을 입력해주세요');
+  const base = { title, who:chAddWho, category:$('ch-modal-category').value,
+    month:CH_MONTH(), chType:chModalType,
+    reward:$('ch-modal-reward').value.trim(), penalty:$('ch-modal-penalty').value.trim() };
+  if(chModalType==='count'){
+    const t=parseInt($('ch-modal-target').value)||0;
+    if(!t) return toast('목표 횟수를 입력해주세요');
+    base.target=t;
+    if(!chEditId) base.progress=0;
+  } else if(chModalType==='accumulate'){
+    const t=parseFloat($('ch-modal-target-acc').value)||0;
+    if(!t) return toast('목표량을 입력해주세요');
+    base.target=t; base.unit=$('ch-modal-unit').value.trim()||'';
+    if(!chEditId) base.progress=0;
+  } else if(chModalType==='amount'){
+    const t=parseInt($('ch-modal-target-amt').value)||0;
+    if(!t) return toast('목표 금액을 입력해주세요');
+    base.target=t; base.amountDir=$('ch-modal-amount-dir').value;
+    if(!chEditId) base.progress=0;
+  } else {
+    if(!chEditId) base.done=false;
+  }
   if(chEditId){
-    await updateDoc(doc(db,'challenges',chEditId), data);
+    await updateDoc(doc(db,'challenges',chEditId), base);
     toast('✅ 수정됐어요!');
   } else {
-    await addDoc(collection(db,'challenges'),{...data, done:false, createdAt:new Date().toISOString()});
+    await addDoc(collection(db,'challenges'), {...base, createdAt:new Date().toISOString()});
     toast('🏆 챌린지 추가됐어요!');
   }
   closeM('ch-modal');
 });
 
-// 인라인 추가 버튼
 document.querySelectorAll('.ch-add-inline-btn').forEach(btn=>{
   btn.addEventListener('click',()=>openChModal(btn.dataset.who));
 });
 
+// 진행값 입력 모달
+let _progressTarget = null;
+function openProgressModal(c){
+  _progressTarget = c;
+  const isAmt = c.chType==='amount';
+  const isAcc = c.chType==='accumulate';
+  const isCount = c.chType==='count';
+  const cur = c.progress||0;
+  const unit = isAmt?'원':isAcc?(c.unit||''):isCount?'회':'';
+  const dir = isAmt?(c.amountDir==='under'?'이하':'이상'):'';
+  const curStr = isAmt?cur.toLocaleString('ko-KR'):cur;
+  const tgtStr = isAmt?c.target.toLocaleString('ko-KR'):c.target;
+  const barPct = Math.min(100,Math.round((cur/c.target)*100));
+
+  let pm=$('ch-progress-modal'); if(pm) pm.remove();
+  const quickBtns = isAmt?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+    ${[1000,5000,10000,50000].map(v=>`<button onclick="var i=document.getElementById('ch-pm-input');i.value=((parseInt(i.value)||0)+${v}).toString()" style="flex:1;padding:7px 4px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:11px;font-weight:700;color:var(--brown2);cursor:pointer">+${v>=10000?v/10000+'만':v/1000+'천'}원</button>`).join('')}
+  </div>`:'';
+
+  document.body.insertAdjacentHTML('beforeend',`
+  <div class="modal-overlay open" id="ch-progress-modal" style="z-index:9999">
+    <div class="modal-sheet" style="padding-bottom:30px">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h3 style="font-size:14px">${CAT_EMOJI[c.category]||'📌'} ${c.title}</h3>
+        <button class="modal-close" id="ch-pm-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:12px;color:var(--brown3);margin-bottom:4px">현재 진행</div>
+          <div style="font-size:34px;font-weight:800;color:var(--brown)">${curStr}<span style="font-size:16px;font-weight:600;color:var(--brown3);margin-left:3px">${unit}</span></div>
+          <div style="font-size:11px;color:var(--brown3);margin-top:2px">목표: ${tgtStr}${unit} ${dir}</div>
+          <div style="background:var(--bg);border-radius:99px;height:8px;overflow:hidden;margin:10px 16px 0">
+            <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--rose),var(--gold));width:${barPct}%;transition:width 0.4s"></div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:var(--rose);margin-top:4px">${barPct}%</div>
+        </div>
+        <label class="form-label">${isCount?'+ 횟수 추가':isAcc?`+ ${c.unit||'수량'} 추가`:'+ 금액 추가'}</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <input class="form-input" type="number" id="ch-pm-input" value="${isCount?1:''}" placeholder="${isAmt?'금액':isAcc?(c.unit||'수량'):'횟수'}" min="0" style="flex:1;font-size:20px;font-weight:700;text-align:center">
+          <span style="font-size:14px;font-weight:600;color:var(--brown2)">${unit}</span>
+        </div>
+        ${quickBtns}
+        <button class="submit-btn" id="ch-pm-save">기록하기</button>
+      </div>
+    </div>
+  </div>`);
+
+  $('ch-pm-close').addEventListener('click',()=>$('ch-progress-modal').remove());
+  $('ch-progress-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.remove(); });
+  $('ch-pm-save').addEventListener('click',async()=>{
+    const add = isAmt?parseInt($('ch-pm-input').value)||0:parseFloat($('ch-pm-input').value)||0;
+    if(add<=0) return toast('값을 입력해주세요');
+    const newProg = Math.round((cur+add)*100)/100;
+    await updateDoc(doc(db,'challenges',c.id),{progress:newProg});
+    $('ch-progress-modal').remove();
+    toast('📝 기록됐어요!');
+  });
+}
+
 async function rChallenge(){
   if($('ch-month-label')) $('ch-month-label').textContent=`${cYear}년 ${cMonth+1}월`;
   const all=_challengeAll.filter(c=>c.month===CH_MONTH());
-
-  // 전체 달성률
-  const totalDone=all.filter(c=>c.done).length;
+  const isDone = c => {
+    const t=c.chType||'ox';
+    if(t==='ox') return c.done===true;
+    if(t==='amount') return c.amountDir==='over' ? (c.progress||0)>=(c.target||1) : (c.progress||0)<=(c.target||1) && (c.progress||0)>0;
+    return (c.progress||0)>=(c.target||1);
+  };
+  const totalDone=all.filter(isDone).length;
   const totalPct=all.length?Math.round(totalDone/all.length*100):0;
   $('ch-total-pct').textContent=totalPct+'%';
   $('ch-total-bar').style.width=totalPct+'%';
   $('ch-total-done').textContent=`완료 ${totalDone}개`;
   $('ch-total-count').textContent=`전체 ${all.length}개`;
-
-  renderSection('both', all);
-  renderSection('kyungeun', all);
-  renderSection('dohun', all);
+  renderSection('both', all, isDone);
+  renderSection('kyungeun', all, isDone);
+  renderSection('dohun', all, isDone);
 }
 
-function renderSection(who, all){
+function renderSection(who, all, isDone){
   const filtered=all.filter(c=>c.who===who);
-  const done=filtered.filter(c=>c.done).length;
-  const pct=filtered.length?Math.round(done/filtered.length*100):0;
-
+  const doneList=filtered.filter(isDone);
+  const pct=filtered.length?Math.round(doneList.length/filtered.length*100):0;
   const ringEl=$(`ch-${who}-ring`), barEl=$(`ch-${who}-bar`), subEl=$(`ch-${who}-sub`);
   if(ringEl) ringEl.textContent=pct+'%';
   if(barEl) barEl.style.width=pct+'%';
-  if(subEl) subEl.textContent=`완료 ${done} / 전체 ${filtered.length}`;
+  if(subEl) subEl.textContent=`완료 ${doneList.length} / 전체 ${filtered.length}`;
 
   const listEl=$(`ch-${who}-list`);
   if(!listEl) return;
@@ -2081,37 +2256,67 @@ function renderSection(who, all){
   }
 
   let banner='';
-  if(done>0 && done===filtered.length){
-    banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)">
-      <div style="font-size:22px">🎉</div>
-      <div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div>
-    </div>`;
+  if(filtered.length>0 && doneList.length===filtered.length){
+    banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)"><div style="font-size:22px">🎉</div><div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div></div>`;
   }
 
-  listEl.innerHTML=banner+filtered.map(c=>{
-    const isDone=c.done===true;
-    const hasRP = c.reward||c.penalty;
-    return `<div style="background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:6px;border-left:3px solid ${isDone?'var(--green)':accentColor}">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="ch-check" data-id="${c.id}" data-done="${isDone}" style="font-size:20px;cursor:pointer;flex-shrink:0;user-select:none">${isDone?'✅':'⬜'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:700;color:${isDone?'var(--brown3)':'var(--brown)'};text-decoration:${isDone?'line-through':'none'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div>
-          <div style="font-size:10px;color:var(--brown3);margin-top:1px">${c.category}</div>
+  const typeLabel = {ox:'O/X',count:'횟수',accumulate:'누적',amount:'금액'};
+  listEl.innerHTML = banner + filtered.map(c=>{
+    const done = isDone(c);
+    const type = c.chType||'ox';
+    const ac = done?'var(--green)':accentColor;
+    let actionHTML='', progressHTML='';
+
+    if(type==='ox'){
+      actionHTML=`<div class="ch-check" data-id="${c.id}" data-done="${done}" style="font-size:22px;cursor:pointer;flex-shrink:0;user-select:none">${done?'✅':'⬜'}</div>`;
+    } else {
+      const cur=c.progress||0, tgt=c.target||1;
+      const isAmt=type==='amount';
+      const unit=isAmt?'원':type==='accumulate'?(c.unit||''):'회';
+      const curStr=isAmt?cur.toLocaleString('ko-KR'):cur;
+      const tgtStr=isAmt?tgt.toLocaleString('ko-KR'):tgt;
+      const pctVal=isAmt&&c.amountDir==='under'?Math.min(100,Math.round((cur/tgt)*100)):Math.min(100,Math.round((cur/tgt)*100));
+      const dir=isAmt?(c.amountDir==='under'?'이하':'이상'):'';
+      progressHTML=`<div style="margin-top:7px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:11px;color:var(--brown3)">${curStr}${unit} / ${tgtStr}${unit}${dir?(' '+dir):''}</span>
+          <span style="font-size:11px;font-weight:800;color:${done?'var(--green)':accentColor}">${pctVal}%</span>
         </div>
-        <button class="ch-edit" data-id="${c.id}" style="background:var(--gold-light);border:none;border-radius:7px;padding:3px 7px;font-size:11px;font-weight:700;color:#b8860b;cursor:pointer;font-family:inherit;flex-shrink:0">✏️</button>
-        <button class="ch-del" data-id="${c.id}" style="background:none;border:none;font-size:15px;cursor:pointer;flex-shrink:0;opacity:0.4">🗑️</button>
+        <div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden">
+          <div style="height:100%;border-radius:99px;background:${done?'var(--green)':accentColor};width:${pctVal}%;transition:width 0.4s"></div>
+        </div>
+      </div>`;
+      actionHTML=`<button class="ch-record-btn" data-id="${c.id}" style="background:${accentColor};border:none;border-radius:9px;padding:6px 10px;font-size:11px;font-weight:700;color:white;cursor:pointer;font-family:inherit;flex-shrink:0">+ 기록</button>`;
+    }
+    const hasRP = c.reward||c.penalty;
+    return `<div style="background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:3px solid ${ac}">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${actionHTML}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:${done?'var(--brown3)':'var(--brown)'};text-decoration:${done?'line-through':'none'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div>
+          <div style="font-size:10px;color:var(--brown3);margin-top:1px">${c.category} · ${typeLabel[type]||'O/X'}</div>
+          ${progressHTML}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button class="ch-edit" data-id="${c.id}" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px 7px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit">✏️</button>
+          <button class="ch-del" data-id="${c.id}" style="background:none;border:none;font-size:14px;cursor:pointer;opacity:0.35">🗑️</button>
+        </div>
       </div>
-      ${hasRP?`<div style="display:flex;gap:6px;margin-top:7px">
-        ${c.reward?`<div style="flex:1;background:rgba(201,150,58,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:#b8860b"><span style="font-weight:700">🎁 보상</span> ${c.reward}</div>`:''}
-        ${c.penalty?`<div style="flex:1;background:rgba(232,120,90,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:var(--rose)"><span style="font-weight:700">💀 패널티</span> ${c.penalty}</div>`:''}
+      ${hasRP?`<div style="display:flex;gap:6px;margin-top:8px">
+        ${c.reward?`<div style="flex:1;background:rgba(201,150,58,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:#b8860b"><span style="font-weight:700">🎁</span> ${c.reward}</div>`:''}
+        ${c.penalty?`<div style="flex:1;background:rgba(232,120,90,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:var(--rose)"><span style="font-weight:700">💀</span> ${c.penalty}</div>`:''}
       </div>`:''}
     </div>`;
   }).join('');
 
   listEl.querySelectorAll('.ch-check').forEach(el=>el.addEventListener('click',async()=>{
-    const isDone=el.dataset.done==='true';
-    await updateDoc(doc(db,'challenges',el.dataset.id),{done:!isDone});
-    toast(isDone?'↩️ 취소됐어요':'✅ 완료!');
+    const d=el.dataset.done==='true';
+    await updateDoc(doc(db,'challenges',el.dataset.id),{done:!d});
+    toast(d?'↩️ 취소됐어요':'✅ 완료!');
+  }));
+  listEl.querySelectorAll('.ch-record-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    const c=_challengeAll.find(x=>x.id===btn.dataset.id);
+    if(c) openProgressModal(c);
   }));
   listEl.querySelectorAll('.ch-edit').forEach(btn=>btn.addEventListener('click',()=>{
     const c=_challengeAll.find(x=>x.id===btn.dataset.id);
@@ -2120,6 +2325,11 @@ function renderSection(who, all){
   listEl.querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{
     if(!confirm('삭제할까요?')) return;
     await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요');
+  }));
+}
+
+// ── SETTINGS ──
+oc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요');
   }));
 }
 
