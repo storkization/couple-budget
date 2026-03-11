@@ -1505,29 +1505,40 @@ const closeM=id=>$(id).classList.remove('open');
 
 // ── 스와이프 다운으로 모달 닫기 ──
 function addSwipeToClose(sheetEl, overlayId){
+  const handle = sheetEl.querySelector('.modal-handle');
+  const dragEl = handle || sheetEl;
   let startY=0, curY=0, dragging=false;
-  sheetEl.addEventListener('touchstart',e=>{
-    if(e.touches[0].clientY < sheetEl.getBoundingClientRect().top+60){
-      startY=e.touches[0].clientY; dragging=true;
-    }
+  dragEl.addEventListener('touchstart',e=>{
+    startY=e.touches[0].clientY; curY=startY; dragging=true;
+    sheetEl.style.transition='none';
   },{passive:true});
-  sheetEl.addEventListener('touchmove',e=>{
+  dragEl.addEventListener('touchmove',e=>{
     if(!dragging) return;
     curY=e.touches[0].clientY;
     const dy=Math.max(0,curY-startY);
     sheetEl.style.transform=`translateY(${dy}px)`;
-    sheetEl.style.transition='none';
   },{passive:true});
-  sheetEl.addEventListener('touchend',()=>{
+  dragEl.addEventListener('touchend',()=>{
     if(!dragging) return;
     dragging=false;
-    sheetEl.style.transition='';
-    sheetEl.style.transform='';
-    if(curY-startY>80){
-      if(overlayId==='dynamic') sheetEl.closest('.modal-overlay').remove();
-      else closeM(overlayId);
+    const dy=curY-startY;
+    if(dy>80){
+      sheetEl.style.transition='transform 0.25s ease';
+      sheetEl.style.transform='translateY(100%)';
+      setTimeout(()=>{
+        sheetEl.style.transform='';
+        sheetEl.style.transition='';
+        if(overlayId==='dynamic') sheetEl.closest('.modal-overlay').remove();
+        else closeM(overlayId);
+      },250);
+    } else {
+      sheetEl.style.transition='transform 0.2s ease';
+      sheetEl.style.transform='';
+      setTimeout(()=>sheetEl.style.transition='',200);
     }
   });
+  // handle 클릭 영역 크게
+  if(handle) handle.style.padding='12px 40px';
 }
 // 고정 모달들에 스와이프 적용
 ['detail-modal','edit-modal','cat-edit-modal','day-modal','event-modal','ch-modal'].forEach(id=>{
