@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="pic/icon192.png" type="image/png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -498,17 +499,18 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
   <!-- CALENDAR -->
   <div id="page-cal" class="hidden">
     <div class="cal-page">
-      <div id="cal-today-bar" style="background:var(--surface);border-radius:var(--r);padding:12px 16px;box-shadow:var(--shadow-sm);margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div id="cal-today-bar" style="background:linear-gradient(135deg,var(--rose-light),var(--gold-light));border-radius:var(--r);padding:12px 16px;box-shadow:var(--shadow-sm);margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
           <span style="font-size:18px">📅</span>
           <div>
             <div id="cal-today-date" style="font-size:13px;font-weight:800;color:var(--brown)"></div>
             <div id="cal-today-time" style="font-size:11px;color:var(--brown3)"></div>
           </div>
         </div>
-        <div id="cal-anniversary-bar" style="background:linear-gradient(135deg,var(--rose-light),var(--gold-light));border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px">
-          <span style="font-size:16px">💑</span>
+        <div id="cal-anniversary-bar" style="background:rgba(255,255,255,0.75);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">💕</span>
           <div>
+            <div style="font-size:10px;font-weight:700;color:var(--rose);margin-bottom:1px">Our Anniversary is...</div>
             <div style="font-size:11px;font-weight:800;color:var(--brown);line-height:1.4" id="cal-anniv-text"></div>
             <div style="font-size:10px;color:var(--brown3)" id="cal-anniv-sub"></div>
           </div>
@@ -603,7 +605,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
             <option value="절약">💰 절약</option>
             <option value="운동">🏋️ 운동</option>
             <option value="식습관">🥗 식습관</option>
-            <option value="데이트">💑 데이트</option>
+            <option value="데이트">👫 데이트</option>
             <option value="저축">🏦 저축</option>
             <option value="생활">🏠 생활</option>
             <option value="기타">📌 기타</option>
@@ -634,7 +636,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
       <!-- 기념일 설정 -->
       <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:12px">
-        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">💑 기념일</div>
+        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">👫 기념일</div>
         <label class="form-label">사귀기 시작한 날</label>
         <div style="display:flex;gap:8px">
           <input class="form-input" type="date" id="settings-anniversary" style="flex:1">
@@ -850,7 +852,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <label class="form-label">🏷️ 종류</label>
         <div style="display:flex;flex-wrap:wrap;gap:6px" id="event-type-chips">
           <button class="cat-chip active" data-et="일반">📌 일반</button>
-          <button class="cat-chip" data-et="데이트">💑 데이트</button>
+          <button class="cat-chip" data-et="데이트">👫 데이트</button>
           <button class="cat-chip" data-et="약속">🤝 약속</button>
           <button class="cat-chip" data-et="외식">🍽️ 외식</button>
           <button class="cat-chip" data-et="의료">💊 의료</button>
@@ -870,7 +872,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="who-toggle">
           <button class="who-btn dohun" id="ev-who-d">💙 도훈</button>
           <button class="who-btn kyungeun" id="ev-who-k">🩷 경은</button>
-          <button class="who-btn together active" id="ev-who-both">💑 함께</button>
+          <button class="who-btn together active" id="ev-who-both">👫 함께</button>
         </div>
       </div>
 
@@ -925,7 +927,7 @@ const DEFAULT_CATS = {
     {group:'🍽️ 식사/음료', items:[{k:'식사',e:'🍱'},{k:'카페',e:'☕'},{k:'간식/디저트',e:'🍰'},{k:'배달음식',e:'🛵'},{k:'술/회식',e:'🍺'}]},
     {group:'🛒 쇼핑',       items:[{k:'생필품',e:'🧴'},{k:'식재료',e:'🥦'},{k:'의류/잡화',e:'👗'},{k:'전자기기',e:'📱'},{k:'가구/인테리어',e:'🛋️'}]},
     {group:'🚌 이동',       items:[{k:'대중교통',e:'🚌'},{k:'택시/카카오',e:'🚕'},{k:'주유',e:'⛽'},{k:'주차',e:'🅿️'}]},
-    {group:'💑 데이트',     items:[{k:'데이트',e:'💑'},{k:'영화/공연',e:'🎬'},{k:'여행',e:'✈️'},{k:'숙박',e:'🏨'}]},
+    {group:'👫 데이트',     items:[{k:'데이트',e:'👫'},{k:'영화/공연',e:'🎬'},{k:'여행',e:'✈️'},{k:'숙박',e:'🏨'}]},
     {group:'💊 건강/미용',  items:[{k:'병원/약국',e:'💊'},{k:'헬스/운동',e:'🏋️'},{k:'미용실',e:'✂️'},{k:'화장품',e:'💄'}]},
     {group:'📦 기타',       items:[{k:'구독/멤버십',e:'📺'},{k:'교육',e:'📚'},{k:'경조사',e:'🎁'},{k:'기타',e:'📦'}]}
   ],
@@ -1603,7 +1605,7 @@ function openDayModal(d){
   const evSec=$('day-ev-section');
   if(devts.length){
     evSec.style.display='block';
-    const TYPE_EMOJI={일반:'📌',데이트:'💑',약속:'🤝',외식:'🍽️',의료:'💊',운동:'🏋️',쇼핑:'🛒',문화:'🎬',여행:'✈️',가족:'👨‍👩‍👧',기념일:'🎉',집안일:'🏠'};
+    const TYPE_EMOJI={일반:'📌',데이트:'👫',약속:'🤝',외식:'🍽️',의료:'💊',운동:'🏋️',쇼핑:'🛒',문화:'🎬',여행:'✈️',가족:'👨‍👩‍👧',기념일:'🎉',집안일:'🏠'};
     function fmtTimeDisplay(t){ if(!t) return ''; const [h,m]=t.split(':'); const ampm=parseInt(h)>=12?'오후':'오전'; const h12=parseInt(h)%12||12; return `${ampm} ${h12}:${m}`; }
     $('day-ev-list').innerHTML=devts.map(ev=>{
       const typeEmoji=TYPE_EMOJI[ev.evType||'일반']||'📌';
@@ -1815,18 +1817,27 @@ function updateCalClock(){
   const now=new Date();
   const dateStr=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
   const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0'),s=String(now.getSeconds()).padStart(2,'0');
-  if($('cal-today-date')) $('cal-today-date').textContent=`Today is  ${dateStr}`;
+  if($('cal-today-date')) $('cal-today-date').textContent=`Today is...  ${dateStr}`;
   if($('cal-today-time')) $('cal-today-time').textContent=`🕐 ${h}:${m}:${s}`;
   // 기념일 카운터
   if($('cal-anniv-text')){
     const anniversaryDate=localStorage.getItem('anniversary_date')||'2025-01-04';
-    const start=new Date(anniversaryDate);
+    const start=new Date(anniversaryDate+'T00:00:00');
     const diff=Math.floor((now-start)/(1000*60*60*24))+1;
+    const [ay,am,ad]=anniversaryDate.split('-');
+    $('cal-anniv-text').textContent=`${ay}년 ${parseInt(am)}월 ${parseInt(ad)}일 · +${diff.toLocaleString()}일째 사랑 중 💕`;
+    // 다음 100단위 기념일 계산
     const next100=Math.ceil(diff/100)*100;
     const daysTo100=next100-diff;
-    const [ay,am,ad]=anniversaryDate.split('-');
-    $('cal-anniv-text').textContent=`${ay}년 ${parseInt(am)}월 ${parseInt(ad)}일, +${diff.toLocaleString()}일째 사랑 중 💕`;
-    $('cal-anniv-sub').textContent=daysTo100===0?`🎉 오늘이 ${next100}일째예요!`:`${next100}일까지 ${daysTo100}일 남았어요 🎯`;
+    // 그 날짜 계산
+    const nextDate=new Date(start);
+    nextDate.setDate(nextDate.getDate()+(next100-1));
+    const nY=nextDate.getFullYear(),nM=nextDate.getMonth()+1,nD=nextDate.getDate();
+    if(daysTo100===0){
+      $('cal-anniv-sub').textContent=`🎉 오늘이 ${next100}일째예요!`;
+    } else {
+      $('cal-anniv-sub').textContent=`${next100}일까지 ${daysTo100}일 남았어요 · ${nY}년 ${nM}월 ${nD}일 🎯`;
+    }
   }
 }
 setInterval(updateCalClock,1000);
@@ -1855,7 +1866,7 @@ $('nav-settings').addEventListener('click',()=>showPage('settings'));
 // ── CHALLENGE ──
 let chTab='dohun'; // 현재 선택 탭
 
-const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'💑',저축:'🏦',생활:'🏠',기타:'📌'};
+const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'👫',저축:'🏦',생활:'🏠',기타:'📌'};
 const CH_MONTH=()=>`${cYear}-${String(cMonth+1).padStart(2,'0')}`;
 
 // 탭 전환
