@@ -920,6 +920,9 @@ let txs=[], evts=[], unsubTx=null, unsubEv=null, unsubBudget=null, unsubAppCfg=n
 let editId=null, eType='expense', eWho='dohun', eCat='';
 let aCat='', selDay=null, evWho='both';
 let statFilter='all';
+let _appConfig = {};
+let _challengeAll = [];
+let _budgetCache = {};
 
 // ── 기본 카테고리 (localStorage로 확장 가능) ──
 const DEFAULT_CATS = {
@@ -1160,8 +1163,6 @@ onAuthStateChanged(auth, user => {
 });
 
 // ── BUDGET - Firestore 기반 (기기 간 공유) ──
-let _budgetCache = {}; // {dohun_2025_2: 300000, ...}
-
 async function startSync(){
   // 기존 리스너 전부 해제
   if(unsubTx) unsubTx();
@@ -1927,7 +1928,6 @@ $('nav-settings').addEventListener('click',()=>showPage('settings'));
 
 // ── CHALLENGE ──
 let chTab='dohun';
-let _challengeAll=[]; // onSnapshot으로 채워지는 실시간 캐시
 
 const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'👫',저축:'🏦',생활:'🏠',기타:'📌'};
 const CH_MONTH=()=>`${cYear}-${String(cMonth+1).padStart(2,'0')}`;
@@ -2061,8 +2061,6 @@ $('ch-add-btn').addEventListener('click',async()=>{
 });
 
 // ── SETTINGS ──
-let _appConfig = {}; // Firestore config/app 캐시
-
 async function loadAppConfig(){
   try{
     const snap=await getDoc(doc(db,'config','app'));
