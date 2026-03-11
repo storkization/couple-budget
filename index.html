@@ -2329,11 +2329,6 @@ function renderSection(who, all, isDone){
 }
 
 // ── SETTINGS ──
-oc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요');
-  }));
-}
-
-// ── SETTINGS ──
 async function loadAppConfig(){
   try{
     const snap=await getDoc(doc(db,'config','app'));
