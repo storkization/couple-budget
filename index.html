@@ -1159,6 +1159,9 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+// ── BUDGET - Firestore 기반 (기기 간 공유) ──
+let _budgetCache = {}; // {dohun_2025_2: 300000, ...}
+
 async function startSync(){
   // 기존 리스너 전부 해제
   if(unsubTx) unsubTx();
@@ -1215,9 +1218,6 @@ $('prev-btn').addEventListener('click',()=>{ cMonth--; if(cMonth<0){cMonth=11;cY
 $('next-btn').addEventListener('click',()=>{ cMonth++; if(cMonth>11){cMonth=0;cYear++;} updateMonthLabel(); renderAll(); refreshCalIfOpen(); if(!$('page-chart').classList.contains('hidden')) rChart(); });
 function refreshCalIfOpen(){ if(!$('page-cal').classList.contains('hidden')){ rCal(); rCalSummary(); } }
 const mTx = () => txs.filter(t=>{ const d=new Date(t.date); return d.getFullYear()===cYear&&d.getMonth()===cMonth; });
-
-// ── BUDGET - Firestore 기반 (기기 간 공유) ──
-let _budgetCache = {}; // {dohun_2025_2: 300000, ...}
 
 function _budgetKey(who){ return `${who}_${cYear}_${cMonth}`; }
 function getBudget(who){ return _budgetCache[_budgetKey(who)] || 0; }
