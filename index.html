@@ -47,8 +47,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .login-spinner.show{display:block}
 
 /* APP HEADER */
-.app-header{background:var(--surface);padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;padding-top:calc(14px + env(safe-area-inset-top,0px))}
-.hdr-left{display:flex;align-items:center;gap:8px}
+.app-header{background:var(--surface);padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.hdr-couple{display:flex;align-items:center;gap:5px}
+.hdr-name-d{font-size:15px;font-weight:800;color:var(--dohun)}
+.hdr-name-k{font-size:15px;font-weight:800;color:var(--kyungeun)}
+.hdr-amp{font-size:13px;font-weight:600;color:var(--brown3)}
+.hdr-heart{font-size:14px;color:var(--rose);animation:heartbeat 1.4s ease-in-out infinite}
+@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.hdr-right{display:flex;align-items:center;gap:8px}
 .uav{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
 .uav-d{background:var(--dohun)}.uav-k{background:var(--kyungeun)}
 .uname{font-size:14px;font-weight:600}
@@ -258,11 +264,16 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 <!-- APP -->
 <div id="app-screen" class="hidden">
   <div class="app-header">
-    <div class="hdr-left">
-      <div class="uav uav-d" id="user-avatar">도</div>
-      <span class="uname" id="user-name">로딩중</span>
+    <div class="hdr-couple">
+      <span class="hdr-name-d">💙 도훈</span>
+      <span class="hdr-amp">&</span>
+      <span class="hdr-name-k">경은 🩷</span>
+      <span class="hdr-heart">♥</span>
     </div>
-    <button class="logout-btn" id="logout-btn">로그아웃</button>
+    <div class="hdr-right">
+      <div class="uav uav-d" id="user-avatar">도</div>
+      <button class="logout-btn" id="logout-btn">로그아웃</button>
+    </div>
   </div>
   <div class="month-nav">
     <button class="m-arrow" id="prev-btn">&#8249;</button>
@@ -883,11 +894,11 @@ onAuthStateChanged(auth, user => {
     }
     $('login-screen').classList.add('hidden');
     $('app-screen').classList.remove('hidden');
-    const isK = user.email === 'ventisummer@gmail.com';
+    const isK = user.email === 'dbke0610@gmail.com';
     cWho = isK?'kyungeun':'dohun';
     const av = $('user-avatar');
     av.textContent = isK?'경':'도'; av.className=`uav ${isK?'uav-k':'uav-d'}`;
-    $('user-name').textContent = isK?'경은':'도훈';
+    av.title = isK ? '경은' : '도훈';
     $('who-dohun').classList.toggle('active',cWho==='dohun');
     $('who-kyungeun').classList.toggle('active',cWho==='kyungeun');
     startSync(); updateMonthLabel(); initAdd(); loadSavedPhotos();
