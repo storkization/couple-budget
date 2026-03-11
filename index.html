@@ -529,90 +529,174 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
   <!-- 챌린지 탭 -->
   <div id="page-challenge" class="hidden">
-    <div style="padding:16px 16px 100px">
+    <div style="padding:16px 16px 110px">
 
-      <!-- 헤더 + 월 표시 -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <div style="font-size:16px;font-weight:800;color:var(--brown)">🏆 이번 달 챌린지</div>
-        <div id="ch-month-label" style="font-size:12px;font-weight:700;color:var(--brown3)"></div>
-      </div>
-      <div style="font-size:12px;color:var(--brown3);margin-bottom:14px">목표를 달성하면 보상을, 실패하면 패널티를!</div>
-
-      <!-- 전체 달성률 바 -->
-      <div style="background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:700;color:var(--brown)">📊 이번 달 전체 달성률</span>
-          <span id="ch-total-pct" style="font-size:14px;font-weight:800;color:var(--rose)">0%</span>
+      <!-- 헤더 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:17px;font-weight:800;color:var(--brown)">🏆 이번 달 챌린지</div>
+          <div style="font-size:11px;color:var(--brown3);margin-top:2px">목표를 달성하면 보상을, 실패하면 패널티를!</div>
         </div>
-        <div style="background:var(--bg);border-radius:99px;height:10px;overflow:hidden">
-          <div id="ch-total-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width 0.5s;width:0%"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--brown3)">
-          <span id="ch-total-done">완료 0</span>
-          <span id="ch-total-count">전체 0개</span>
-        </div>
+        <div id="ch-month-label" style="font-size:12px;font-weight:700;color:var(--brown3);background:var(--bg);padding:5px 10px;border-radius:99px"></div>
       </div>
 
-      <!-- 탭: 도훈 / 경은 / 함께 -->
-      <div style="display:flex;gap:6px;margin-bottom:14px" id="ch-tabs">
-        <button class="ch-tab active" data-tab="dohun" style="flex:1;padding:9px;border-radius:12px;border:2px solid var(--dohun);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--dohun);color:white">💙 도훈</button>
-        <button class="ch-tab" data-tab="kyungeun" style="flex:1;padding:9px;border-radius:12px;border:2px solid var(--kyungeun);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--bg);color:var(--kyungeun)">🩷 경은</button>
-        <button class="ch-tab" data-tab="both" style="flex:1;padding:9px;border-radius:12px;border:2px solid var(--gold);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--bg);color:var(--gold)">👫 함께</button>
-      </div>
-
-      <!-- 선택된 사람 달성률 + 보상/패널티 -->
-      <div id="ch-person-summary" style="background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:14px">
-        <div style="display:flex;gap:10px;margin-bottom:10px">
-          <div style="flex:1;text-align:center">
-            <div id="ch-person-pct" style="font-size:24px;font-weight:800;color:var(--brown)">0%</div>
-            <div style="font-size:10px;color:var(--brown3)">달성률</div>
-          </div>
-          <div style="flex:1;text-align:center">
-            <div id="ch-person-done" style="font-size:24px;font-weight:800;color:var(--green)">0</div>
-            <div style="font-size:10px;color:var(--brown3)">완료</div>
-          </div>
-          <div style="flex:1;text-align:center">
-            <div id="ch-person-remain" style="font-size:24px;font-weight:800;color:var(--rose)">0</div>
-            <div style="font-size:10px;color:var(--brown3)">남은 것</div>
-          </div>
+      <!-- 전체 달성률 카드 -->
+      <div style="background:linear-gradient(135deg,#3d2b1f 0%,#7a5c4a 100%);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-md);margin-bottom:18px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.06)"></div>
+        <div style="position:absolute;bottom:-30px;right:30px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.04)"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative">
+          <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.85)">📊 전체 달성률</span>
+          <span id="ch-total-pct" style="font-size:22px;font-weight:800;color:white">0%</span>
         </div>
-        <!-- 보상/패널티 -->
-        <div style="display:flex;gap:8px">
-          <div style="flex:1;background:var(--gold-light);border-radius:10px;padding:10px">
-            <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:4px">🎁 모두 달성 시 보상</div>
-            <div id="ch-reward-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:18px"></div>
-            <input id="ch-reward-input" class="form-input" type="text" placeholder="보상 입력..." style="margin-top:6px;font-size:12px;padding:6px 10px;display:none">
-            <button id="ch-reward-edit" style="background:none;border:none;font-size:11px;color:var(--gold);cursor:pointer;font-family:inherit;font-weight:700;margin-top:2px">✏️ 수정</button>
-          </div>
-          <div style="flex:1;background:var(--rose-light);border-radius:10px;padding:10px">
-            <div style="font-size:11px;font-weight:700;color:var(--rose);margin-bottom:4px">💀 실패 시 패널티</div>
-            <div id="ch-penalty-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:18px"></div>
-            <input id="ch-penalty-input" class="form-input" type="text" placeholder="패널티 입력..." style="margin-top:6px;font-size:12px;padding:6px 10px;display:none">
-            <button id="ch-penalty-edit" style="background:none;border:none;font-size:11px;color:var(--rose);cursor:pointer;font-family:inherit;font-weight:700;margin-top:2px">✏️ 수정</button>
-          </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:99px;height:8px;overflow:hidden;position:relative">
+          <div id="ch-total-bar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#f5c842,#e8785a);transition:width 0.6s cubic-bezier(0.34,1.2,0.64,1);width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;position:relative">
+          <span id="ch-total-done" style="font-size:11px;color:rgba(255,255,255,0.7)">완료 0개</span>
+          <span id="ch-total-count" style="font-size:11px;color:rgba(255,255,255,0.5)">전체 0개</span>
         </div>
       </div>
 
-      <!-- 챌린지 목록 -->
-      <div id="ch-list" style="margin-bottom:14px"></div>
+      <!-- 👫 함께 섹션 -->
+      <div class="ch-section" style="border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm)">
+        <div style="background:linear-gradient(135deg,#b8860b 0%,#daa520 60%,#f5c842 100%);padding:14px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px">👫</span>
+              <div>
+                <div style="font-size:14px;font-weight:800;color:white">함께</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.8)">두 사람이 함께하는 목표</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div id="ch-both-ring" style="font-size:18px;font-weight:800;color:white">0%</div>
+              <div id="ch-both-sub" style="font-size:10px;color:rgba(255,255,255,0.7)">완료 0 / 전체 0</div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.25);border-radius:99px;height:5px;overflow:hidden;margin-top:10px">
+            <div id="ch-both-bar" style="height:100%;border-radius:99px;background:white;transition:width 0.5s;width:0%"></div>
+          </div>
+        </div>
+        <div style="background:var(--surface);padding:12px 14px">
+          <!-- 보상/패널티 -->
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div style="flex:1;background:linear-gradient(135deg,#fef9e7,#fdf3c0);border-radius:10px;padding:9px;border:1px solid rgba(201,150,58,0.2)">
+              <div style="font-size:10px;font-weight:700;color:#b8860b;margin-bottom:3px">🎁 보상</div>
+              <div id="ch-both-reward-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:16px"></div>
+              <input id="ch-both-reward-input" class="form-input" type="text" placeholder="보상 입력..." style="margin-top:5px;font-size:11px;padding:5px 8px;display:none">
+              <button id="ch-both-reward-edit" style="background:none;border:none;font-size:10px;color:#b8860b;cursor:pointer;font-family:inherit;font-weight:700;margin-top:1px">✏️ 수정</button>
+            </div>
+            <div style="flex:1;background:linear-gradient(135deg,#fdecea,#fbd5d0);border-radius:10px;padding:9px;border:1px solid rgba(232,120,90,0.2)">
+              <div style="font-size:10px;font-weight:700;color:var(--rose);margin-bottom:3px">💀 패널티</div>
+              <div id="ch-both-penalty-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:16px"></div>
+              <input id="ch-both-penalty-input" class="form-input" type="text" placeholder="패널티 입력..." style="margin-top:5px;font-size:11px;padding:5px 8px;display:none">
+              <button id="ch-both-penalty-edit" style="background:none;border:none;font-size:10px;color:var(--rose);cursor:pointer;font-family:inherit;font-weight:700;margin-top:1px">✏️ 수정</button>
+            </div>
+          </div>
+          <div id="ch-both-list"></div>
+          <button class="ch-add-inline-btn" data-who="both" style="width:100%;padding:8px;background:linear-gradient(135deg,#fef9e7,#fdf3c0);border:1.5px dashed #daa520;border-radius:10px;font-family:inherit;font-size:12px;font-weight:700;color:#b8860b;cursor:pointer;margin-top:6px">+ 함께 챌린지 추가</button>
+        </div>
+      </div>
 
-      <!-- 새 챌린지 추가 -->
-      <div style="background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm)">
-        <div style="font-size:12px;font-weight:700;color:var(--brown2);margin-bottom:8px">✏️ 새 챌린지 추가</div>
+      <!-- 🩷 경은 섹션 -->
+      <div class="ch-section" style="border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm)">
+        <div style="background:linear-gradient(135deg,#a0446e 0%,#c96ea0 60%,#e8a0c8 100%);padding:14px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px">🩷</span>
+              <div>
+                <div style="font-size:14px;font-weight:800;color:white">경은</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.8)">경은의 개인 목표</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div id="ch-kyungeun-ring" style="font-size:18px;font-weight:800;color:white">0%</div>
+              <div id="ch-kyungeun-sub" style="font-size:10px;color:rgba(255,255,255,0.7)">완료 0 / 전체 0</div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.25);border-radius:99px;height:5px;overflow:hidden;margin-top:10px">
+            <div id="ch-kyungeun-bar" style="height:100%;border-radius:99px;background:white;transition:width 0.5s;width:0%"></div>
+          </div>
+        </div>
+        <div style="background:var(--surface);padding:12px 14px">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div style="flex:1;background:linear-gradient(135deg,#fdf0f7,#fae0f0);border-radius:10px;padding:9px;border:1px solid rgba(201,110,160,0.2)">
+              <div style="font-size:10px;font-weight:700;color:var(--kyungeun);margin-bottom:3px">🎁 보상</div>
+              <div id="ch-kyungeun-reward-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:16px"></div>
+              <input id="ch-kyungeun-reward-input" class="form-input" type="text" placeholder="보상 입력..." style="margin-top:5px;font-size:11px;padding:5px 8px;display:none">
+              <button id="ch-kyungeun-reward-edit" style="background:none;border:none;font-size:10px;color:var(--kyungeun);cursor:pointer;font-family:inherit;font-weight:700;margin-top:1px">✏️ 수정</button>
+            </div>
+            <div style="flex:1;background:linear-gradient(135deg,#fdecea,#fbd5d0);border-radius:10px;padding:9px;border:1px solid rgba(232,120,90,0.2)">
+              <div style="font-size:10px;font-weight:700;color:var(--rose);margin-bottom:3px">💀 패널티</div>
+              <div id="ch-kyungeun-penalty-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:16px"></div>
+              <input id="ch-kyungeun-penalty-input" class="form-input" type="text" placeholder="패널티 입력..." style="margin-top:5px;font-size:11px;padding:5px 8px;display:none">
+              <button id="ch-kyungeun-penalty-edit" style="background:none;border:none;font-size:10px;color:var(--rose);cursor:pointer;font-family:inherit;font-weight:700;margin-top:1px">✏️ 수정</button>
+            </div>
+          </div>
+          <div id="ch-kyungeun-list"></div>
+          <button class="ch-add-inline-btn" data-who="kyungeun" style="width:100%;padding:8px;background:linear-gradient(135deg,#fdf0f7,#fae0f0);border:1.5px dashed var(--kyungeun);border-radius:10px;font-family:inherit;font-size:12px;font-weight:700;color:var(--kyungeun);cursor:pointer;margin-top:6px">+ 경은 챌린지 추가</button>
+        </div>
+      </div>
+
+      <!-- 💙 도훈 섹션 -->
+      <div class="ch-section" style="border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm)">
+        <div style="background:linear-gradient(135deg,#2a5a80 0%,#4a7fa8 60%,#7ab0d4 100%);padding:14px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px">💙</span>
+              <div>
+                <div style="font-size:14px;font-weight:800;color:white">도훈</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.8)">도훈의 개인 목표</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div id="ch-dohun-ring" style="font-size:18px;font-weight:800;color:white">0%</div>
+              <div id="ch-dohun-sub" style="font-size:10px;color:rgba(255,255,255,0.7)">완료 0 / 전체 0</div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.25);border-radius:99px;height:5px;overflow:hidden;margin-top:10px">
+            <div id="ch-dohun-bar" style="height:100%;border-radius:99px;background:white;transition:width 0.5s;width:0%"></div>
+          </div>
+        </div>
+        <div style="background:var(--surface);padding:12px 14px">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div style="flex:1;background:linear-gradient(135deg,#eaf4fd,#d0e6f5);border-radius:10px;padding:9px;border:1px solid rgba(74,127,168,0.2)">
+              <div style="font-size:10px;font-weight:700;color:var(--dohun);margin-bottom:3px">🎁 보상</div>
+              <div id="ch-dohun-reward-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:16px"></div>
+              <input id="ch-dohun-reward-input" class="form-input" type="text" placeholder="보상 입력..." style="margin-top:5px;font-size:11px;padding:5px 8px;display:none">
+              <button id="ch-dohun-reward-edit" style="background:none;border:none;font-size:10px;color:var(--dohun);cursor:pointer;font-family:inherit;font-weight:700;margin-top:1px">✏️ 수정</button>
+            </div>
+            <div style="flex:1;background:linear-gradient(135deg,#fdecea,#fbd5d0);border-radius:10px;padding:9px;border:1px solid rgba(232,120,90,0.2)">
+              <div style="font-size:10px;font-weight:700;color:var(--rose);margin-bottom:3px">💀 패널티</div>
+              <div id="ch-dohun-penalty-text" style="font-size:12px;color:var(--brown);font-weight:600;min-height:16px"></div>
+              <input id="ch-dohun-penalty-input" class="form-input" type="text" placeholder="패널티 입력..." style="margin-top:5px;font-size:11px;padding:5px 8px;display:none">
+              <button id="ch-dohun-penalty-edit" style="background:none;border:none;font-size:10px;color:var(--rose);cursor:pointer;font-family:inherit;font-weight:700;margin-top:1px">✏️ 수정</button>
+            </div>
+          </div>
+          <div id="ch-dohun-list"></div>
+          <button class="ch-add-inline-btn" data-who="dohun" style="width:100%;padding:8px;background:linear-gradient(135deg,#eaf4fd,#d0e6f5);border:1.5px dashed var(--dohun);border-radius:10px;font-family:inherit;font-size:12px;font-weight:700;color:var(--dohun);cursor:pointer;margin-top:6px">+ 도훈 챌린지 추가</button>
+        </div>
+      </div>
+
+      <!-- 챌린지 추가 입력 (인라인 팝업용 숨김 폼) -->
+      <div id="ch-add-form" style="background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);display:none;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--brown2);margin-bottom:8px">✏️ <span id="ch-add-form-title">챌린지 추가</span></div>
         <input class="form-input" type="text" id="ch-input" placeholder="예: 외식 5만원 이하, 카페 3번 이하..." style="margin-bottom:8px">
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <select class="form-select" id="ch-category" style="flex:1">
-            <option value="절약">💰 절약</option>
-            <option value="운동">🏋️ 운동</option>
-            <option value="식습관">🥗 식습관</option>
-            <option value="데이트">👫 데이트</option>
-            <option value="저축">🏦 저축</option>
-            <option value="생활">🏠 생활</option>
-            <option value="기타">📌 기타</option>
-          </select>
+        <select class="form-select" id="ch-category" style="width:100%;margin-bottom:8px">
+          <option value="절약">💰 절약</option>
+          <option value="운동">🏋️ 운동</option>
+          <option value="식습관">🥗 식습관</option>
+          <option value="데이트">👫 데이트</option>
+          <option value="저축">🏦 저축</option>
+          <option value="생활">🏠 생활</option>
+          <option value="기타">📌 기타</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <button id="ch-add-cancel" style="flex:1;padding:9px;background:var(--bg);border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;color:var(--brown3);cursor:pointer">취소</button>
+          <button id="ch-add-btn" style="flex:2;padding:9px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));color:white;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">+ 추가</button>
         </div>
-        <button class="submit-btn" id="ch-add-btn" style="padding:10px">+ 챌린지 추가</button>
       </div>
+
     </div>
   </div>
 
@@ -809,7 +893,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
             <option>오전</option><option>오후</option>
           </select>
           <select class="form-select" id="event-hour-start" style="width:70px">
-            ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}시</option>`).join('')}
+            <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option>
+            <option value="4">4시</option><option value="5">5시</option><option value="6">6시</option>
+            <option value="7">7시</option><option value="8">8시</option><option value="9">9시</option>
+            <option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
           </select>
           <select class="form-select" id="event-min-start" style="width:70px">
             <option value="00">00분</option><option value="10">10분</option><option value="15">15분</option>
@@ -827,7 +914,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
             <option>오전</option><option selected>오후</option>
           </select>
           <select class="form-select" id="event-hour-end" style="width:70px">
-            ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}시</option>`).join('')}
+            <option value="1">1시</option><option value="2">2시</option><option value="3">3시</option>
+            <option value="4">4시</option><option value="5">5시</option><option value="6">6시</option>
+            <option value="7">7시</option><option value="8">8시</option><option value="9">9시</option>
+            <option value="10">10시</option><option value="11">11시</option><option value="12">12시</option>
           </select>
           <select class="form-select" id="event-min-end" style="width:70px">
             <option value="00">00분</option><option value="10">10분</option><option value="15">15분</option>
@@ -1927,31 +2017,68 @@ $('nav-challenge').addEventListener('click',()=>showPage('challenge'));
 $('nav-settings').addEventListener('click',()=>showPage('settings'));
 
 // ── CHALLENGE ──
-let chTab='dohun';
-
+let chAddWho = 'both'; // 현재 추가 대상
 const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'👫',저축:'🏦',생활:'🏠',기타:'📌'};
 const CH_MONTH=()=>`${cYear}-${String(cMonth+1).padStart(2,'0')}`;
-
-// 탭 전환
-document.querySelectorAll('.ch-tab').forEach(btn=>btn.addEventListener('click',()=>{
-  chTab=btn.dataset.tab;
-  document.querySelectorAll('.ch-tab').forEach(b=>{
-    const isD=b.dataset.tab==='dohun', isK=b.dataset.tab==='kyungeun';
-    const active=b.dataset.tab===chTab;
-    b.style.background=active?(isD?'var(--dohun)':isK?'var(--kyungeun)':'var(--gold)'):'var(--bg)';
-    b.style.color=active?'white':(isD?'var(--dohun)':isK?'var(--kyungeun)':'var(--gold)');
-  });
-  rChallenge();
-}));
 
 function startChallengeSync(){
   if(unsubChallenge) unsubChallenge();
   unsubChallenge = onSnapshot(collection(db,'challenges'), snap=>{
     _challengeAll=snap.docs.map(d=>({id:d.id,...d.data()}));
-    // 챌린지 탭이 열려있을 때만 즉시 렌더
     if(!$('page-challenge').classList.contains('hidden')) rChallenge();
   }, ()=>{});
 }
+
+// 인라인 추가 버튼
+document.querySelectorAll('.ch-add-inline-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    chAddWho = btn.dataset.who;
+    const whoLabel = chAddWho==='both'?'👫 함께':chAddWho==='kyungeun'?'🩷 경은':'💙 도훈';
+    $('ch-add-form-title').textContent = whoLabel + ' 챌린지 추가';
+    $('ch-input').value='';
+    const form=$('ch-add-form');
+    form.style.display='block';
+    form.scrollIntoView({behavior:'smooth',block:'center'});
+    $('ch-input').focus();
+  });
+});
+$('ch-add-cancel').addEventListener('click',()=>{ $('ch-add-form').style.display='none'; });
+$('ch-add-btn').addEventListener('click',async()=>{
+  const title=$('ch-input').value.trim();
+  if(!title) return toast('챌린지 내용을 입력해주세요');
+  await addDoc(collection(db,'challenges'),{
+    title, who:chAddWho, category:$('ch-category').value,
+    month:CH_MONTH(), done:false, createdAt:new Date().toISOString()
+  });
+  $('ch-input').value='';
+  $('ch-add-form').style.display='none';
+  toast('🏆 챌린지 추가됐어요!');
+});
+
+// 보상/패널티 섹션별 설정
+function setupSectionRP(who){
+  ['reward','penalty'].forEach(type=>{
+    const txtEl=$(`ch-${who}-${type}-text`);
+    const inputEl=$(`ch-${who}-${type}-input`);
+    const editBtn=$(`ch-${who}-${type}-edit`);
+    if(!editBtn) return;
+    let editing=false;
+    editBtn.addEventListener('click',async()=>{
+      editing=!editing;
+      txtEl.style.display=editing?'none':'block';
+      inputEl.style.display=editing?'block':'none';
+      editBtn.textContent=editing?'💾 저장':'✏️ 수정';
+      if(!editing){
+        const val=inputEl.value.trim();
+        txtEl.textContent=val||'미설정';
+        const rpDocId=`rp_${CH_MONTH()}_${who}`;
+        await setDoc(doc(db,'config',rpDocId),{[type]:val},{merge:true});
+        toast(type==='reward'?'🎁 보상 저장됐어요!':'💀 패널티 저장됐어요!');
+      }
+    });
+  });
+}
+['both','kyungeun','dohun'].forEach(setupSectionRP);
 
 async function rChallenge(){
   if($('ch-month-label')) $('ch-month-label').textContent=`${cYear}년 ${cMonth+1}월`;
@@ -1962,103 +2089,79 @@ async function rChallenge(){
   const totalPct=all.length?Math.round(totalDone/all.length*100):0;
   $('ch-total-pct').textContent=totalPct+'%';
   $('ch-total-bar').style.width=totalPct+'%';
-  $('ch-total-done').textContent=`완료 ${totalDone}`;
+  $('ch-total-done').textContent=`완료 ${totalDone}개`;
   $('ch-total-count').textContent=`전체 ${all.length}개`;
 
-  // 현재 탭 필터
-  const filtered=all.filter(c=>c.who===chTab);
-  const pDone=filtered.filter(c=>c.done).length;
-  const pPct=filtered.length?Math.round(pDone/filtered.length*100):0;
-  $('ch-person-pct').textContent=pPct+'%';
-  const pctColor=pPct>=100?'var(--green)':pPct>=50?'var(--gold)':'var(--rose)';
-  $('ch-person-pct').style.color=pctColor;
-  $('ch-person-done').textContent=pDone;
-  $('ch-person-remain').textContent=filtered.length-pDone;
+  // 각 섹션 렌더
+  await renderSection('both', all);
+  await renderSection('kyungeun', all);
+  await renderSection('dohun', all);
+}
 
-  // 보상/패널티 Firestore에서 불러오기
-  const rpDocId=`rp_${CH_MONTH()}_${chTab}`;
+async function renderSection(who, all){
+  const filtered=all.filter(c=>c.who===who);
+  const done=filtered.filter(c=>c.done).length;
+  const pct=filtered.length?Math.round(done/filtered.length*100):0;
+
+  // 진행 바 + 수치
+  const ringEl=$(`ch-${who}-ring`), barEl=$(`ch-${who}-bar`), subEl=$(`ch-${who}-sub`);
+  if(ringEl) ringEl.textContent=pct+'%';
+  if(barEl) barEl.style.width=pct+'%';
+  if(subEl) subEl.textContent=`완료 ${done} / 전체 ${filtered.length}`;
+
+  // 보상/패널티 로드
+  const rpDocId=`rp_${CH_MONTH()}_${who}`;
   let rp={reward:'',penalty:''};
-  try{
-    const rpSnap=await getDoc(doc(db,'config',rpDocId));
-    if(rpSnap.exists()) rp={...rp,...rpSnap.data()};
-  }catch(e){}
-  $('ch-reward-text').textContent=rp.reward||'미설정';
-  $('ch-penalty-text').textContent=rp.penalty||'미설정';
-  $('ch-reward-input').value=rp.reward||'';
-  $('ch-penalty-input').value=rp.penalty||'';
+  try{ const s=await getDoc(doc(db,'config',rpDocId)); if(s.exists()) rp={...rp,...s.data()}; }catch(e){}
+  const rt=$(`ch-${who}-reward-text`), pt=$(`ch-${who}-penalty-text`);
+  const ri=$(`ch-${who}-reward-input`), pi=$(`ch-${who}-penalty-input`);
+  if(rt) rt.textContent=rp.reward||'미설정';
+  if(pt) pt.textContent=rp.penalty||'미설정';
+  if(ri) ri.value=rp.reward||'';
+  if(pi) pi.value=rp.penalty||'';
 
-  // 완료 축하 배너
-  if(filtered.length>0 && pDone===filtered.length){
-    $('ch-list').innerHTML=`
-      <div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:var(--r);padding:16px;text-align:center;margin-bottom:10px;border:2px solid var(--gold)">
-        <div style="font-size:28px">🎉</div>
-        <div style="font-size:14px;font-weight:800;color:var(--brown);margin-top:4px">모든 챌린지 완료!</div>
-        <div style="font-size:12px;color:var(--brown3);margin-top:2px">${rp.reward?'보상: '+rp.reward:'보상을 설정해보세요 🎁'}</div>
-      </div>`+renderChItems(filtered);
-  } else {
-    $('ch-list').innerHTML=filtered.length
-      ? renderChItems(filtered)
-      : `<div style="text-align:center;padding:24px 0;color:var(--brown3);font-size:13px">📭 챌린지가 없어요<br><span style="font-size:11px">아래에서 추가해보세요!</span></div>`;
+  // 챌린지 목록
+  const listEl=$(`ch-${who}-list`);
+  if(!listEl) return;
+  const accentColor=who==='dohun'?'var(--dohun)':who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
+
+  if(filtered.length===0){
+    listEl.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:12px">📭 챌린지가 없어요</div>`;
+    return;
   }
 
-  // 이벤트 바인딩
-  $('ch-list').querySelectorAll('.ch-check').forEach(el=>el.addEventListener('click',async()=>{
-    const done=el.dataset.done==='true';
-    await updateDoc(doc(db,'challenges',el.dataset.id),{done:!done});
-    toast(done?'↩️ 취소':'✅ 완료!');
-  }));
-  $('ch-list').querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{
-    if(!confirm('삭제할까요?')) return;
-    await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제');
-  }));
-}
+  // 모두 완료 축하
+  let banner='';
+  if(done>0 && done===filtered.length){
+    banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)">
+      <div style="font-size:22px">🎉</div>
+      <div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div>
+      <div style="font-size:11px;color:var(--brown3);margin-top:1px">${rp.reward?'보상: '+rp.reward:'보상을 설정해보세요 🎁'}</div>
+    </div>`;
+  }
 
-function renderChItems(items){
-  return items.map(c=>{
-    const done=c.done===true;
-    const accentColor=chTab==='dohun'?'var(--dohun)':chTab==='kyungeun'?'var(--kyungeun)':'var(--gold)';
-    return `<div style="background:var(--surface);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow-sm);margin-bottom:8px;display:flex;align-items:center;gap:12px;border-left:4px solid ${done?'var(--green)':accentColor}">
-      <div style="font-size:24px;cursor:pointer;flex-shrink:0" class="ch-check" data-id="${c.id}" data-done="${done}">${done?'✅':'⬜'}</div>
+  listEl.innerHTML=banner+filtered.map(c=>{
+    const isDone=c.done===true;
+    return `<div style="background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;border-left:3px solid ${isDone?'var(--green)':accentColor}">
+      <div class="ch-check" data-id="${c.id}" data-done="${isDone}" style="font-size:20px;cursor:pointer;flex-shrink:0;user-select:none">${isDone?'✅':'⬜'}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:${done?'var(--brown3)':'var(--brown)'};text-decoration:${done?'line-through':'none'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div>
-        <div style="font-size:10px;color:var(--brown3);margin-top:2px">${c.category}</div>
+        <div style="font-size:12px;font-weight:700;color:${isDone?'var(--brown3)':'var(--brown)'};text-decoration:${isDone?'line-through':'none'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div>
+        <div style="font-size:10px;color:var(--brown3);margin-top:1px">${c.category}</div>
       </div>
-      <button class="ch-del" data-id="${c.id}" style="background:none;border:none;font-size:16px;cursor:pointer;flex-shrink:0;opacity:0.5">🗑️</button>
+      <button class="ch-del" data-id="${c.id}" style="background:none;border:none;font-size:15px;cursor:pointer;flex-shrink:0;opacity:0.4">🗑️</button>
     </div>`;
   }).join('');
-}
 
-// 보상/패널티 수정
-function setupRPEdit(type){
-  const txtEl=$(`ch-${type}-text`), inputEl=$(`ch-${type}-input`), editBtn=$(`ch-${type}-edit`);
-  let editing=false;
-  editBtn.addEventListener('click',async()=>{
-    editing=!editing;
-    txtEl.style.display=editing?'none':'block';
-    inputEl.style.display=editing?'block':'none';
-    editBtn.textContent=editing?'💾 저장':'✏️ 수정';
-    if(!editing){
-      const val=inputEl.value.trim();
-      txtEl.textContent=val||'미설정';
-      const rpDocId=`rp_${CH_MONTH()}_${chTab}`;
-      await setDoc(doc(db,'config',rpDocId),{[type]:val},{merge:true});
-      toast(type==='reward'?'🎁 보상 저장됐어요!':'💀 패널티 저장됐어요!');
-    }
-  });
+  listEl.querySelectorAll('.ch-check').forEach(el=>el.addEventListener('click',async()=>{
+    const isDone=el.dataset.done==='true';
+    await updateDoc(doc(db,'challenges',el.dataset.id),{done:!isDone});
+    toast(isDone?'↩️ 취소됐어요':'✅ 완료!');
+  }));
+  listEl.querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{
+    if(!confirm('삭제할까요?')) return;
+    await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요');
+  }));
 }
-setupRPEdit('reward');
-setupRPEdit('penalty');
-
-$('ch-add-btn').addEventListener('click',async()=>{
-  const title=$('ch-input').value.trim();
-  if(!title) return toast('챌린지 내용을 입력해주세요');
-  await addDoc(collection(db,'challenges'),{
-    title, who:chTab, category:$('ch-category').value,
-    month:CH_MONTH(), done:false, createdAt:new Date().toISOString()
-  });
-  $('ch-input').value=''; toast('🏆 챌린지 추가됐어요!');
-  // onSnapshot이 자동으로 _challengeAll 갱신 후 rChallenge() 호출
-});
 
 // ── SETTINGS ──
 async function loadAppConfig(){
