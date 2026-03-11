@@ -922,81 +922,80 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <button class="modal-close" id="ch-modal-close">✕</button>
     </div>
     <div class="modal-body">
-
-      <!-- 챌린지 제목 -->
       <div style="margin-bottom:12px">
         <label class="form-label">✏️ 챌린지 이름</label>
         <input class="form-input" type="text" id="ch-modal-input" placeholder="예: 이번 달 카페 줄이기">
       </div>
-
-      <!-- 달성 타입 선택 -->
       <div style="margin-bottom:12px">
         <label class="form-label">🎯 달성 타입</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="ch-type-btns">
-          <button class="ch-type-btn active" data-type="ox" style="padding:10px 6px;border-radius:12px;border:2px solid var(--rose);background:var(--rose);color:white;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
-            <div style="font-size:18px">✅</div>
-            <div>O / X</div>
-            <div style="font-size:10px;opacity:0.85;font-weight:500">달성 여부</div>
+          <button class="ch-type-btn active" data-type="calendar" style="padding:10px 6px;border-radius:12px;border:2px solid var(--rose);background:var(--rose);color:white;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+            <div style="font-size:18px">📅</div><div>달력</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">매일 체크</div>
           </button>
           <button class="ch-type-btn" data-type="count" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
-            <div style="font-size:18px">🔢</div>
-            <div>횟수</div>
-            <div style="font-size:10px;opacity:0.85;font-weight:500">N회 달성</div>
+            <div style="font-size:18px">🔢</div><div>횟수</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">N회 이상/이하</div>
           </button>
           <button class="ch-type-btn" data-type="accumulate" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
-            <div style="font-size:18px">📊</div>
-            <div>누적</div>
-            <div style="font-size:10px;opacity:0.85;font-weight:500">목표량 채우기</div>
+            <div style="font-size:18px">📊</div><div>누적</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">목표량 이상/이하</div>
           </button>
           <button class="ch-type-btn" data-type="amount" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
-            <div style="font-size:18px">💰</div>
-            <div>금액</div>
-            <div style="font-size:10px;opacity:0.85;font-weight:500">N원 이하/이상</div>
+            <div style="font-size:18px">💰</div><div>금액</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">N원 이상/이하</div>
           </button>
         </div>
       </div>
 
-      <!-- 타입별 세부 설정 -->
-      <!-- O/X: 별도 설정 없음 -->
-      <div id="ch-type-ox" style="margin-bottom:12px;background:var(--bg);border-radius:12px;padding:12px;text-align:center;color:var(--brown3);font-size:12px">
-        월말에 달성했으면 ✅, 못했으면 ❌ 체크해요
+      <!-- 달력 타입 -->
+      <div id="ch-type-calendar" style="margin-bottom:12px;background:var(--bg);border-radius:12px;padding:12px;text-align:center;color:var(--brown3);font-size:12px">
+        📅 달성한 날을 달력에서 탭해서 체크해요<br>
+        <span style="font-size:11px">달성률 = 체크한 날 / 이번 달 전체 일수</span>
       </div>
 
       <!-- 횟수 -->
       <div id="ch-type-count" style="margin-bottom:12px;display:none">
-        <label class="form-label">🎯 목표 횟수</label>
-        <div style="display:flex;align-items:center;gap:10px">
+        <label class="form-label">🎯 목표 횟수 & 방향</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select class="form-select" id="ch-modal-count-dir" style="width:80px">
+            <option value="over">이상</option>
+            <option value="under">이하</option>
+          </select>
           <input class="form-input" type="number" id="ch-modal-target" placeholder="예: 3" min="1" style="flex:1;font-size:16px;font-weight:700;text-align:center">
-          <span style="font-size:14px;font-weight:700;color:var(--brown2);white-space:nowrap">회</span>
+          <span style="font-size:14px;font-weight:700;color:var(--brown2)">회</span>
         </div>
-        <div style="font-size:11px;color:var(--brown3);margin-top:5px">탭할 때마다 +1씩 카운트돼요</div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:5px">이상: 많을수록 좋아요 · 이하: 적을수록 좋아요</div>
       </div>
 
       <!-- 누적 -->
       <div id="ch-type-accumulate" style="margin-bottom:12px;display:none">
-        <label class="form-label">🎯 목표량</label>
-        <div style="display:flex;align-items:center;gap:8px">
+        <label class="form-label">🎯 목표량 & 방향</label>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <select class="form-select" id="ch-modal-acc-dir" style="width:80px">
+            <option value="over">이상</option>
+            <option value="under">이하</option>
+          </select>
           <input class="form-input" type="number" id="ch-modal-target-acc" placeholder="예: 30" min="1" style="flex:1;font-size:16px;font-weight:700;text-align:center">
-          <input class="form-input" type="text" id="ch-modal-unit" placeholder="단위 (예: km, L, 페이지)" style="flex:1.5">
+          <input class="form-input" type="text" id="ch-modal-unit" placeholder="단위 (km, L...)" style="width:80px">
         </div>
-        <div style="font-size:11px;color:var(--brown3);margin-top:5px">기록할 때마다 숫자를 직접 입력해서 쌓아요</div>
+        <div style="font-size:11px;color:var(--brown3)">기록할 때마다 숫자 입력해서 쌓아요</div>
       </div>
 
       <!-- 금액 -->
       <div id="ch-type-amount" style="margin-bottom:12px;display:none">
-        <label class="form-label">🎯 목표 금액</label>
+        <label class="form-label">🎯 목표 금액 & 방향</label>
         <div style="display:flex;align-items:center;gap:8px">
-          <select class="form-select" id="ch-modal-amount-dir" style="width:90px">
+          <select class="form-select" id="ch-modal-amount-dir" style="width:80px">
             <option value="under">이하</option>
             <option value="over">이상</option>
           </select>
           <input class="form-input" type="number" id="ch-modal-target-amt" placeholder="예: 50000" min="0" style="flex:1;font-size:15px;font-weight:700;text-align:center">
           <span style="font-size:14px;font-weight:700;color:var(--brown2)">원</span>
         </div>
-        <div style="font-size:11px;color:var(--brown3);margin-top:5px">지출할 때마다 금액을 직접 입력해서 쌓아요</div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:5px">지출할 때마다 금액 입력해서 쌓아요</div>
       </div>
 
-      <!-- 카테고리 -->
       <div style="margin-bottom:12px">
         <label class="form-label">🏷️ 카테고리</label>
         <select class="form-select" id="ch-modal-category">
@@ -1009,8 +1008,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <option value="기타">📌 기타</option>
         </select>
       </div>
-
-      <!-- 보상 / 패널티 -->
       <div style="display:flex;gap:8px;margin-bottom:16px">
         <div style="flex:1;background:var(--gold-light);border-radius:12px;padding:10px;border:1px solid rgba(201,150,58,0.2)">
           <label class="form-label" style="color:#b8860b;font-size:11px">🎁 달성 시 보상</label>
@@ -1021,7 +1018,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="form-input" type="text" id="ch-modal-penalty" placeholder="예: 설거지 일주일" style="font-size:12px;padding:7px 10px;background:white">
         </div>
       </div>
-
       <button class="submit-btn" id="ch-modal-save">저장하기</button>
     </div>
   </div>
@@ -1506,6 +1502,39 @@ function openDetail(id){
 }
 const dr=(l,v)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--brown3)">${l}</span><span style="font-size:12px;font-weight:600">${v}</span></div>`;
 const closeM=id=>$(id).classList.remove('open');
+
+// ── 스와이프 다운으로 모달 닫기 ──
+function addSwipeToClose(sheetEl, overlayId){
+  let startY=0, curY=0, dragging=false;
+  sheetEl.addEventListener('touchstart',e=>{
+    if(e.touches[0].clientY < sheetEl.getBoundingClientRect().top+60){
+      startY=e.touches[0].clientY; dragging=true;
+    }
+  },{passive:true});
+  sheetEl.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    curY=e.touches[0].clientY;
+    const dy=Math.max(0,curY-startY);
+    sheetEl.style.transform=`translateY(${dy}px)`;
+    sheetEl.style.transition='none';
+  },{passive:true});
+  sheetEl.addEventListener('touchend',()=>{
+    if(!dragging) return;
+    dragging=false;
+    sheetEl.style.transition='';
+    sheetEl.style.transform='';
+    if(curY-startY>80){
+      if(overlayId==='dynamic') sheetEl.closest('.modal-overlay').remove();
+      else closeM(overlayId);
+    }
+  });
+}
+// 고정 모달들에 스와이프 적용
+['detail-modal','edit-modal','cat-edit-modal','day-modal','event-modal','ch-modal'].forEach(id=>{
+  const overlay=$(id); if(!overlay) return;
+  const sheet=overlay.querySelector('.modal-sheet');
+  if(sheet) addSwipeToClose(sheet, id);
+});
 $('detail-close').addEventListener('click',()=>closeM('detail-modal'));
 $('detail-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('detail-modal');});
 
@@ -2069,9 +2098,10 @@ $('nav-settings').addEventListener('click',()=>showPage('settings'));
 // ── CHALLENGE ──
 let chAddWho = 'both';
 let chEditId = null;
-let chModalType = 'ox';
+let chModalType = 'calendar';
 const CAT_EMOJI={절약:'💰',운동:'🏋️',식습관:'🥗',데이트:'👫',저축:'🏦',생활:'🏠',기타:'📌'};
 const CH_MONTH=()=>`${cYear}-${String(cMonth+1).padStart(2,'0')}`;
+const DAYS_IN_MONTH=()=>new Date(cYear,cMonth+1,0).getDate();
 
 function startChallengeSync(){
   if(unsubChallenge) unsubChallenge();
@@ -2081,10 +2111,9 @@ function startChallengeSync(){
   }, ()=>{});
 }
 
-// 타입 버튼 전환
 function setChModalType(t){
   chModalType = t;
-  const colors = {ox:'var(--rose)', count:'var(--dohun)', accumulate:'var(--green)', amount:'var(--gold)'};
+  const colors = {calendar:'var(--rose)', count:'var(--dohun)', accumulate:'var(--green)', amount:'var(--gold)'};
   document.querySelectorAll('.ch-type-btn').forEach(b=>{
     const active = b.dataset.type === t;
     const c = colors[b.dataset.type];
@@ -2092,13 +2121,13 @@ function setChModalType(t){
     b.style.color = active ? 'white' : 'var(--brown3)';
     b.style.borderColor = active ? c : 'var(--border)';
   });
-  ['ox','count','accumulate','amount'].forEach(tp=>{
-    $(`ch-type-${tp}`).style.display = tp===t ? 'block' : 'none';
+  ['calendar','count','accumulate','amount'].forEach(tp=>{
+    const el = document.getElementById('ch-type-'+tp);
+    if(el) el.style.display = tp===t ? 'block' : 'none';
   });
 }
 document.querySelectorAll('.ch-type-btn').forEach(b=>b.addEventListener('click',()=>setChModalType(b.dataset.type)));
 
-// 챌린지 모달
 function openChModal(who, editData=null){
   chAddWho = who;
   chEditId = editData ? editData.id : null;
@@ -2108,11 +2137,11 @@ function openChModal(who, editData=null){
   $('ch-modal-category').value = editData?.category||'절약';
   $('ch-modal-reward').value = editData?.reward||'';
   $('ch-modal-penalty').value = editData?.penalty||'';
-  const t = editData?.chType||'ox';
+  const t = editData?.chType||'calendar';
   setChModalType(t);
-  if(t==='count') $('ch-modal-target').value = editData?.target||'';
-  if(t==='accumulate'){ $('ch-modal-target-acc').value = editData?.target||''; $('ch-modal-unit').value = editData?.unit||''; }
-  if(t==='amount'){ $('ch-modal-target-amt').value = editData?.target||''; $('ch-modal-amount-dir').value = editData?.amountDir||'under'; }
+  if(t==='count'){ $('ch-modal-target').value=editData?.target||''; $('ch-modal-count-dir').value=editData?.dir||'over'; }
+  if(t==='accumulate'){ $('ch-modal-target-acc').value=editData?.target||''; $('ch-modal-unit').value=editData?.unit||''; $('ch-modal-acc-dir').value=editData?.dir||'over'; }
+  if(t==='amount'){ $('ch-modal-target-amt').value=editData?.target||''; $('ch-modal-amount-dir').value=editData?.dir||'under'; }
   $('ch-modal').classList.add('open');
   setTimeout(()=>$('ch-modal-input').focus(), 300);
 }
@@ -2128,20 +2157,20 @@ $('ch-modal-save').addEventListener('click',async()=>{
   if(chModalType==='count'){
     const t=parseInt($('ch-modal-target').value)||0;
     if(!t) return toast('목표 횟수를 입력해주세요');
-    base.target=t;
-    if(!chEditId) base.progress=0;
+    base.target=t; base.dir=$('ch-modal-count-dir').value;
+    if(!chEditId) base.records=[];
   } else if(chModalType==='accumulate'){
     const t=parseFloat($('ch-modal-target-acc').value)||0;
     if(!t) return toast('목표량을 입력해주세요');
-    base.target=t; base.unit=$('ch-modal-unit').value.trim()||'';
-    if(!chEditId) base.progress=0;
+    base.target=t; base.unit=$('ch-modal-unit').value.trim()||''; base.dir=$('ch-modal-acc-dir').value;
+    if(!chEditId) base.records=[];
   } else if(chModalType==='amount'){
     const t=parseInt($('ch-modal-target-amt').value)||0;
     if(!t) return toast('목표 금액을 입력해주세요');
-    base.target=t; base.amountDir=$('ch-modal-amount-dir').value;
-    if(!chEditId) base.progress=0;
+    base.target=t; base.dir=$('ch-modal-amount-dir').value;
+    if(!chEditId) base.records=[];
   } else {
-    if(!chEditId) base.done=false;
+    if(!chEditId) base.calDays=[];
   }
   if(chEditId){
     await updateDoc(doc(db,'challenges',chEditId), base);
@@ -2157,175 +2186,139 @@ document.querySelectorAll('.ch-add-inline-btn').forEach(btn=>{
   btn.addEventListener('click',()=>openChModal(btn.dataset.who));
 });
 
-// 진행값 입력 모달
-let _progressTarget = null;
+// 진행값 기록 모달
 function openProgressModal(c){
-  _progressTarget = c;
   const isAmt = c.chType==='amount';
   const isAcc = c.chType==='accumulate';
-  const isCount = c.chType==='count';
-  const cur = c.progress||0;
-  const unit = isAmt?'원':isAcc?(c.unit||''):isCount?'회':'';
-  const dir = isAmt?(c.amountDir==='under'?'이하':'이상'):'';
-  const curStr = isAmt?cur.toLocaleString('ko-KR'):cur;
+  const records = c.records||[];
+  const cur = records.reduce((s,r)=>s+(r.value||0),0);
+  const unit = isAmt?'원':isAcc?(c.unit||''):'회';
+  const isUnder = c.dir==='under';
+  const dirLabel = isUnder?'이하':'이상';
+  const curStr = isAmt?Math.round(cur).toLocaleString('ko-KR'):cur;
   const tgtStr = isAmt?c.target.toLocaleString('ko-KR'):c.target;
-  const barPct = Math.min(100,Math.round((cur/c.target)*100));
-
+  const pctRaw = Math.round((cur/(c.target||1))*100);
+  let barColor, statusText;
+  if(isUnder){
+    if(cur > c.target){ barColor='var(--rose)'; statusText=`${isAmt?(Math.round(cur-c.target)).toLocaleString('ko-KR'):(cur-c.target)}${unit} 초과 ❌`; }
+    else if(pctRaw>=80){ barColor='#f5a623'; const rem=c.target-cur; statusText=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 남음 ⚠️`; }
+    else { barColor='var(--green)'; const rem=c.target-cur; statusText=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 여유 ✅`; }
+  } else {
+    if(cur>=c.target){ barColor='var(--green)'; statusText='달성! 🎉'; }
+    else { barColor='var(--dohun)'; const rem=c.target-cur; statusText=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 남음`; }
+  }
+  const barPct = Math.min(100,pctRaw);
+  const quickBtns = isAmt?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${[1000,5000,10000,50000].map(v=>`<button onclick="var i=document.getElementById('ch-pm-input');i.value=((parseInt(i.value)||0)+${v}).toString()" style="flex:1;padding:7px 4px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:11px;font-weight:700;color:var(--brown2);cursor:pointer">+${v>=10000?v/10000+'만':v/1000+'천'}원</button>`).join('')}</div>`:'';
+  const recentHTML = records.length ? `<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:6px">📋 기록 내역 (탭하면 삭제)</div>${[...records].reverse().map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:var(--bg);border-radius:8px;margin-bottom:4px"><span style="font-size:12px;color:var(--brown)">${isAmt?r.value.toLocaleString('ko-KR'):r.value}${unit}</span><span style="font-size:10px;color:var(--brown3)">${r.date||''}</span><button onclick="deleteRecord('${c.id}',${records.length-1-i})" style="background:none;border:none;font-size:13px;cursor:pointer;opacity:0.5">🗑️</button></div>`).join('')}</div>` : '';
   let pm=$('ch-progress-modal'); if(pm) pm.remove();
-  const quickBtns = isAmt?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-    ${[1000,5000,10000,50000].map(v=>`<button onclick="var i=document.getElementById('ch-pm-input');i.value=((parseInt(i.value)||0)+${v}).toString()" style="flex:1;padding:7px 4px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:11px;font-weight:700;color:var(--brown2);cursor:pointer">+${v>=10000?v/10000+'만':v/1000+'천'}원</button>`).join('')}
-  </div>`:'';
-
-  document.body.insertAdjacentHTML('beforeend',`
-  <div class="modal-overlay open" id="ch-progress-modal" style="z-index:9999">
-    <div class="modal-sheet" style="padding-bottom:30px">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h3 style="font-size:14px">${CAT_EMOJI[c.category]||'📌'} ${c.title}</h3>
-        <button class="modal-close" id="ch-pm-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div style="text-align:center;margin-bottom:16px">
-          <div style="font-size:12px;color:var(--brown3);margin-bottom:4px">현재 진행</div>
-          <div style="font-size:34px;font-weight:800;color:var(--brown)">${curStr}<span style="font-size:16px;font-weight:600;color:var(--brown3);margin-left:3px">${unit}</span></div>
-          <div style="font-size:11px;color:var(--brown3);margin-top:2px">목표: ${tgtStr}${unit} ${dir}</div>
-          <div style="background:var(--bg);border-radius:99px;height:8px;overflow:hidden;margin:10px 16px 0">
-            <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,var(--rose),var(--gold));width:${barPct}%;transition:width 0.4s"></div>
-          </div>
-          <div style="font-size:11px;font-weight:700;color:var(--rose);margin-top:4px">${barPct}%</div>
-        </div>
-        <label class="form-label">${isCount?'+ 횟수 추가':isAcc?`+ ${c.unit||'수량'} 추가`:'+ 금액 추가'}</label>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-          <input class="form-input" type="number" id="ch-pm-input" value="${isCount?1:''}" placeholder="${isAmt?'금액':isAcc?(c.unit||'수량'):'횟수'}" min="0" style="flex:1;font-size:20px;font-weight:700;text-align:center">
-          <span style="font-size:14px;font-weight:600;color:var(--brown2)">${unit}</span>
-        </div>
-        ${quickBtns}
-        <button class="submit-btn" id="ch-pm-save">기록하기</button>
-      </div>
-    </div>
-  </div>`);
-
+  document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay open" id="ch-progress-modal" style="z-index:9999"><div class="modal-sheet" style="padding-bottom:30px"><div class="modal-handle"></div><div class="modal-header"><h3 style="font-size:14px">${CAT_EMOJI[c.category]||'📌'} ${c.title}</h3><button class="modal-close" id="ch-pm-close">✕</button></div><div class="modal-body"><div style="text-align:center;margin-bottom:14px"><div style="font-size:12px;color:var(--brown3);margin-bottom:4px">목표: ${tgtStr}${unit} ${dirLabel}</div><div style="font-size:34px;font-weight:800;color:var(--brown)">${curStr}<span style="font-size:16px;font-weight:600;color:var(--brown3);margin-left:3px">${unit}</span></div><div style="background:var(--bg);border-radius:99px;height:8px;overflow:hidden;margin:8px 0 4px"><div style="height:100%;border-radius:99px;background:${barColor};width:${barPct}%;transition:width 0.4s"></div></div><div style="font-size:11px;font-weight:700;color:${barColor}">${statusText}</div></div><label class="form-label">+ 기록 추가</label><div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input class="form-input" type="number" id="ch-pm-input" placeholder="${isAmt?'금액':isAcc?(c.unit||'수량'):'횟수'}" min="0" style="flex:1;font-size:20px;font-weight:700;text-align:center"><span style="font-size:14px;font-weight:600;color:var(--brown2)">${unit}</span></div>${quickBtns}<button class="submit-btn" id="ch-pm-save">기록하기</button>${recentHTML}</div></div></div>`);
+  addSwipeToClose($('ch-progress-modal').querySelector('.modal-sheet'), 'ch-progress-modal');
   $('ch-pm-close').addEventListener('click',()=>$('ch-progress-modal').remove());
   $('ch-progress-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.remove(); });
   $('ch-pm-save').addEventListener('click',async()=>{
     const add = isAmt?parseInt($('ch-pm-input').value)||0:parseFloat($('ch-pm-input').value)||0;
     if(add<=0) return toast('값을 입력해주세요');
-    const newProg = Math.round((cur+add)*100)/100;
-    await updateDoc(doc(db,'challenges',c.id),{progress:newProg});
-    $('ch-progress-modal').remove();
-    toast('📝 기록됐어요!');
+    const today = new Date().toISOString().split('T')[0];
+    await updateDoc(doc(db,'challenges',c.id),{records:[...records,{value:add,date:today}]});
+    $('ch-progress-modal').remove(); toast('📝 기록됐어요!');
   });
+}
+
+window.deleteRecord = async function(id, idx){
+  if(!confirm('이 기록을 삭제할까요?')) return;
+  const c = _challengeAll.find(x=>x.id===id); if(!c) return;
+  const nr = [...(c.records||[])]; nr.splice(idx,1);
+  await updateDoc(doc(db,'challenges',id),{records:nr});
+  $('ch-progress-modal').remove(); toast('🗑️ 기록 삭제됐어요');
+};
+
+window.toggleCalDay = async function(id, day){
+  const c = _challengeAll.find(x=>x.id===id); if(!c) return;
+  const days = [...(c.calDays||[])];
+  const idx = days.indexOf(day);
+  if(idx>=0) days.splice(idx,1); else days.push(day);
+  await updateDoc(doc(db,'challenges',id),{calDays:days});
+};
+
+function chIsDoneStrict(c){
+  const t=c.chType||'calendar';
+  if(t==='calendar'){ return (c.calDays||[]).length >= Math.ceil(DAYS_IN_MONTH()*0.8); }
+  const cur = (c.records||[]).reduce((s,r)=>s+(r.value||0),0);
+  return c.dir==='under' ? cur <= (c.target||0) && (c.records||[]).length > 0 : cur >= (c.target||1);
 }
 
 async function rChallenge(){
   if($('ch-month-label')) $('ch-month-label').textContent=`${cYear}년 ${cMonth+1}월`;
   const all=_challengeAll.filter(c=>c.month===CH_MONTH());
-  const isDone = c => {
-    const t=c.chType||'ox';
-    if(t==='ox') return c.done===true;
-    if(t==='amount') return c.amountDir==='over' ? (c.progress||0)>=(c.target||1) : (c.progress||0)<=(c.target||1) && (c.progress||0)>0;
-    return (c.progress||0)>=(c.target||1);
-  };
-  const totalDone=all.filter(isDone).length;
+  const totalDone=all.filter(chIsDoneStrict).length;
   const totalPct=all.length?Math.round(totalDone/all.length*100):0;
   $('ch-total-pct').textContent=totalPct+'%';
   $('ch-total-bar').style.width=totalPct+'%';
   $('ch-total-done').textContent=`완료 ${totalDone}개`;
   $('ch-total-count').textContent=`전체 ${all.length}개`;
-  renderSection('both', all, isDone);
-  renderSection('kyungeun', all, isDone);
-  renderSection('dohun', all, isDone);
+  renderSection('both', all);
+  renderSection('kyungeun', all);
+  renderSection('dohun', all);
 }
 
-function renderSection(who, all, isDone){
+function renderSection(who, all){
   const filtered=all.filter(c=>c.who===who);
-  const doneList=filtered.filter(isDone);
+  const doneList=filtered.filter(chIsDoneStrict);
   const pct=filtered.length?Math.round(doneList.length/filtered.length*100):0;
   const ringEl=$(`ch-${who}-ring`), barEl=$(`ch-${who}-bar`), subEl=$(`ch-${who}-sub`);
   if(ringEl) ringEl.textContent=pct+'%';
   if(barEl) barEl.style.width=pct+'%';
   if(subEl) subEl.textContent=`완료 ${doneList.length} / 전체 ${filtered.length}`;
-
-  const listEl=$(`ch-${who}-list`);
-  if(!listEl) return;
+  const listEl=$(`ch-${who}-list`); if(!listEl) return;
   const accentColor=who==='dohun'?'var(--dohun)':who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
-
-  if(filtered.length===0){
-    listEl.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:12px">📭 챌린지가 없어요</div>`;
-    return;
-  }
-
+  if(filtered.length===0){ listEl.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:12px">📭 챌린지가 없어요</div>`; return; }
   let banner='';
-  if(filtered.length>0 && doneList.length===filtered.length){
-    banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)"><div style="font-size:22px">🎉</div><div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div></div>`;
-  }
-
-  const typeLabel = {ox:'O/X',count:'횟수',accumulate:'누적',amount:'금액'};
+  if(doneList.length===filtered.length&&filtered.length>0){ banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)"><div style="font-size:22px">🎉</div><div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div></div>`; }
+  const typeLabel={calendar:'📅 달력',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
   listEl.innerHTML = banner + filtered.map(c=>{
-    const done = isDone(c);
-    const type = c.chType||'ox';
+    const done = chIsDoneStrict(c);
+    const type = c.chType||'calendar';
     const ac = done?'var(--green)':accentColor;
-    let actionHTML='', progressHTML='';
-
-    if(type==='ox'){
-      actionHTML=`<div class="ch-check" data-id="${c.id}" data-done="${done}" style="font-size:22px;cursor:pointer;flex-shrink:0;user-select:none">${done?'✅':'⬜'}</div>`;
+    let cardBody='', actionHTML='';
+    if(type==='calendar'){
+      const totalDays=DAYS_IN_MONTH();
+      const checked=c.calDays||[];
+      const pctCal=Math.round(checked.length/totalDays*100);
+      let calHTML=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px">`;
+      for(let d=1;d<=totalDays;d++){
+        const isChk=checked.includes(d);
+        calHTML+=`<div onclick="toggleCalDay('${c.id}',${d})" style="aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;background:${isChk?ac:'var(--surface)'};color:${isChk?'white':'var(--brown3)'};border:1px solid ${isChk?ac:'var(--border)'};user-select:none;transition:all 0.15s">${d}</div>`;
+      }
+      calHTML+=`</div><div style="font-size:11px;color:${done?'var(--green)':accentColor};font-weight:700;margin-top:5px;text-align:right">${checked.length}/${totalDays}일 · ${pctCal}%</div>`;
+      cardBody=calHTML;
     } else {
-      const cur=c.progress||0, tgt=c.target||1;
+      const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
+      const tgt=c.target||1;
       const isAmt=type==='amount';
+      const isUnder=c.dir==='under';
       const unit=isAmt?'원':type==='accumulate'?(c.unit||''):'회';
-      const curStr=isAmt?cur.toLocaleString('ko-KR'):cur;
+      const curStr=isAmt?Math.round(cur).toLocaleString('ko-KR'):cur;
       const tgtStr=isAmt?tgt.toLocaleString('ko-KR'):tgt;
-      const pctVal=isAmt&&c.amountDir==='under'?Math.min(100,Math.round((cur/tgt)*100)):Math.min(100,Math.round((cur/tgt)*100));
-      const dir=isAmt?(c.amountDir==='under'?'이하':'이상'):'';
-      progressHTML=`<div style="margin-top:7px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:11px;color:var(--brown3)">${curStr}${unit} / ${tgtStr}${unit}${dir?(' '+dir):''}</span>
-          <span style="font-size:11px;font-weight:800;color:${done?'var(--green)':accentColor}">${pctVal}%</span>
-        </div>
-        <div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden">
-          <div style="height:100%;border-radius:99px;background:${done?'var(--green)':accentColor};width:${pctVal}%;transition:width 0.4s"></div>
-        </div>
-      </div>`;
-      actionHTML=`<button class="ch-record-btn" data-id="${c.id}" style="background:${accentColor};border:none;border-radius:9px;padding:6px 10px;font-size:11px;font-weight:700;color:white;cursor:pointer;font-family:inherit;flex-shrink:0">+ 기록</button>`;
+      const pctVal=Math.round((cur/tgt)*100);
+      const over=isUnder&&cur>tgt;
+      let barC,statusStr;
+      if(isUnder){
+        if(over){ barC='var(--rose)'; statusStr=`${isAmt?(Math.round(cur-tgt)).toLocaleString('ko-KR'):(cur-tgt)}${unit} 초과 ❌`; }
+        else if(pctVal>=80){ barC='#f5a623'; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 여유 ⚠️`; }
+        else { barC='var(--green)'; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 여유 ✅`; }
+      } else {
+        if(done){ barC='var(--green)'; statusStr='달성! 🎉'; }
+        else { barC=accentColor; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 남음`; }
+      }
+      cardBody=`<div style="margin-top:7px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--brown3)">${curStr}${unit} / ${tgtStr}${unit} ${isUnder?'이하':'이상'}</span><span style="font-size:11px;font-weight:800;color:${barC}">${statusStr}</span></div><div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden"><div style="height:100%;border-radius:99px;background:${barC};width:${Math.min(100,pctVal)}%;transition:width 0.4s"></div></div></div>`;
+      actionHTML=`<button class="ch-record-btn" data-id="${c.id}" style="background:${accentColor};border:none;border-radius:9px;padding:6px 10px;font-size:11px;font-weight:700;color:white;cursor:pointer;font-family:inherit;flex-shrink:0;align-self:flex-start;margin-top:2px">+ 기록</button>`;
     }
-    const hasRP = c.reward||c.penalty;
-    return `<div style="background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:3px solid ${ac}">
-      <div style="display:flex;align-items:center;gap:10px">
-        ${actionHTML}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:700;color:${done?'var(--brown3)':'var(--brown)'};text-decoration:${done?'line-through':'none'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div>
-          <div style="font-size:10px;color:var(--brown3);margin-top:1px">${c.category} · ${typeLabel[type]||'O/X'}</div>
-          ${progressHTML}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-          <button class="ch-edit" data-id="${c.id}" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px 7px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit">✏️</button>
-          <button class="ch-del" data-id="${c.id}" style="background:none;border:none;font-size:14px;cursor:pointer;opacity:0.35">🗑️</button>
-        </div>
-      </div>
-      ${hasRP?`<div style="display:flex;gap:6px;margin-top:8px">
-        ${c.reward?`<div style="flex:1;background:rgba(201,150,58,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:#b8860b"><span style="font-weight:700">🎁</span> ${c.reward}</div>`:''}
-        ${c.penalty?`<div style="flex:1;background:rgba(232,120,90,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:var(--rose)"><span style="font-weight:700">💀</span> ${c.penalty}</div>`:''}
-      </div>`:''}
-    </div>`;
+    const hasRP=c.reward||c.penalty;
+    return `<div style="background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:8px;border-left:3px solid ${ac}"><div style="display:flex;align-items:flex-start;gap:10px">${actionHTML}<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:${done?'var(--brown3)':'var(--brown)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div><div style="font-size:10px;color:var(--brown3);margin-top:1px">${c.category} · ${typeLabel[type]||'📅 달력'}</div>${cardBody}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="ch-edit" data-id="${c.id}" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px 7px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit">✏️</button><button class="ch-del" data-id="${c.id}" style="background:none;border:none;font-size:14px;cursor:pointer;opacity:0.35">🗑️</button></div></div>${hasRP?`<div style="display:flex;gap:6px;margin-top:8px">${c.reward?`<div style="flex:1;background:rgba(201,150,58,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:#b8860b"><span style="font-weight:700">🎁</span> ${c.reward}</div>`:''} ${c.penalty?`<div style="flex:1;background:rgba(232,120,90,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:var(--rose)"><span style="font-weight:700">💀</span> ${c.penalty}</div>`:''}</div>`:''}</div>`;
   }).join('');
-
-  listEl.querySelectorAll('.ch-check').forEach(el=>el.addEventListener('click',async()=>{
-    const d=el.dataset.done==='true';
-    await updateDoc(doc(db,'challenges',el.dataset.id),{done:!d});
-    toast(d?'↩️ 취소됐어요':'✅ 완료!');
-  }));
-  listEl.querySelectorAll('.ch-record-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    const c=_challengeAll.find(x=>x.id===btn.dataset.id);
-    if(c) openProgressModal(c);
-  }));
-  listEl.querySelectorAll('.ch-edit').forEach(btn=>btn.addEventListener('click',()=>{
-    const c=_challengeAll.find(x=>x.id===btn.dataset.id);
-    if(c) openChModal(c.who, c);
-  }));
-  listEl.querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{
-    if(!confirm('삭제할까요?')) return;
-    await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요');
-  }));
+  listEl.querySelectorAll('.ch-record-btn').forEach(btn=>btn.addEventListener('click',()=>{ const c=_challengeAll.find(x=>x.id===btn.dataset.id); if(c) openProgressModal(c); }));
+  listEl.querySelectorAll('.ch-edit').forEach(btn=>btn.addEventListener('click',()=>{ const c=_challengeAll.find(x=>x.id===btn.dataset.id); if(c) openChModal(c.who,c); }));
+  listEl.querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('삭제할까요?')) return; await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요'); }));
 }
 
 // ── SETTINGS ──
