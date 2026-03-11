@@ -1501,7 +1501,7 @@ $('submit-btn').addEventListener('click',async()=>{
   try{
     await addDoc(txCol,{type:cType,amount,date,desc,memo,category:aCat,who:cWho,createdAt:new Date().toISOString()});
     $('inp-amount').value='';$('inp-desc').value='';$('inp-memo').value='';
-    toast('✅ 추가됐어요!');showPage('home');
+    toast('✅ 추가됐어요!');
   }catch(e){toast('오류: '+e.message);}
 });
 
