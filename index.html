@@ -1331,12 +1331,6 @@ function photoMonthKey() {
 function photoDocRef() {
   return doc(db, 'config', `photos_${photoMonthKey()}`);
 }
-window.changePhotoMonth = function(delta) {
-  _photoMonth += delta;
-  if(_photoMonth < 0) { _photoMonth = 11; _photoYear--; }
-  if(_photoMonth > 11) { _photoMonth = 0; _photoYear++; }
-  loadSavedPhotos();
-};
 
 window.loadPhoto = async (idx, input) => {
   if(!input.files[0]) return;
