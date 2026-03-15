@@ -262,8 +262,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .cat-edit-section{display:none}.cat-edit-section.show{display:block}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:10px 0 calc(16px + env(safe-area-inset-bottom,0px));z-index:100;box-shadow:0 -4px 20px rgba(61,43,31,0.08)}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px;font-family:inherit}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:10px 12px calc(18px + env(safe-area-inset-bottom,0px));z-index:100;box-shadow:0 -4px 20px rgba(61,43,31,0.08)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px 4px;font-family:inherit;min-width:0}
 .nav-icon{font-size:19px;transition:transform 0.2s}.nav-lbl{font-size:9px;font-weight:600;color:var(--brown3)}
 .nav-btn.active .nav-lbl{color:var(--rose)}.nav-btn.active .nav-icon{transform:scale(1.1)}
 
@@ -349,13 +349,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
     </div>
 
     <div class="photos-section">
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
-        <button onclick="changePhotoMonth(-1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--brown3);padding:4px 8px">‹</button>
-        <div>
-          <div class="photos-title" style="margin-bottom:0">Our Memorable Moments<span>♥</span></div>
-          <div id="photo-month-label" style="text-align:center;font-size:11px;color:var(--brown3);margin-top:1px"></div>
-        </div>
-        <button onclick="changePhotoMonth(1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--brown3);padding:4px 8px">›</button>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px">
+        <div class="photos-title" style="margin-bottom:0">Our Memorable Moments<span>♥</span></div>
+        <div id="photo-month-label" style="font-size:11px;color:var(--brown3);margin-top:1px"></div>
       </div>
       <div class="photos-grid">
         <div class="photo-slot" id="ps0"><span class="add-icon">📷</span><input type="file" accept="image/*" onchange="loadPhoto(0,this)"></div>
@@ -740,9 +736,30 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <!-- 데이터 초기화 -->
       <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-top:12px">
         <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">🗑️ 데이터 초기화</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
           <select id="reset-year" class="form-select" style="flex:1"></select>
           <select id="reset-month" class="form-select" style="flex:1"></select>
+        </div>
+        <!-- 삭제 항목 체크박스 -->
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:8px">삭제할 항목 선택</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--brown2);cursor:pointer">
+              <input type="checkbox" id="chk-tx" checked style="width:15px;height:15px;accent-color:var(--rose)"> 💳 거래내역
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--brown2);cursor:pointer">
+              <input type="checkbox" id="chk-budget" checked style="width:15px;height:15px;accent-color:var(--rose)"> 🎯 예산
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--brown2);cursor:pointer">
+              <input type="checkbox" id="chk-challenge" checked style="width:15px;height:15px;accent-color:var(--rose)"> 🏆 챌린지
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--brown2);cursor:pointer">
+              <input type="checkbox" id="chk-events" checked style="width:15px;height:15px;accent-color:var(--rose)"> 📅 일정
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--brown2);cursor:pointer">
+              <input type="checkbox" id="chk-photos" checked style="width:15px;height:15px;accent-color:var(--rose)"> 📷 사진
+            </label>
+          </div>
         </div>
         <div style="display:flex;gap:8px">
           <button id="reset-month-btn" style="flex:1;background:var(--gold-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--gold);cursor:pointer;font-family:inherit">📅 선택 월 삭제</button>
@@ -2731,29 +2748,51 @@ $('reset-month-btn').addEventListener('click',async()=>{
   if(!confirm(`⚠️ 정말 삭제할까요?\n${label}의 거래내역, 예산, 챌린지, 일정이\n모두 영구 삭제되며 되돌릴 수 없어요!`)) return;
 
   const ops = [];
+  const delTx = $('chk-tx').checked;
+  const delBudget = $('chk-budget').checked;
+  const delChallenge = $('chk-challenge').checked;
+  const delEvents = $('chk-events').checked;
+  const delPhotos = $('chk-photos').checked;
+
+  if(!delTx && !delBudget && !delChallenge && !delEvents && !delPhotos)
+    return toast('삭제할 항목을 하나 이상 선택해주세요');
 
   // 1. 거래내역
-  const rows=txs.filter(t=>{const d=new Date(t.date);return d.getFullYear()===y&&d.getMonth()===m;});
-  rows.forEach(t=>ops.push(deleteDoc(doc(db,'transactions',t.id))));
-
-  // 2. 예산
-  const budgetKey = `${y}_${m}`;
-  const budgetSnap = await getDoc(doc(db,'config','budget'));
-  if(budgetSnap.exists()){
-    const data = budgetSnap.data();
-    const patch = {};
-    Object.keys(data).forEach(k=>{ if(k.includes(budgetKey)) patch[k]=deleteField(); });
-    if(Object.keys(patch).length) ops.push(updateDoc(doc(db,'config','budget'), patch));
+  if(delTx){
+    const rows=txs.filter(t=>{const d=new Date(t.date);return d.getFullYear()===y&&d.getMonth()===m;});
+    rows.forEach(t=>ops.push(deleteDoc(doc(db,'transactions',t.id))));
   }
 
-  // 3. 챌린지 (해당 월)
-  const monthStr=`${y}-${String(m+1).padStart(2,'0')}`;
-  const chRows=_challengeAll.filter(c=>c.month===monthStr);
-  chRows.forEach(c=>ops.push(deleteDoc(doc(db,'challenges',c.id))));
+  // 2. 예산
+  if(delBudget){
+    const budgetKey = `${y}_${m}`;
+    const budgetSnap = await getDoc(doc(db,'config','budget'));
+    if(budgetSnap.exists()){
+      const data = budgetSnap.data();
+      const patch = {};
+      Object.keys(data).forEach(k=>{ if(k.includes(budgetKey)) patch[k]=deleteField(); });
+      if(Object.keys(patch).length) ops.push(updateDoc(doc(db,'config','budget'), patch));
+    }
+  }
 
-  // 4. 일정 (해당 월)
-  const evRows=evts.filter(e=>{const d=new Date(e.date);return d.getFullYear()===y&&d.getMonth()===m;});
-  evRows.forEach(e=>ops.push(deleteDoc(doc(db,'events',e.id))));
+  // 3. 챌린지
+  if(delChallenge){
+    const monthStr=`${y}-${String(m+1).padStart(2,'0')}`;
+    const chRows=_challengeAll.filter(c=>c.month===monthStr);
+    chRows.forEach(c=>ops.push(deleteDoc(doc(db,'challenges',c.id))));
+  }
+
+  // 4. 일정
+  if(delEvents){
+    const evRows=evts.filter(e=>{const d=new Date(e.date);return d.getFullYear()===y&&d.getMonth()===m;});
+    evRows.forEach(e=>ops.push(deleteDoc(doc(db,'events',e.id))));
+  }
+
+  // 5. 사진
+  if(delPhotos){
+    const photoDocKey = `photos_${y}-${String(m+1).padStart(2,'0')}`;
+    ops.push(deleteDoc(doc(db,'config',photoDocKey)).catch(()=>{}));
+  }
 
   await Promise.all(ops);
   toast(`🗑️ ${label} 데이터가 모두 삭제됐어요`);
