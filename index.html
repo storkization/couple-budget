@@ -317,6 +317,35 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
   <!-- HOME -->
   <div id="page-home">
+
+    <!-- 💬 한마디 말풍선 -->
+    <div style="padding:14px 16px 0">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <!-- 도훈 말풍선 -->
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--dohun);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0">도</div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;color:var(--dohun);margin-bottom:3px">💙 도훈</div>
+            <div id="bubble-dohun-wrap" style="position:relative">
+              <div id="bubble-dohun-text" style="background:var(--dohun-light);border-radius:0 14px 14px 14px;padding:10px 14px;font-size:13px;color:var(--brown);line-height:1.5;min-height:40px;word-break:break-all">...</div>
+              <button id="bubble-dohun-edit" style="display:none;position:absolute;bottom:6px;right:8px;background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">✏️</button>
+            </div>
+          </div>
+        </div>
+        <!-- 경은 말풍선 -->
+        <div style="display:flex;align-items:flex-end;gap:8px;flex-direction:row-reverse">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--kyungeun);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0">경</div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;color:var(--kyungeun);margin-bottom:3px;text-align:right">🩷 경은</div>
+            <div id="bubble-kyungeun-wrap" style="position:relative">
+              <div id="bubble-kyungeun-text" style="background:var(--kyungeun-light);border-radius:14px 0 14px 14px;padding:10px 14px;font-size:13px;color:var(--brown);line-height:1.5;min-height:40px;word-break:break-all">...</div>
+              <button id="bubble-kyungeun-edit" style="display:none;position:absolute;bottom:6px;left:8px;background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">✏️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="photos-section">
       <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
         <button onclick="changePhotoMonth(-1)" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--brown3);padding:4px 8px">‹</button>
@@ -1116,7 +1145,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, setDoc, getDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
@@ -1426,6 +1455,7 @@ async function startSync(){
 
   // ── 챌린지: 실시간 ──
   startChallengeSync();
+  initBubbles();
 
   // ── 거래내역: 실시간 ──
   unsubTx = onSnapshot(txCol, snap=>{
@@ -1504,7 +1534,37 @@ $('k-budget-set-btn').addEventListener('click',async()=>{
   await setBudgetFS('kyungeun', v); renderSummary(); toast('🩷 경은 예산 설정됐어요!');
 });
 
-// ── GAUGE BAROMETER ──
+// ── 한마디 말풍선 ──
+let unsubBubble = null;
+function initBubbles(){
+  const user = auth.currentUser; if(!user) return;
+  const isD = user.email === 'ventisummer@gmail.com';
+  const myWho = isD ? 'dohun' : 'kyungeun';
+
+  // 내 편집 버튼만 보이기
+  $('bubble-dohun-edit').style.display = isD ? 'inline' : 'none';
+  $('bubble-kyungeun-edit').style.display = !isD ? 'inline' : 'none';
+
+  // 실시간 구독
+  if(unsubBubble) unsubBubble();
+  unsubBubble = onSnapshot(doc(db,'config','bubbles'), snap=>{
+    const data = snap.exists() ? snap.data() : {};
+    $('bubble-dohun-text').textContent = data.dohun || '(아직 한마디가 없어요 😢)';
+    $('bubble-kyungeun-text').textContent = data.kyungeun || '(아직 한마디가 없어요 😢)';
+  }, ()=>{});
+
+  // 편집 버튼
+  ['dohun','kyungeun'].forEach(who=>{
+    $(`bubble-${who}-edit`).onclick = async () => {
+      const cur = $(`bubble-${who}-text`).textContent;
+      const val = prompt('한마디 입력:', cur === '(아직 한마디가 없어요 😢)' ? '' : cur);
+      if(val === null) return;
+      await setDoc(doc(db,'config','bubbles'), {[who]: val.trim()||'...'}, {merge:true});
+      toast('💬 저장됐어요!');
+    };
+  });
+}
+
 function gaugeHTML(pct, hexColor) {
   const p = Math.min(pct, 100);
   const barColor = pct >= 100 ? '#e8785a' : pct >= 80 ? '#c9963a' : hexColor;
@@ -2658,16 +2718,40 @@ function initResetSelects(){
 $('reset-month-btn').addEventListener('click',async()=>{
   const y=parseInt($('reset-year').value), m=parseInt($('reset-month').value);
   const label=`${y}년 ${m+1}월`;
-  if(!confirm(`${label} 데이터를 모두 삭제할까요?`)) return;
-  if(!confirm(`⚠️ 정말요? ${label} 데이터는 되돌릴 수 없어요!`)) return;
+  if(!confirm(`${label} 데이터를 모두 삭제할까요?\n(거래내역, 예산, 챌린지, 일정 전부)`)) return;
+  if(!confirm(`⚠️ 정말 삭제할까요?\n${label}의 거래내역, 예산, 챌린지, 일정이\n모두 영구 삭제되며 되돌릴 수 없어요!`)) return;
+
+  const ops = [];
+
+  // 1. 거래내역
   const rows=txs.filter(t=>{const d=new Date(t.date);return d.getFullYear()===y&&d.getMonth()===m;});
-  if(!rows.length) return toast(`${label} 데이터가 없어요`);
-  await Promise.all(rows.map(t=>deleteDoc(doc(db,'transactions',t.id))));
-  toast(`🗑️ ${label} 데이터가 삭제됐어요`);
+  rows.forEach(t=>ops.push(deleteDoc(doc(db,'transactions',t.id))));
+
+  // 2. 예산
+  const budgetKey = `${y}_${m}`;
+  const budgetSnap = await getDoc(doc(db,'config','budget'));
+  if(budgetSnap.exists()){
+    const data = budgetSnap.data();
+    const patch = {};
+    Object.keys(data).forEach(k=>{ if(k.includes(budgetKey)) patch[k]=deleteField(); });
+    if(Object.keys(patch).length) ops.push(updateDoc(doc(db,'config','budget'), patch));
+  }
+
+  // 3. 챌린지 (해당 월)
+  const monthStr=`${y}-${String(m+1).padStart(2,'0')}`;
+  const chRows=_challengeAll.filter(c=>c.month===monthStr);
+  chRows.forEach(c=>ops.push(deleteDoc(doc(db,'challenges',c.id))));
+
+  // 4. 일정 (해당 월)
+  const evRows=evts.filter(e=>{const d=new Date(e.date);return d.getFullYear()===y&&d.getMonth()===m;});
+  evRows.forEach(e=>ops.push(deleteDoc(doc(db,'events',e.id))));
+
+  await Promise.all(ops);
+  toast(`🗑️ ${label} 데이터가 모두 삭제됐어요`);
 });
 $('reset-all-btn').addEventListener('click',async()=>{
-  if(!confirm('전체 데이터를 삭제할까요?')) return;
-  if(!confirm('⚠️ 정말요? 모든 거래 내역이 영구 삭제돼요!')) return;
+  if(!confirm('전체 데이터를 삭제할까요?\n(모든 월의 거래내역이 삭제돼요)')) return;
+  if(!confirm('⚠️ 정말 삭제할까요?\n모든 거래내역이 영구 삭제되며\n되돌릴 수 없어요!')) return;
   await Promise.all(txs.map(t=>deleteDoc(doc(db,'transactions',t.id))));
   toast('🗑️ 전체 데이터가 삭제됐어요');
 });
