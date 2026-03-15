@@ -1470,32 +1470,19 @@ $('k-budget-set-btn').addEventListener('click',async()=>{
 
 // ── GAUGE BAROMETER ──
 function gaugeHTML(pct, hexColor) {
-  const p = Math.min(pct, 120); // 120%까지 표시
-  const displayPct = Math.round(pct);
-  const cx = 70, cy = 62, r = 48, needleLen = 36;
-  // arc: left(180°) → right(0°), pct maps 0→π, 100→0
-  const clampRatio = Math.min(p, 100) / 100;
-  const endAngle = Math.PI * (1 - clampRatio);
-  const endX = cx + r * Math.cos(endAngle);
-  const endY = cy - r * Math.sin(endAngle);
-  const largeArc = clampRatio > 0.5 ? 1 : 0;
-  const arcColor = pct >= 100 ? '#e8785a' : pct >= 80 ? '#c9963a' : hexColor;
-  const nAngle = Math.PI * (1 - clampRatio);
-  const nx = cx + needleLen * Math.cos(nAngle);
-  const ny = cy - needleLen * Math.sin(nAngle);
-  const arcPath = clampRatio > 0
-    ? `<path d="M ${cx-r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${endX.toFixed(1)} ${endY.toFixed(1)}" fill="none" stroke="${arcColor}" stroke-width="10" stroke-linecap="round"/>`
-    : '';
-  return `<svg width="140" height="76" viewBox="0 0 140 76" style="overflow:visible">
-    <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="rgba(61,43,31,0.08)" stroke-width="10" stroke-linecap="round"/>
-    ${arcPath}
-    <line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="#3d2b1f" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="${cx}" cy="${cy}" r="4" fill="#3d2b1f"/>
-    <text x="${cx}" y="${cy-12}" text-anchor="middle" font-size="12" font-weight="800" fill="#3d2b1f" font-family="Pretendard,sans-serif">${displayPct}%</text>
-    <text x="${cx-r}" y="${cy+14}" text-anchor="middle" font-size="7" fill="rgba(61,43,31,0.35)" font-family="Pretendard,sans-serif">0%</text>
-    <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="7" fill="#5a9e7a" font-family="Pretendard,sans-serif">50%</text>
-    <text x="${cx+r}" y="${cy+14}" text-anchor="middle" font-size="7" fill="rgba(61,43,31,0.35)" font-family="Pretendard,sans-serif">100%</text>
-  </svg>`;
+  const p = Math.min(pct, 100);
+  const barColor = pct >= 100 ? '#e8785a' : pct >= 80 ? '#c9963a' : hexColor;
+  return `<div style="margin-top:6px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+      <span style="font-size:9px;color:var(--brown3)">0%</span>
+      <span style="font-size:10px;font-weight:800;color:${barColor}">${Math.round(pct)}%</span>
+      <span style="font-size:9px;color:var(--brown3)">100%</span>
+    </div>
+    <div style="background:var(--bg);border-radius:99px;height:10px;overflow:hidden;position:relative">
+      <div style="height:100%;border-radius:99px;background:${barColor};width:${p}%;transition:width 0.5s"></div>
+      <div style="position:absolute;top:0;left:80%;width:1px;height:100%;background:rgba(201,150,58,0.5)"></div>
+    </div>
+  </div>`;
 }
 
 function updateWhoSummary(){
