@@ -279,8 +279,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
     <img src="pic/introcouple.jpg" class="couple-photo" alt="도훈 & 경은"
          onerror="this.parentElement.innerHTML='<div class=\'photo-fb\'>❤️</div>'">
   </div>
-  <h2 class="login-title">우리 가계부</h2>
-  <p class="login-names"><span class="nm-d">도훈</span><span>❤️</span><span class="nm-k">경은</span></p>
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:11px;font-weight:600;letter-spacing:3px;color:var(--brown3);text-transform:uppercase;margin-bottom:8px">Our Couple Budget</div>
+    <div style="font-size:22px;font-weight:800;color:var(--brown);line-height:1.4;letter-spacing:-0.3px">
+      경은이와 도훈이의<br>
+      <span style="background:linear-gradient(135deg,var(--rose),var(--kyungeun));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:26px">부자되는 커플 가계부</span>
+    </div>
+    <div style="font-size:18px;margin-top:4px">♥</div>
+  </div>
   <div class="login-notice">📱 팝업이 차단되면 브라우저에서 팝업을 허용해 주세요</div>
   <button class="google-btn" id="login-btn">
     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">Google로 로그인
@@ -715,10 +721,32 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <!-- CSV 내보내기 -->
       <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-top:12px;margin-bottom:16px">
         <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">📤 CSV 내보내기</div>
-        <div style="display:flex;gap:8px">
-          <button id="csv-month-btn" style="flex:1;background:var(--green-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--green-dark);cursor:pointer;font-family:inherit">📅 이번 달</button>
-          <button id="csv-all-btn" style="flex:1;background:var(--dohun-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--dohun);cursor:pointer;font-family:inherit">📊 전체</button>
+        <div style="font-size:11px;color:var(--brown3);margin-bottom:10px">항목: 날짜 · 유형 · 금액 · 내용 · 카테고리 · 누가 · 메모</div>
+
+        <!-- 기간 선택 버튼 -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <button class="csv-period-btn active" data-period="month" style="flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid var(--green);background:var(--green);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">당월</button>
+          <button class="csv-period-btn" data-period="3" style="flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--brown2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">3개월</button>
+          <button class="csv-period-btn" data-period="6" style="flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--brown2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">6개월</button>
+          <button class="csv-period-btn" data-period="custom" style="flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--brown2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">직접입력</button>
+          <button class="csv-period-btn" data-period="all" style="flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--brown2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">전체</button>
         </div>
+
+        <!-- 직접입력 영역 -->
+        <div id="csv-custom-range" style="display:none;gap:6px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--brown2);font-weight:600;min-width:28px">시작</span>
+            <select id="csv-start-year" class="form-select" style="flex:1"></select>
+            <select id="csv-start-month" class="form-select" style="flex:1"></select>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:12px;color:var(--brown2);font-weight:600;min-width:28px">종료</span>
+            <select id="csv-end-year" class="form-select" style="flex:1"></select>
+            <select id="csv-end-month" class="form-select" style="flex:1"></select>
+          </div>
+        </div>
+
+        <button id="csv-download-btn" style="width:100%;background:linear-gradient(135deg,var(--green),var(--green-dark));border:none;border-radius:11px;padding:12px;font-size:13px;font-weight:700;color:white;cursor:pointer;font-family:inherit">📥 CSV 다운로드</button>
       </div>
     </div>
   </div>
@@ -1420,8 +1448,8 @@ function updateMonthLabel(){
   $('month-label').textContent=`${cYear}년 ${cMonth+1}월`;
   if($('budget-month-label')) $('budget-month-label').textContent=`${cMonth+1}월`;
 }
-$('prev-btn').addEventListener('click',()=>{ cMonth--; if(cMonth<0){cMonth=11;cYear--;} _photoMonth=cMonth; _photoYear=cYear; updateMonthLabel(); renderAll(); refreshCalIfOpen(); loadSavedPhotos(); if(!$('page-chart').classList.contains('hidden')) rChart(); });
-$('next-btn').addEventListener('click',()=>{ cMonth++; if(cMonth>11){cMonth=0;cYear++;} _photoMonth=cMonth; _photoYear=cYear; updateMonthLabel(); renderAll(); refreshCalIfOpen(); loadSavedPhotos(); if(!$('page-chart').classList.contains('hidden')) rChart(); });
+$('prev-btn').addEventListener('click',()=>{ cMonth--; if(cMonth<0){cMonth=11;cYear--;} _photoMonth=cMonth; _photoYear=cYear; updateMonthLabel(); renderAll(); refreshCalIfOpen(); loadSavedPhotos(); if(!$('page-chart').classList.contains('hidden')) rChart(); if(!$('page-challenge').classList.contains('hidden')) rChallenge(); });
+$('next-btn').addEventListener('click',()=>{ cMonth++; if(cMonth>11){cMonth=0;cYear++;} _photoMonth=cMonth; _photoYear=cYear; updateMonthLabel(); renderAll(); refreshCalIfOpen(); loadSavedPhotos(); if(!$('page-chart').classList.contains('hidden')) rChart(); if(!$('page-challenge').classList.contains('hidden')) rChallenge(); });
 function refreshCalIfOpen(){ if(!$('page-cal').classList.contains('hidden')){ rCal(); rCalSummary(); } }
 const mTx = () => txs.filter(t=>{ const d=new Date(t.date); return d.getFullYear()===cYear&&d.getMonth()===cMonth; });
 
@@ -2597,6 +2625,7 @@ async function initSettings(){
   $('settings-anniversary').value=saved;
   updateAnnivPreview(saved);
   initResetSelects();
+  initCsvSelects();
 }
 function updateAnnivPreview(dateStr){
   if(!dateStr) return;
@@ -2643,6 +2672,7 @@ $('reset-all-btn').addEventListener('click',async()=>{
 });
 
 // ── CSV 내보내기 ──
+let csvPeriod = 'month';
 function toCSV(rows){
   const header=['날짜','유형','금액','내용','카테고리','누가','메모'];
   const lines=[header.join(','),...rows.map(t=>[
@@ -2663,17 +2693,60 @@ function downloadCSV(content,filename){
   a.href=url;a.download=filename;a.click();
   URL.revokeObjectURL(url);
 }
-$('csv-month-btn').addEventListener('click',()=>{
-  const rows=mTx().sort((a,b)=>a.date.localeCompare(b.date));
-  if(!rows.length) return toast('이번 달 데이터가 없어요');
-  downloadCSV(toCSV(rows),`가계부_${cYear}년${cMonth+1}월.csv`);
-  toast('📥 CSV 다운로드됐어요!');
+function initCsvSelects(){
+  const y=new Date().getFullYear();
+  const years=[y-2,y-1,y,y+1].map(yr=>`<option value="${yr}">${yr}년</option>`).join('');
+  const months=Array.from({length:12},(_,i)=>`<option value="${i}">${i+1}월</option>`).join('');
+  ['csv-start-year','csv-end-year'].forEach(id=>$(id).innerHTML=years);
+  ['csv-start-month','csv-end-month'].forEach(id=>$(id).innerHTML=months);
+  $('csv-start-year').value=cYear; $('csv-start-month').value=cMonth;
+  $('csv-end-year').value=cYear; $('csv-end-month').value=cMonth;
+}
+document.querySelectorAll('.csv-period-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    csvPeriod=btn.dataset.period;
+    document.querySelectorAll('.csv-period-btn').forEach(b=>{
+      const active=b===btn;
+      b.style.background=active?'var(--green)':'var(--bg)';
+      b.style.color=active?'white':'var(--brown2)';
+      b.style.borderColor=active?'var(--green)':'var(--border)';
+    });
+    $('csv-custom-range').style.display=csvPeriod==='custom'?'flex':'none';
+    $('csv-custom-range').style.flexDirection='column';
+  });
 });
-$('csv-all-btn').addEventListener('click',()=>{
-  const rows=[...txs].sort((a,b)=>a.date.localeCompare(b.date));
-  if(!rows.length) return toast('데이터가 없어요');
-  downloadCSV(toCSV(rows),'가계부_전체.csv');
-  toast('📥 CSV 다운로드됐어요!');
+$('csv-download-btn').addEventListener('click',()=>{
+  let rows=[], filename='가계부.csv';
+  const now=new Date();
+  if(csvPeriod==='month'){
+    rows=mTx().sort((a,b)=>a.date.localeCompare(b.date));
+    filename=`가계부_${cYear}년${cMonth+1}월.csv`;
+  } else if(csvPeriod==='all'){
+    rows=[...txs].sort((a,b)=>a.date.localeCompare(b.date));
+    filename='가계부_전체.csv';
+  } else if(csvPeriod==='3'||csvPeriod==='6'){
+    const n=parseInt(csvPeriod);
+    let sm=cMonth-(n-1), sy=cYear;
+    while(sm<0){sm+=12;sy--;}
+    rows=txs.filter(t=>{
+      const d=new Date(t.date);
+      const ym=d.getFullYear()*12+d.getMonth();
+      return ym>=sy*12+sm && ym<=cYear*12+cMonth;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+    filename=`가계부_최근${n}개월.csv`;
+  } else if(csvPeriod==='custom'){
+    const sy=parseInt($('csv-start-year').value), sm=parseInt($('csv-start-month').value);
+    const ey=parseInt($('csv-end-year').value), em=parseInt($('csv-end-month').value);
+    rows=txs.filter(t=>{
+      const d=new Date(t.date);
+      const ym=d.getFullYear()*12+d.getMonth();
+      return ym>=sy*12+sm && ym<=ey*12+em;
+    }).sort((a,b)=>a.date.localeCompare(b.date));
+    filename=`가계부_${sy}년${sm+1}월~${ey}년${em+1}월.csv`;
+  }
+  if(!rows.length) return toast('해당 기간 데이터가 없어요');
+  downloadCSV(toCSV(rows),filename);
+  toast(`📥 CSV 다운로드됐어요! (${rows.length}건)`);
 });
 </script>
 </body>
