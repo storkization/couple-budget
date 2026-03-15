@@ -1,7 +1,7 @@
 {
-  "name": "도훈 & 경은 가계부",
-  "short_name": "우리 가계부",
-  "description": "도훈이랑 경은이의 커플 가계부",
+  "name": "리치 투게더",
+  "short_name": "리치투게더",
+  "description": "경은이와 도훈이의 부자되는 커플 가계부",
   "start_url": "/couple-budget/",
   "scope": "/couple-budget/",
   "display": "standalone",
