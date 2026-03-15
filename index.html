@@ -1360,8 +1360,9 @@ function loadSavedPhotos() {
 
 // ── AUTH ──
 const ALLOWED_EMAILS = ['dbke0610@gmail.com', 'ventisummer@gmail.com'];
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-// 리다이렉트 후 돌아왔을 때 결과 처리
+// 리다이렉트 결과 처리 (iOS 팝업 차단 시 fallback redirect 결과도 처리)
 getRedirectResult(auth).then(result => {
   if(!result) return;
   if(!ALLOWED_EMAILS.includes(result.user.email)){
@@ -1369,35 +1370,57 @@ getRedirectResult(auth).then(result => {
     setTimeout(()=>toast('❌ 접근 권한이 없어요'), 500);
   }
 }).catch(e => {
-  if(e.code !== 'auth/null-provider') toast('로그인 오류: ' + e.code);
+  if(e.code !== 'auth/null-provider') console.warn('redirect result:', e.code);
 });
 
-$('login-btn').addEventListener('click', async () => {
+$('login-btn').addEventListener('click', () => {
   $('login-spinner').classList.add('show');
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isMobile = /Android/i.test(navigator.userAgent);
-  try {
-    if(isIOS || isMobile){
-      // iOS/모바일: 항상 redirect (팝업 차단 없음, 루프 없음)
-      await signInWithRedirect(auth, provider);
-    } else {
-      // PC: 팝업 방식
-      const result = await signInWithPopup(auth, provider);
-      if(!ALLOWED_EMAILS.includes(result.user.email)){
-        await signOut(auth);
+  const isAndroid = /Android/i.test(navigator.userAgent);
+
+  if(isIOS) {
+    // iOS: 팝업 시도, 차단되면 redirect fallback
+    signInWithPopup(auth, provider)
+      .then(result => {
+        if(!ALLOWED_EMAILS.includes(result.user.email)){
+          signOut(auth);
+          $('login-spinner').classList.remove('show');
+          toast('❌ 접근 권한이 없어요');
+        }
+      })
+      .catch(e => {
         $('login-spinner').classList.remove('show');
-        toast('❌ 접근 권한이 없어요');
-      }
-    }
-  } catch(e) {
-    $('login-spinner').classList.remove('show');
-    if(e.code==='auth/popup-blocked'){
-      await signInWithRedirect(auth, provider);
-    } else if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
-      toast('로그인이 취소됐어요');
-    } else {
-      toast('로그인 오류: '+e.code);
-    }
+        if(e.code==='auth/popup-blocked'){
+          // 팝업 차단 시 redirect로 fallback (iOS에서도 1회성 redirect는 괜찮음)
+          $('login-spinner').classList.add('show');
+          signInWithRedirect(auth, provider);
+        } else if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
+          toast('로그인이 취소됐어요');
+        } else {
+          toast('로그인 오류: '+e.code);
+        }
+      });
+  } else if(isAndroid) {
+    signInWithRedirect(auth, provider);
+  } else {
+    // PC: 팝업 방식
+    signInWithPopup(auth, provider)
+      .then(result => {
+        if(!ALLOWED_EMAILS.includes(result.user.email)){
+          signOut(auth);
+          $('login-spinner').classList.remove('show');
+          toast('❌ 접근 권한이 없어요');
+        }
+      })
+      .catch(e => {
+        $('login-spinner').classList.remove('show');
+        if(e.code==='auth/popup-blocked'){
+          signInWithRedirect(auth, provider);
+        } else if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
+          toast('로그인이 취소됐어요');
+        } else {
+          toast('로그인 오류: '+e.code);
+        }
+      });
   }
 });
 $('logout-btn').addEventListener('click', () => signOut(auth));
