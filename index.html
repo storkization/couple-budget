@@ -1376,12 +1376,26 @@ $('login-btn').addEventListener('click', async () => {
   $('login-spinner').classList.add('show');
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isPWA = window.navigator.standalone === true;
   try {
-    if(isSafari || isMobile){
-      // 사파리/모바일: 리다이렉트 방식 (팝업 차단 없음)
+    if(isPWA){
+      // iOS PWA 모드: redirect 루프 방지 — 팝업 방식 시도
+      try {
+        const result = await signInWithPopup(auth, provider);
+        if(!ALLOWED_EMAILS.includes(result.user.email)){
+          await signOut(auth);
+          $('login-spinner').classList.remove('show');
+          toast('❌ 접근 권한이 없어요');
+        }
+      } catch(popupErr) {
+        // 팝업 실패 시 Safari에서 직접 열기
+        $('login-spinner').classList.remove('show');
+        toast('Safari에서 로그인 후 돌아와 주세요');
+        setTimeout(()=>{ window.open('https://storkization.github.io/couple-budget/', '_blank'); }, 800);
+      }
+    } else if(isSafari || isMobile){
       await signInWithRedirect(auth, provider);
     } else {
-      // PC 크롬 등: 팝업 방식
       const result = await signInWithPopup(auth, provider);
       if(!ALLOWED_EMAILS.includes(result.user.email)){
         await signOut(auth);
