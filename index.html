@@ -364,7 +364,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="budget-input" type="text" id="d-budget-input" placeholder="도훈 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="d-budget-set-btn" style="background:var(--dohun)">설정</button>
         </div>
-        <div id="baro-d" style="text-align:center;margin-top:4px"></div>
       </div>
 
       <!-- 경은 예산 바 -->
@@ -378,7 +377,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="budget-input" type="text" id="k-budget-input" placeholder="경은 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="k-budget-set-btn" style="background:var(--kyungeun)">설정</button>
         </div>
-        <div id="baro-k" style="text-align:center;margin-top:4px"></div>
       </div>
 
       <!-- 합계 바 -->
@@ -390,7 +388,13 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="budget-bar-bg">
           <div class="budget-bar-fill safe" id="t-budget-bar" style="width:0%"></div>
         </div>
-        <div id="baro-t" style="text-align:center;margin-top:4px"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span style="font-size:9px;color:var(--brown3)">0%</span>
+          <span style="font-size:9px;color:var(--brown3)">25%</span>
+          <span style="font-size:9px;color:var(--green)">50%</span>
+          <span style="font-size:9px;color:var(--gold)">75%</span>
+          <span style="font-size:9px;color:var(--rose)">100%</span>
+        </div>
       </div>
     </div>
     <div class="section-head">이번 달 내역</div>
@@ -1432,19 +1436,15 @@ async function loadBudgetsFromFirestore(){
 
 function updateBudgetBar(barId, infoId, expense, budget, who){
   const sfx = who==='d'?'-d': who==='k'?'-k':'';
-  const baroId = who==='d'?'baro-d': who==='k'?'baro-k':'baro-t';
-  const hexColor = who==='d'?'#4a7fa8': who==='k'?'#c96ea0':'#5a9e7a';
   if(budget > 0){
     const pct = Math.min(100, Math.round(expense / budget * 100));
     $(infoId).textContent = `${fmtFull(expense)} / ${fmtFull(budget)} (${pct}%)`;
     $(barId).style.width = pct + '%';
     $(barId).className = 'budget-bar-fill ' + (pct>=100?'over'+sfx:pct>=80?'warn'+sfx:'safe'+sfx);
-    if($(baroId)) $(baroId).innerHTML = gaugeHTML(Math.round(expense/budget*100), hexColor);
   } else {
     $(infoId).textContent = '미설정';
     $(barId).style.width = '0%';
     $(barId).className = 'budget-bar-fill safe'+sfx;
-    if($(baroId)) $(baroId).innerHTML = gaugeHTML(0, hexColor);
   }
 }
 
