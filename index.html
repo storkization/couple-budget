@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>도훈 & 경은 가계부 ❤️</title>
+<title>리치♥투게더</title>
 <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="우리 가계부">
+<meta name="apple-mobile-web-app-title" content="리치투게더">
 <link rel="apple-touch-icon" href="pic/icon192.png">
 <meta name="theme-color" content="#e8785a">
 <style>
@@ -33,15 +33,15 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .hidden{display:none!important}
 
 /* LOGIN */
-#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 30% 20%,#f5e6df,var(--bg) 60%)}
-.couple-photo-wrap{width:130px;height:130px;border-radius:50%;overflow:hidden;margin-bottom:18px;border:4px solid white;box-shadow:0 8px 32px rgba(232,120,90,0.3),0 0 0 2px var(--rose-light);animation:pulse 3s ease-in-out infinite}
+#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(160deg,#6b1a2e 0%,#9b2444 40%,#c0394f 70%,#7a1535 100%)}
+.couple-photo-wrap{width:130px;height:130px;border-radius:50%;overflow:hidden;margin-bottom:18px;border:4px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 2px rgba(255,255,255,0.15);animation:pulse 3s ease-in-out infinite}
 .couple-photo{width:100%;height:100%;object-fit:cover}
 .photo-fb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(135deg,var(--rose-light),var(--kyungeun-light))}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 .login-title{font-size:26px;font-weight:800;margin-bottom:6px}
 .login-names{font-size:14px;color:var(--brown2);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .nm-d{color:var(--dohun);font-weight:700}.nm-k{color:var(--kyungeun);font-weight:700}
-.login-notice{font-size:12px;color:var(--brown3);margin-bottom:32px;text-align:center;line-height:1.6;background:var(--gold-light);border-radius:10px;padding:10px 16px;border:1px solid rgba(201,150,58,0.2)}
+.login-notice{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:32px;text-align:center;line-height:1.6;background:rgba(255,255,255,0.1);border-radius:10px;padding:10px 16px;border:1px solid rgba(255,255,255,0.15)}
 .google-btn{display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--border);border-radius:16px;padding:14px 28px;font-family:inherit;font-size:15px;font-weight:600;color:var(--brown);cursor:pointer;box-shadow:var(--shadow-md);transition:all 0.2s}
 .google-btn:active{transform:scale(0.97)}
 .google-btn img{width:20px;height:20px}
@@ -280,16 +280,17 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
          onerror="this.parentElement.innerHTML='<div class=\'photo-fb\'>❤️</div>'">
   </div>
   <div style="text-align:center;margin-bottom:20px">
-    <div style="font-size:11px;font-weight:600;letter-spacing:3px;color:var(--brown3);text-transform:uppercase;margin-bottom:8px">Our Couple Budget</div>
-    <div style="font-size:22px;font-weight:800;color:var(--brown);line-height:1.4;letter-spacing:-0.3px">
-      경은이와 도훈이의<br>
-      <span style="background:linear-gradient(135deg,var(--rose),var(--kyungeun));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:26px">부자되는 커플 가계부</span>
-    </div>
-    <div style="font-size:18px;margin-top:4px">♥</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:4px;color:#ffd580;text-transform:uppercase;margin-bottom:12px">✦ Our Money Diary ✦</div>
+    <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:8px;letter-spacing:0.5px">경은이와 도훈이의</div>
+    <div style="font-size:30px;font-weight:900;color:white;line-height:1.4;letter-spacing:-0.5px;text-shadow:0 2px 20px rgba(255,180,180,0.5)">부자되는<br>커플 가계부</div>
+    <div style="font-size:32px;margin-top:10px;animation:heartbeat 1.2s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(255,100,120,0.8))">💗</div>
   </div>
+  <style>
+    @keyframes heartbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(1.1)}}
+  </style>
   <div class="login-notice">📱 팝업이 차단되면 브라우저에서 팝업을 허용해 주세요</div>
   <button class="google-btn" id="login-btn">
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">Google로 로그인
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google로 로그인
   </button>
   <div class="login-spinner" id="login-spinner">🔄 로그인 중... 잠시만요</div>
 </div>
@@ -699,7 +700,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)">
         <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">ℹ️ 앱 정보</div>
         <div style="font-size:13px;color:var(--brown2);line-height:1.8">
-          <div>💙 도훈 & 경은 💰 가계부</div>
+          <div>리치 투게더 💕</div>
           <div style="font-size:11px;color:var(--brown3)">버전 1.0 · Made with 💕</div>
           <div style="font-size:11px;color:var(--brown3)">Created by Shawn Kim</div>
         </div>
