@@ -495,12 +495,19 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div id="cat-chart"></div>
       </div>
       <div class="chart-card">
-        <div style="font-size:12px;font-weight:700;color:var(--brown2);margin-bottom:10px">📈 최근 4개월 지출</div>
+        <div class="chart-title-row">
+          <span style="font-size:12px;font-weight:700;color:var(--brown2)">📈 최근 4개월 지출</span>
+          <select class="chart-filter" id="monthly-filter">
+            <option value="all">전체</option>
+            <option value="dohun">💙 도훈</option>
+            <option value="kyungeun">🩷 경은</option>
+          </select>
+        </div>
         <div class="monthly-bars" id="monthly-bars"></div>
         <div id="monthly-rows"></div>
       </div>
 
-      <!-- 일별 지출 리스트 -->
+      <!-- 일별 지출 표 -->
       <div class="chart-card">
         <div class="chart-title-row">
           <span class="chart-title">📋 일별 지출</span>
@@ -1504,17 +1511,37 @@ function renderDailyList(){
     byDay[d][t.who]=(byDay[d][t.who]||0)+Number(t.amount);
   });
   const days=Object.keys(byDay).map(Number).sort((a,b)=>b-a);
-  el.innerHTML=days.map(d=>{
-    const dA=byDay[d].dohun||0, kA=byDay[d].kyungeun||0, total=dA+kA;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:13px;font-weight:700;color:var(--brown)">${cMonth+1}월 ${d}일</div>
-      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-        ${dA?`<span style="font-size:11px;color:#4a7fa8;font-weight:600">💙 ${fmtFull(dA)}</span>`:''}
-        ${kA?`<span style="font-size:11px;color:#c96ea0;font-weight:600">🩷 ${fmtFull(kA)}</span>`:''}
-        <span style="font-size:13px;font-weight:800;color:var(--rose)">${fmtFull(total)}</span>
-      </div>
-    </div>`;
-  }).join('');
+  el.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th style="padding:8px 4px;text-align:left;color:var(--brown2);font-weight:700">날짜</th>
+          <th style="padding:8px 4px;text-align:right;color:var(--dohun);font-weight:700">💙 도훈</th>
+          <th style="padding:8px 4px;text-align:right;color:var(--kyungeun);font-weight:700">🩷 경은</th>
+          <th style="padding:8px 4px;text-align:right;color:var(--brown2);font-weight:700">합계</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${days.map((d,i)=>{
+          const dA=byDay[d].dohun||0, kA=byDay[d].kyungeun||0, total=dA+kA;
+          const bg=i%2===0?'transparent':'rgba(61,43,31,0.03)';
+          return `<tr style="border-bottom:1px solid var(--border);background:${bg}">
+            <td style="padding:8px 4px;font-weight:700;color:var(--brown)">${cMonth+1}/${d}</td>
+            <td style="padding:8px 4px;text-align:right;color:${dA?'var(--dohun)':'var(--brown3)'}">${dA?fmtFull(dA):'-'}</td>
+            <td style="padding:8px 4px;text-align:right;color:${kA?'var(--kyungeun)':'var(--brown3)'}">${kA?fmtFull(kA):'-'}</td>
+            <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--rose)">${fmtFull(total)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid var(--border);background:var(--bg)">
+          <td style="padding:8px 4px;font-weight:800;color:var(--brown)">합계</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--dohun)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].dohun||0),0))}</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--kyungeun)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].kyungeun||0),0))}</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--rose)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].dohun||0)+(byDay[d].kyungeun||0),0))}</td>
+        </tr>
+      </tfoot>
+    </table>`;
 }
 function renderSummary(){
   const mt = mTx();
@@ -1793,7 +1820,9 @@ $('minor-save-btn').addEventListener('click',()=>{
 });
 
 // ── CHART (드롭다운 통합) ──
+let monthlyFilter = 'all';
 $('stat-filter').addEventListener('change',()=>{ statFilter=$('stat-filter').value; rChart(); });
+$('monthly-filter').addEventListener('change',()=>{ monthlyFilter=$('monthly-filter').value; rChart(); });
 
 const CAT_COLORS = ['#e8785a','#4a7fa8','#c96ea0','#5a9e7a','#c9963a','#7a6ac9','#e87a3a','#3ab8c9','#c94a6e','#6ac95a'];
 
@@ -1843,12 +1872,12 @@ function rChart(){
     return `<div class="cat-bar"><div class="cat-bar-head"><span>${getE(cat)} ${cat}</span><span>${fmtFull(amt)} (${total?Math.round(amt/total*100):0}%)</span></div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${total?amt/total*100:0}%;background:${color}"></div></div></div>`;
   }).join('')||'<div class="empty-state"><div class="empty-emoji">📊</div><div class="empty-text">데이터가 없어요</div></div>';
 
-  // ── 최근 4개월 (통합 필터 적용) ──
+  // ── 최근 4개월 (월별 필터 적용) ──
   const months=[];
   for(let i=3;i>=0;i--){
     let m=cMonth-i,y=cYear; if(m<0){m+=12;y--;}
     const src=txs.filter(tx=>{const d=new Date(tx.date);return d.getFullYear()===y&&d.getMonth()===m&&tx.type==='expense';});
-    const fSrc = statFilter==='all' ? src : src.filter(t=>t.who===statFilter);
+    const fSrc = monthlyFilter==='all' ? src : src.filter(t=>t.who===monthlyFilter);
     const e=fSrc.reduce((s,t)=>s+Number(t.amount),0);
     months.push({label:`${m+1}월`,exp:e,cur:i===0});
   }
