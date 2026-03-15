@@ -1540,7 +1540,7 @@ async function startSync(){
     // 저장된 테마 적용
     if(_appConfig.theme && _appConfig.theme !== _currentTheme){
       _currentTheme = _appConfig.theme;
-      applyTheme(_currentTheme);
+      applyTheme(_currentTheme, false);
     }
   }, ()=>{});
 
@@ -2907,27 +2907,37 @@ window.disablePIN = ()=>{
   toast('🔓 PIN 잠금이 해제됐어요');
   renderPinSettings();
 };
+window.showPinScreen = showPinScreen;
 
 // ── THEME ──
 const THEMES = [
-  {id:'rose',     name:'🌸 기본',     rose:'#e8785a', roseLight:'#f5d5cc', roseDark:'#c45c40', bg:'#f7f3ef'},
-  {id:'black',    name:'🖤 다크',     rose:'#555555', roseLight:'#dddddd', roseDark:'#333333', bg:'#f5f5f5'},
-  {id:'teal',     name:'🩵 민트',     rose:'#3a9e9e', roseLight:'#c8eeee', roseDark:'#2a7a7a', bg:'#f2fafa'},
-  {id:'lavender', name:'💜 라벤더',   rose:'#8a5ae0', roseLight:'#ddd5fa', roseDark:'#6a3ab8', bg:'#f7f5fd'},
+  {id:'rose',     name:'🌸 기본',   rose:'#e8785a', roseLight:'#f5d5cc', roseDark:'#c45c40', bg:'#f7f3ef', surface:'#ffffff', brown:'#3d2b1f', brown2:'#7a5c4a', brown3:'#b89080', border:'rgba(61,43,31,0.1)'},
+  {id:'dark',     name:'🖤 다크',   rose:'#ff6b6b', roseLight:'#3a2a2a', roseDark:'#cc4444', bg:'#1a1a2e', surface:'#16213e', brown:'#e8e8f0', brown2:'#a0a0c0', brown3:'#606080', border:'rgba(255,255,255,0.1)'},
+  {id:'teal',     name:'🩵 민트',   rose:'#00b4a0', roseLight:'#b2ede7', roseDark:'#007a6e', bg:'#e8f8f6', surface:'#ffffff', brown:'#1a3d38', brown2:'#2d6b63', brown3:'#5a9e96', border:'rgba(0,100,90,0.12)'},
+  {id:'lavender', name:'💜 라벤더', rose:'#7c4dff', roseLight:'#d9ccff', roseDark:'#5500ee', bg:'#f0ecff', surface:'#ffffff', brown:'#2a1a4a', brown2:'#5a3a8a', brown3:'#9a7acc', border:'rgba(100,60,180,0.12)'},
 ];
 let _currentTheme = 'rose';
-function applyTheme(id){
+function applyTheme(id, confirm_=true){
   const t = THEMES.find(t=>t.id===id) || THEMES[0];
+  if(confirm_ && id!==_currentTheme){
+    if(!confirm(`"${t.name}" 테마로 변경할까요?`)) return;
+  }
   const root = document.documentElement;
   root.style.setProperty('--rose', t.rose);
   root.style.setProperty('--rose-light', t.roseLight);
   root.style.setProperty('--rose-dark', t.roseDark);
   root.style.setProperty('--bg', t.bg);
+  root.style.setProperty('--surface', t.surface);
+  root.style.setProperty('--brown', t.brown);
+  root.style.setProperty('--brown2', t.brown2);
+  root.style.setProperty('--brown3', t.brown3);
+  root.style.setProperty('--border', t.border);
   _currentTheme = id;
   document.querySelectorAll('.theme-btn').forEach(b=>{
     const active = b.dataset.theme===id;
     b.style.border = active ? `2.5px solid ${t.rose}` : '2.5px solid transparent';
-    b.style.transform = active ? 'scale(1.1)' : 'scale(1)';
+    b.style.transform = active ? 'scale(1.08)' : 'scale(1)';
+    b.style.boxShadow = active ? `0 2px 10px ${t.rose}55` : 'none';
   });
   saveAppConfig({theme: id}).catch(()=>{});
 }
@@ -2935,11 +2945,11 @@ function renderThemeGrid(){
   const grid = $('theme-grid'); if(!grid) return;
   grid.innerHTML = THEMES.map(t=>`
     <button class="theme-btn" data-theme="${t.id}" onclick="applyTheme('${t.id}')"
-      style="background:${t.rose};border-radius:12px;padding:10px 6px;border:2.5px solid transparent;cursor:pointer;font-family:inherit;transition:all 0.2s">
-      <div style="font-size:16px;margin-bottom:3px">${t.name.split(' ')[0]}</div>
-      <div style="font-size:9px;font-weight:700;color:white;opacity:0.9">${t.name.split(' ')[1]}</div>
+      style="background:${t.rose};border-radius:10px;padding:8px 4px;border:2.5px solid transparent;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px">
+      <span style="font-size:14px">${t.name.split(' ')[0]}</span>
+      <span style="font-size:10px;font-weight:700;color:white;opacity:0.9">${t.name.split(' ')[1]}</span>
     </button>`).join('');
-  applyTheme(_currentTheme);
+  applyTheme(_currentTheme, false);
 }
 window.applyTheme = applyTheme;
 
@@ -2975,9 +2985,9 @@ window.applyTheme = applyTheme;
     if(dy<=0) return;
     if($('page-settings') && !$('page-settings').classList.contains('hidden')) return;
 
-    const show=Math.min(dy/40,1);
-    const lineLen=Math.min(dy*0.35, 40); // 화살표 줄기 길이
-    const ready=dy>140;
+    const show=Math.min(dy/50,1);
+    const lineLen=Math.min(dy*0.28, 40);
+    const ready=dy>200;
 
     // PTR 위치 내려오기
     ptrEl.style.transform=`translateX(-50%) translateY(${(show-1)*100+show*10}%)`;
@@ -3011,14 +3021,18 @@ window.applyTheme = applyTheme;
     if(!pulling) return;
     const dy=e.changedTouches[0].clientY-startY;
     pulling=false;
-    if(dy>140 && $('page-settings') && $('page-settings').classList.contains('hidden')){
-      if($('ptr-text')){
-        $('ptr-text').textContent='새로고침 중...';
-        $('ptr-text').style.color='var(--brown2)';
-      }
+    if(dy>200 && $('page-settings') && $('page-settings').classList.contains('hidden')){
+      // 화살표 숨기고 이모티콘 표시
+      const svg=document.getElementById('ptr-svg');
+      const txt=$('ptr-text');
+      if(svg) svg.style.display='none';
+      if(txt){ txt.textContent='🔄'; txt.style.fontSize='28px'; txt.style.color='var(--rose)'; }
       setTimeout(async()=>{
         await startSync();
         if(ptrEl) ptrEl.style.transform='translateX(-50%) translateY(-100%)';
+        // 리셋
+        if(document.getElementById('ptr-svg')) document.getElementById('ptr-svg').style.display='';
+        if($('ptr-text')){ $('ptr-text').style.fontSize='11px'; }
         toast('✅ 새로고침 완료!');
       },600);
     } else {
