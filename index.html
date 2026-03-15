@@ -302,7 +302,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <button class="logout-btn" id="logout-btn">로그아웃</button>
     </div>
   </div>
-  <div class="month-nav">
+  <div class="month-nav" id="month-nav">
     <button class="m-arrow" id="prev-btn">&#8249;</button>
     <span class="m-label" id="month-label"></span>
     <button class="m-arrow" id="next-btn">&#8250;</button>
@@ -678,6 +678,25 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div style="font-size:13px;color:var(--brown2);line-height:1.8">
           <div>💙 도훈 & 경은 💰 가계부</div>
           <div style="font-size:11px;color:var(--brown3)">버전 1.0 · Made with 💕</div>
+          <div style="font-size:11px;color:var(--brown3)">Created by Shawn Kim</div>
+        </div>
+      </div>
+
+      <!-- 데이터 초기화 -->
+      <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-top:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">🗑️ 데이터 초기화</div>
+        <div style="display:flex;gap:8px">
+          <button id="reset-month-btn" style="flex:1;background:var(--gold-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--gold);cursor:pointer;font-family:inherit">📅 이번 달</button>
+          <button id="reset-all-btn" style="flex:1;background:var(--rose-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--rose);cursor:pointer;font-family:inherit">🗑️ 전체</button>
+        </div>
+      </div>
+
+      <!-- CSV 내보내기 -->
+      <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-top:12px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">📤 CSV 내보내기</div>
+        <div style="display:flex;gap:8px">
+          <button id="csv-month-btn" style="flex:1;background:var(--green-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--green-dark);cursor:pointer;font-family:inherit">📅 이번 달</button>
+          <button id="csv-all-btn" style="flex:1;background:var(--dohun-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--dohun);cursor:pointer;font-family:inherit">📊 전체</button>
         </div>
       </div>
     </div>
@@ -2188,6 +2207,7 @@ function showPage(p){
     $(`page-${pg}`).classList.toggle('hidden',pg!==p);
     $(`nav-${pg}`).classList.toggle('active',pg===p);
   });
+  $('month-nav').style.display=p==='settings'?'none':'';
   if(p==='add'){$('inp-date').value=new Date().toISOString().split('T')[0];initAdd();}
   if(p==='chart') rChart();
   if(p==='cal'){rCal();rCalSummary();}
@@ -2504,6 +2524,55 @@ $('settings-anniv-save').addEventListener('click',async()=>{
 $('settings-anniversary').addEventListener('change',()=>updateAnnivPreview($('settings-anniversary').value));
 $('settings-logout-btn').addEventListener('click',()=>{
   if(confirm('로그아웃 할까요?')) signOut(auth);
+});
+
+// ── DATA RESET ──
+$('reset-month-btn').addEventListener('click',async()=>{
+  if(!confirm(`${cYear}년 ${cMonth+1}월 데이터를 모두 삭제할까요?`)) return;
+  const mt=mTx();
+  if(!mt.length) return toast('이번 달 데이터가 없어요');
+  await Promise.all(mt.map(t=>deleteDoc(doc(db,'transactions',t.id))));
+  toast(`🗑️ ${cYear}년 ${cMonth+1}월 데이터가 삭제됐어요`);
+});
+$('reset-all-btn').addEventListener('click',async()=>{
+  if(!confirm('전체 데이터를 삭제할까요? 되돌릴 수 없어요!')) return;
+  if(!confirm('정말요? 모든 거래 내역이 사라져요!')) return;
+  await Promise.all(txs.map(t=>deleteDoc(doc(db,'transactions',t.id))));
+  toast('🗑️ 전체 데이터가 삭제됐어요');
+});
+
+// ── CSV 내보내기 ──
+function toCSV(rows){
+  const header=['날짜','유형','금액','내용','카테고리','누가','메모'];
+  const lines=[header.join(','),...rows.map(t=>[
+    t.date,
+    t.type==='expense'?'지출':'수입',
+    t.amount,
+    `"${(t.desc||'').replace(/"/g,'""')}"`,
+    `"${(t.category||'').replace(/"/g,'""')}"`,
+    t.who==='dohun'?'도훈':'경은',
+    `"${(t.memo||'').replace(/"/g,'""')}"`
+  ].join(','))];
+  return lines.join('\n');
+}
+function downloadCSV(content,filename){
+  const blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+}
+$('csv-month-btn').addEventListener('click',()=>{
+  const rows=mTx().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!rows.length) return toast('이번 달 데이터가 없어요');
+  downloadCSV(toCSV(rows),`가계부_${cYear}년${cMonth+1}월.csv`);
+  toast('📥 CSV 다운로드됐어요!');
+});
+$('csv-all-btn').addEventListener('click',()=>{
+  const rows=[...txs].sort((a,b)=>a.date.localeCompare(b.date));
+  if(!rows.length) return toast('데이터가 없어요');
+  downloadCSV(toCSV(rows),'가계부_전체.csv');
+  toast('📥 CSV 다운로드됐어요!');
 });
 </script>
 </body>
