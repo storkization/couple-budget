@@ -261,7 +261,13 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .cat-edit-tab.active{background:var(--rose);color:white}
 .cat-edit-section{display:none}.cat-edit-section.show{display:block}
 
-/* BOTTOM NAV */
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);background:transparent;transition:all 0.15s}
+.pin-dot.filled{background:white;border-color:white}
+.pin-dot.error{background:#ff6b6b;border-color:#ff6b6b}
+.pin-btn{background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:72px;height:72px;font-size:22px;font-weight:700;color:white;cursor:pointer;font-family:inherit;transition:all 0.15s;backdrop-filter:blur(4px)}
+.pin-btn:active{background:rgba(255,255,255,0.35);transform:scale(0.93)}
+.pin-del{font-size:18px}
+
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:12px 12px calc(22px + env(safe-area-inset-bottom,0px));z-index:100;box-shadow:0 -4px 20px rgba(61,43,31,0.08)}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:6px 4px;font-family:inherit;min-width:0}
 .nav-icon{font-size:19px;transition:transform 0.2s}.nav-lbl{font-size:9px;font-weight:600;color:var(--brown3)}
@@ -273,6 +279,35 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 </style>
 </head>
 <body>
+
+<!-- PIN LOCK -->
+<div id="pin-screen" class="hidden" style="position:fixed;inset:0;background:linear-gradient(160deg,#6b1a2e 0%,#9b2444 40%,#c0394f 70%,#7a1535 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:40px 24px">
+  <div style="font-size:32px;margin-bottom:8px">🔒</div>
+  <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px">앱 잠금</div>
+  <div id="pin-sub" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:32px">PIN 4자리를 입력해주세요</div>
+  <!-- 입력 표시 -->
+  <div style="display:flex;gap:16px;margin-bottom:36px">
+    <div class="pin-dot" id="pin-dot-0"></div>
+    <div class="pin-dot" id="pin-dot-1"></div>
+    <div class="pin-dot" id="pin-dot-2"></div>
+    <div class="pin-dot" id="pin-dot-3"></div>
+  </div>
+  <!-- 숫자패드 -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px">
+    <button class="pin-btn" data-n="1">1</button>
+    <button class="pin-btn" data-n="2">2</button>
+    <button class="pin-btn" data-n="3">3</button>
+    <button class="pin-btn" data-n="4">4</button>
+    <button class="pin-btn" data-n="5">5</button>
+    <button class="pin-btn" data-n="6">6</button>
+    <button class="pin-btn" data-n="7">7</button>
+    <button class="pin-btn" data-n="8">8</button>
+    <button class="pin-btn" data-n="9">9</button>
+    <div></div>
+    <button class="pin-btn" data-n="0">0</button>
+    <button class="pin-btn pin-del" id="pin-del">⌫</button>
+  </div>
+</div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -794,7 +829,17 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <!-- 고급설정 -->
       <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);margin-top:12px;margin-bottom:16px">
         <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">⚙️ 고급설정</div>
-        <div style="font-size:11px;color:var(--brown3);margin-bottom:12px">자주 바꾸지 않는 설정들이에요</div>
+        <div style="font-size:11px;color:var(--brown3);margin-bottom:16px">자주 바꾸지 않는 설정들이에요</div>
+
+        <!-- 테마 컬러 -->
+        <label class="form-label">🎨 테마 컬러</label>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px" id="theme-grid"></div>
+
+        <!-- 앱 잠금 -->
+        <label class="form-label" style="margin-top:16px">🔒 앱 잠금 (PIN)</label>
+        <div id="pin-settings-wrap"></div>
+
+        <!-- 기념일 -->
         <label class="form-label">💕 사귀기 시작한 날</label>
         <div style="display:flex;gap:8px">
           <input class="form-input" type="date" id="settings-anniversary" style="flex:1">
@@ -1463,6 +1508,8 @@ onAuthStateChanged(auth, user => {
     $('who-dohun').classList.toggle('active',cWho==='dohun');
     $('who-kyungeun').classList.toggle('active',cWho==='kyungeun');
     startSync(); updateMonthLabel(); initAdd(); loadSavedPhotos();
+    // PIN 잠금
+    if(isPINEnabled()) showPinScreen('verify');
   } else {
     $('login-screen').classList.remove('hidden');
     $('app-screen').classList.add('hidden');
@@ -1496,6 +1543,11 @@ async function startSync(){
   unsubAppCfg = onSnapshot(doc(db,'config','app'), snap=>{
     if(snap.exists()) _appConfig={..._appConfig,...snap.data()};
     updateCalClock();
+    // 저장된 테마 적용
+    if(_appConfig.theme && _appConfig.theme !== _currentTheme){
+      _currentTheme = _appConfig.theme;
+      applyTheme(_currentTheme);
+    }
   }, ()=>{});
 
   // ── 사진: 실시간 ──
@@ -2731,6 +2783,8 @@ async function initSettings(){
   updateAnnivPreview(saved);
   initResetSelects();
   initCsvSelects();
+  renderThemeGrid();
+  renderPinSettings();
 }
 function updateAnnivPreview(dateStr){
   if(!dateStr) return;
@@ -2781,6 +2835,120 @@ function renderUpcoming(){
     </div>`;
   }).join('');
 }
+
+// ── PIN LOCK ──
+let _pinInput = '';
+let _pinMode = 'verify'; // 'verify' | 'set' | 'confirm'
+let _pinTemp = '';
+
+function getPIN(){ return localStorage.getItem('app_pin')||''; }
+function setPIN(p){ localStorage.setItem('app_pin',p); }
+function isPINEnabled(){ return !!getPIN(); }
+
+function showPinScreen(mode='verify'){
+  _pinMode = mode;
+  _pinInput = '';
+  _pinTemp = '';
+  $('pin-screen').classList.remove('hidden');
+  $('pin-sub').textContent = mode==='set' ? 'PIN 4자리를 설정해주세요' :
+                             mode==='confirm' ? '한 번 더 입력해주세요' : 'PIN 4자리를 입력해주세요';
+  updatePinDots();
+}
+function hidePinScreen(){ $('pin-screen').classList.add('hidden'); }
+
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    const dot=$(`pin-dot-${i}`);
+    dot.classList.toggle('filled', i<_pinInput.length);
+    dot.classList.remove('error');
+  }
+}
+function pinError(){
+  for(let i=0;i<4;i++) $(`pin-dot-${i}`).classList.add('error');
+  setTimeout(()=>{ _pinInput=''; updatePinDots(); $('pin-sub').style.color='rgba(255,255,255,0.7)'; },600);
+  $('pin-sub').textContent='❌ 틀렸어요. 다시 입력해주세요';
+  $('pin-sub').style.color='#ff9999';
+}
+
+document.querySelectorAll('.pin-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const n = btn.dataset.n;
+    if(btn.id==='pin-del'){ _pinInput=_pinInput.slice(0,-1); updatePinDots(); return; }
+    if(_pinInput.length>=4) return;
+    _pinInput += n;
+    updatePinDots();
+    if(_pinInput.length===4){
+      setTimeout(()=>{
+        if(_pinMode==='verify'){
+          if(_pinInput===getPIN()){ hidePinScreen(); }
+          else { pinError(); }
+        } else if(_pinMode==='set'){
+          _pinTemp=_pinInput; _pinInput='';
+          showPinScreen('confirm');
+        } else if(_pinMode==='confirm'){
+          if(_pinInput===_pinTemp){
+            setPIN(_pinInput);
+            hidePinScreen();
+            toast('🔒 PIN이 설정됐어요!');
+            renderPinSettings();
+          } else { pinError(); $('pin-sub').textContent='❌ 일치하지 않아요. 다시 설정해주세요'; }
+        }
+      },120);
+    }
+  });
+});
+
+function renderPinSettings(){
+  const el=$('pin-settings-wrap'); if(!el) return;
+  const enabled=isPINEnabled();
+  el.innerHTML=enabled
+    ? `<div style="display:flex;gap:8px">
+        <button onclick="showPinScreen('set')" style="flex:1;background:var(--gold-light);border:none;border-radius:11px;padding:10px;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;font-family:inherit">🔑 PIN 변경</button>
+        <button onclick="disablePIN()" style="flex:1;background:var(--rose-light);border:none;border-radius:11px;padding:10px;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer;font-family:inherit">🔓 잠금 해제</button>
+      </div>`
+    : `<button onclick="showPinScreen('set')" style="width:100%;background:var(--dohun-light);border:none;border-radius:11px;padding:11px;font-size:13px;font-weight:700;color:var(--dohun);cursor:pointer;font-family:inherit">🔒 PIN 잠금 설정</button>`;
+}
+window.disablePIN = ()=>{
+  if(!confirm('PIN 잠금을 해제할까요?')) return;
+  localStorage.removeItem('app_pin');
+  toast('🔓 PIN 잠금이 해제됐어요');
+  renderPinSettings();
+};
+
+// ── THEME ──
+const THEMES = [
+  {id:'rose',     name:'🌸 기본',     rose:'#e8785a', roseLight:'#f5d5cc', roseDark:'#c45c40', bg:'#f7f3ef'},
+  {id:'black',    name:'🖤 다크',     rose:'#555555', roseLight:'#dddddd', roseDark:'#333333', bg:'#f5f5f5'},
+  {id:'teal',     name:'🩵 민트',     rose:'#3a9e9e', roseLight:'#c8eeee', roseDark:'#2a7a7a', bg:'#f2fafa'},
+  {id:'lavender', name:'💜 라벤더',   rose:'#8a5ae0', roseLight:'#ddd5fa', roseDark:'#6a3ab8', bg:'#f7f5fd'},
+];
+let _currentTheme = 'rose';
+function applyTheme(id){
+  const t = THEMES.find(t=>t.id===id) || THEMES[0];
+  const root = document.documentElement;
+  root.style.setProperty('--rose', t.rose);
+  root.style.setProperty('--rose-light', t.roseLight);
+  root.style.setProperty('--rose-dark', t.roseDark);
+  root.style.setProperty('--bg', t.bg);
+  _currentTheme = id;
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    const active = b.dataset.theme===id;
+    b.style.border = active ? `2.5px solid ${t.rose}` : '2.5px solid transparent';
+    b.style.transform = active ? 'scale(1.1)' : 'scale(1)';
+  });
+  saveAppConfig({theme: id}).catch(()=>{});
+}
+function renderThemeGrid(){
+  const grid = $('theme-grid'); if(!grid) return;
+  grid.innerHTML = THEMES.map(t=>`
+    <button class="theme-btn" data-theme="${t.id}" onclick="applyTheme('${t.id}')"
+      style="background:${t.rose};border-radius:12px;padding:10px 6px;border:2.5px solid transparent;cursor:pointer;font-family:inherit;transition:all 0.2s">
+      <div style="font-size:16px;margin-bottom:3px">${t.name.split(' ')[0]}</div>
+      <div style="font-size:9px;font-weight:700;color:white;opacity:0.9">${t.name.split(' ')[1]}</div>
+    </button>`).join('');
+  applyTheme(_currentTheme);
+}
+window.applyTheme = applyTheme;
 
 // ── PULL TO REFRESH ──
 (function(){
