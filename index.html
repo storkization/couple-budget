@@ -364,6 +364,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="budget-input" type="text" id="d-budget-input" placeholder="도훈 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="d-budget-set-btn" style="background:var(--dohun)">설정</button>
         </div>
+        <div id="baro-d" style="text-align:center;margin-top:4px"></div>
       </div>
 
       <!-- 경은 예산 바 -->
@@ -377,6 +378,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="budget-input" type="text" id="k-budget-input" placeholder="경은 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="k-budget-set-btn" style="background:var(--kyungeun)">설정</button>
         </div>
+        <div id="baro-k" style="text-align:center;margin-top:4px"></div>
       </div>
 
       <!-- 합계 바 -->
@@ -388,13 +390,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="budget-bar-bg">
           <div class="budget-bar-fill safe" id="t-budget-bar" style="width:0%"></div>
         </div>
-        <!-- 바로미터 눈금 -->
-        <div style="display:flex;justify-content:space-between;margin-top:3px">
-          <span style="font-size:9px;color:var(--brown3)">0%</span>
-          <span style="font-size:9px;color:var(--green)">50%</span>
-          <span style="font-size:9px;color:var(--gold)">80%</span>
-          <span style="font-size:9px;color:var(--rose)">100%</span>
-        </div>
+        <div id="baro-t" style="text-align:center;margin-top:4px"></div>
       </div>
     </div>
     <div class="section-head">이번 달 내역</div>
@@ -414,6 +410,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <button class="who-btn dohun active" id="who-dohun">💙 도훈</button>
           <button class="who-btn kyungeun" id="who-kyungeun">🩷 경은</button>
         </div>
+        <div id="add-who-summary" style="margin-top:8px;font-size:12px;color:var(--brown3);text-align:center;padding:6px 8px;background:var(--bg);border-radius:8px"></div>
       </div>
       <div class="form-card">
         <label class="form-label">💰 금액</label>
@@ -498,6 +495,15 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="monthly-bars" id="monthly-bars"></div>
         <div id="monthly-rows"></div>
       </div>
+
+      <!-- 일별 지출 리스트 -->
+      <div class="chart-card">
+        <div class="chart-title-row">
+          <span class="chart-title">📋 일별 지출</span>
+        </div>
+        <div id="daily-list"></div>
+      </div>
+
     </div>
   </div>
 
@@ -1426,15 +1432,19 @@ async function loadBudgetsFromFirestore(){
 
 function updateBudgetBar(barId, infoId, expense, budget, who){
   const sfx = who==='d'?'-d': who==='k'?'-k':'';
+  const baroId = who==='d'?'baro-d': who==='k'?'baro-k':'baro-t';
+  const hexColor = who==='d'?'#4a7fa8': who==='k'?'#c96ea0':'#5a9e7a';
   if(budget > 0){
     const pct = Math.min(100, Math.round(expense / budget * 100));
     $(infoId).textContent = `${fmtFull(expense)} / ${fmtFull(budget)} (${pct}%)`;
     $(barId).style.width = pct + '%';
     $(barId).className = 'budget-bar-fill ' + (pct>=100?'over'+sfx:pct>=80?'warn'+sfx:'safe'+sfx);
+    if($(baroId)) $(baroId).innerHTML = gaugeHTML(Math.round(expense/budget*100), hexColor);
   } else {
     $(infoId).textContent = '미설정';
     $(barId).style.width = '0%';
     $(barId).className = 'budget-bar-fill safe'+sfx;
+    if($(baroId)) $(baroId).innerHTML = gaugeHTML(0, hexColor);
   }
 }
 
@@ -1458,7 +1468,67 @@ $('k-budget-set-btn').addEventListener('click',async()=>{
   await setBudgetFS('kyungeun', v); renderSummary(); toast('🩷 경은 예산 설정됐어요!');
 });
 
-// ── SUMMARY ──
+// ── GAUGE BAROMETER ──
+function gaugeHTML(pct, hexColor) {
+  const p = Math.min(pct, 120); // 120%까지 표시
+  const displayPct = Math.round(pct);
+  const cx = 70, cy = 62, r = 48, needleLen = 36;
+  // arc: left(180°) → right(0°), pct maps 0→π, 100→0
+  const clampRatio = Math.min(p, 100) / 100;
+  const endAngle = Math.PI * (1 - clampRatio);
+  const endX = cx + r * Math.cos(endAngle);
+  const endY = cy - r * Math.sin(endAngle);
+  const largeArc = clampRatio > 0.5 ? 1 : 0;
+  const arcColor = pct >= 100 ? '#e8785a' : pct >= 80 ? '#c9963a' : hexColor;
+  const nAngle = Math.PI * (1 - clampRatio);
+  const nx = cx + needleLen * Math.cos(nAngle);
+  const ny = cy - needleLen * Math.sin(nAngle);
+  const arcPath = clampRatio > 0
+    ? `<path d="M ${cx-r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${endX.toFixed(1)} ${endY.toFixed(1)}" fill="none" stroke="${arcColor}" stroke-width="10" stroke-linecap="round"/>`
+    : '';
+  return `<svg width="140" height="76" viewBox="0 0 140 76" style="overflow:visible">
+    <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="rgba(61,43,31,0.08)" stroke-width="10" stroke-linecap="round"/>
+    ${arcPath}
+    <line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="#3d2b1f" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="#3d2b1f"/>
+    <text x="${cx}" y="${cy-12}" text-anchor="middle" font-size="12" font-weight="800" fill="#3d2b1f" font-family="Pretendard,sans-serif">${displayPct}%</text>
+    <text x="${cx-r}" y="${cy+14}" text-anchor="middle" font-size="7" fill="rgba(61,43,31,0.35)" font-family="Pretendard,sans-serif">0%</text>
+    <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="7" fill="#5a9e7a" font-family="Pretendard,sans-serif">50%</text>
+    <text x="${cx+r}" y="${cy+14}" text-anchor="middle" font-size="7" fill="rgba(61,43,31,0.35)" font-family="Pretendard,sans-serif">100%</text>
+  </svg>`;
+}
+
+function updateWhoSummary(){
+  const el=$('add-who-summary'); if(!el) return;
+  const exp=mTx().filter(t=>t.type==='expense'&&t.who===cWho).reduce((s,t)=>s+Number(t.amount),0);
+  const color=cWho==='dohun'?'#4a7fa8':'#c96ea0';
+  const name=cWho==='dohun'?'💙 도훈':'🩷 경은';
+  el.innerHTML=`<span style="font-weight:700;color:${color}">${name}</span> 이번 달 누계 지출액: <span style="font-weight:800;color:var(--rose)">${fmtFull(exp)}</span>`;
+}
+
+function renderDailyList(){
+  const el=$('daily-list'); if(!el) return;
+  const mt=mTx().filter(t=>t.type==='expense');
+  if(!mt.length){el.innerHTML='<div style="text-align:center;padding:20px;font-size:13px;color:var(--brown3)">이번 달 지출이 없어요</div>';return;}
+  const byDay={};
+  mt.forEach(t=>{
+    const d=new Date(t.date).getDate();
+    if(!byDay[d]) byDay[d]={dohun:0,kyungeun:0};
+    byDay[d][t.who]=(byDay[d][t.who]||0)+Number(t.amount);
+  });
+  const days=Object.keys(byDay).map(Number).sort((a,b)=>b-a);
+  el.innerHTML=days.map(d=>{
+    const dA=byDay[d].dohun||0, kA=byDay[d].kyungeun||0, total=dA+kA;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:var(--brown)">${cMonth+1}월 ${d}일</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        ${dA?`<span style="font-size:11px;color:#4a7fa8;font-weight:600">💙 ${fmtFull(dA)}</span>`:''}
+        ${kA?`<span style="font-size:11px;color:#c96ea0;font-weight:600">🩷 ${fmtFull(kA)}</span>`:''}
+        <span style="font-size:13px;font-weight:800;color:var(--rose)">${fmtFull(total)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 function renderSummary(){
   const mt = mTx();
   const calc = (who, type) => mt.filter(t=>t.who===who&&t.type===type).reduce((s,t)=>s+Number(t.amount),0);
@@ -1521,7 +1591,7 @@ function renderTxList(){
   c.innerHTML=Object.entries(g).map(([d,items])=>`<div class="date-group"><div class="date-label">${fmtDate(d)}</div>${items.map(tx=>txH(tx)).join('')}</div>`).join('');
   c.querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>openDetail(el.dataset.id)));
 }
-function renderAll(){ renderSummary(); renderTxList(); }
+function renderAll(){ renderSummary(); renderTxList(); updateWhoSummary(); if(!$('page-chart').classList.contains('hidden')) renderDailyList(); }
 
 // ── DETAIL ──
 function openDetail(id){
@@ -1649,8 +1719,8 @@ function initAdd(){
 }
 $('btn-expense').addEventListener('click',()=>{ cType='expense';$('btn-expense').classList.add('active');$('btn-income').classList.remove('active');aCat=CATS.expense[0].items[0].k;renderChips('cat-chips-add','expense',aCat); });
 $('btn-income').addEventListener('click',()=>{ cType='income';$('btn-income').classList.add('active');$('btn-expense').classList.remove('active');aCat=CATS.income[0].items[0].k;renderChips('cat-chips-add','income',aCat); });
-$('who-dohun').addEventListener('click',()=>{ cWho='dohun';$('who-dohun').classList.add('active');$('who-kyungeun').classList.remove('active'); });
-$('who-kyungeun').addEventListener('click',()=>{ cWho='kyungeun';$('who-kyungeun').classList.add('active');$('who-dohun').classList.remove('active'); });
+$('who-dohun').addEventListener('click',()=>{ cWho='dohun';$('who-dohun').classList.add('active');$('who-kyungeun').classList.remove('active');updateWhoSummary(); });
+$('who-kyungeun').addEventListener('click',()=>{ cWho='kyungeun';$('who-kyungeun').classList.add('active');$('who-dohun').classList.remove('active');updateWhoSummary(); });
 // 천단위 콤마 헬퍼
 function fmtInput(v){ return (parseInt(String(v).replace(/,/g,''))||0).toLocaleString('ko-KR'); }
 function parseInput(v){ return parseInt(String(v).replace(/,/g,''))||0; }
@@ -2212,8 +2282,8 @@ function showPage(p){
     $(`nav-${pg}`).classList.toggle('active',pg===p);
   });
   $('month-nav').style.display=p==='settings'?'none':'';
-  if(p==='add'){$('inp-date').value=new Date().toISOString().split('T')[0];initAdd();}
-  if(p==='chart') rChart();
+  if(p==='add'){$('inp-date').value=new Date().toISOString().split('T')[0];initAdd();updateWhoSummary();}
+  if(p==='chart') { rChart(); renderDailyList(); }
   if(p==='cal'){rCal();rCalSummary();}
   if(p==='challenge') rChallenge();
   if(p==='settings') initSettings();
