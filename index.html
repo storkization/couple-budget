@@ -173,6 +173,27 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .cat-chip.active{background:var(--rose);color:white;border-color:var(--rose-dark)}
 .submit-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));color:white;border:none;border-radius:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(232,120,90,0.35);transition:all 0.2s}
 .submit-btn:active{transform:scale(0.98)}
+/* 계산기 힌트 */
+.calc-hint{font-size:11px;color:var(--rose);font-weight:700;margin-top:5px;min-height:16px;display:flex;align-items:center;gap:4px}
+/* 일괄추가 버튼 행 */
+.add-btn-row{display:flex;gap:8px;margin-bottom:10px}
+.add-btn-row .submit-btn{flex:1}
+.basket-btn{flex:1;padding:14px;background:var(--green-light);color:var(--green-dark);border:2px solid var(--green);border-radius:14px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.basket-btn:active{background:var(--green);color:white}
+/* 배치 리스트 */
+.batch-section{background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:10px}
+.batch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.batch-title{font-size:13px;font-weight:700;color:var(--brown2)}
+.batch-clear{font-size:11px;color:var(--rose);background:var(--rose-light);border:none;border-radius:8px;padding:3px 9px;cursor:pointer;font-family:inherit;font-weight:600}
+.batch-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.batch-item:last-child{border-bottom:none}
+.batch-item-info{display:flex;flex-direction:column;gap:2px}
+.batch-item-desc{font-size:13px;font-weight:600;color:var(--brown)}
+.batch-item-sub{font-size:11px;color:var(--brown3)}
+.batch-item-amt{font-size:14px;font-weight:800}
+.batch-item-del{background:none;border:none;font-size:16px;cursor:pointer;padding:2px 6px;color:var(--brown3)}
+.batch-save-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;border-radius:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(90,158,122,0.35);transition:all 0.2s;margin-top:8px}
+.batch-save-btn:active{transform:scale(0.98)}
 
 /* CHART */
 .chart-page{padding:14px 14px 110px}
@@ -465,6 +486,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <button class="quick-chip" data-amt="50000">+5만</button>
           <button class="quick-chip" data-amt="100000">+10만</button>
         </div>
+        <div class="calc-hint" id="calc-hint"></div>
       </div>
       <div class="form-card">
         <div class="row1"><label class="form-label">📅 날짜</label><input class="form-input" type="date" id="inp-date"></div>
@@ -478,7 +500,23 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         </div>
         <div class="row1"><label class="form-label">💬 메모 (선택)</label><textarea class="form-textarea" id="inp-memo" placeholder="메모..."></textarea></div>
       </div>
-      <button class="submit-btn" id="submit-btn">+ 추가하기</button>
+      <!-- 배치 리스트 -->
+      <div class="batch-section hidden" id="batch-section">
+        <div class="batch-header">
+          <span class="batch-title">🧺 담은 목록 <span id="batch-count">0</span>건</span>
+          <button class="batch-clear" id="batch-clear-btn">전체 삭제</button>
+        </div>
+        <div id="batch-list"></div>
+        <div style="margin-top:6px;padding-top:8px;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--brown2);font-weight:600">합계</span>
+          <span style="font-size:16px;font-weight:800;color:var(--rose)" id="batch-total">0원</span>
+        </div>
+        <button class="batch-save-btn" id="batch-save-btn">💾 일괄 저장하기</button>
+      </div>
+      <div class="add-btn-row">
+        <button class="submit-btn" id="submit-btn">+ 추가하기</button>
+        <button class="basket-btn" id="basket-btn">🧺 담기</button>
+      </div>
     </div>
   </div>
 
@@ -1972,27 +2010,143 @@ $('who-kyungeun').addEventListener('click',()=>{ cWho='kyungeun';$('who-kyungeun
 function fmtInput(v){ return (parseInt(String(v).replace(/,/g,''))||0).toLocaleString('ko-KR'); }
 function parseInput(v){ return parseInt(String(v).replace(/,/g,''))||0; }
 
+// ── 계산기: 수식 입력 지원 ──
+function evalExpr(raw){
+  // 숫자, +, -, *, /, (, ), 공백만 허용
+  const clean=raw.replace(/,/g,'').replace(/[^0-9+\-*/().\s]/g,'');
+  if(!clean) return {val:0,isExpr:false};
+  const isExpr=/[+\-*/()]/.test(clean);
+  if(!isExpr) return {val:parseInt(clean)||0,isExpr:false};
+  try{
+    const result=Function('"use strict";return ('+clean+')')();
+    return {val:Math.round(result)||0,isExpr:true};
+  }catch(e){return {val:0,isExpr:true,err:true};}
+}
+
 $('inp-amount').addEventListener('input',function(){
-  const raw=this.value.replace(/[^0-9]/g,'');
-  const num=parseInt(raw)||0;
-  const pos=this.selectionStart;
-  this.value=num>0?num.toLocaleString('ko-KR'):'';
+  const raw=this.value;
+  const isExpr=/[+\-*/()]/.test(raw.replace(/,/g,''));
+  if(isExpr){
+    // 수식 모드: 그대로 두고 힌트만 표시
+    const {val,err}=evalExpr(raw);
+    const hint=$('calc-hint');
+    if(err||!raw.trim()){ hint.textContent=''; }
+    else { hint.innerHTML=`= <strong>${val.toLocaleString('ko-KR')}원</strong> (Enter로 확정)`; }
+  } else {
+    // 일반 숫자 모드: 천단위 콤마
+    const num=parseInt(raw.replace(/[^0-9]/g,''))||0;
+    const oldLen=this.value.length;
+    this.value=num>0?num.toLocaleString('ko-KR'):'';
+    $('calc-hint').textContent='';
+  }
+});
+
+$('inp-amount').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const {val,isExpr,err}=evalExpr(this.value);
+    if(isExpr&&!err&&val>0){
+      this.value=val.toLocaleString('ko-KR');
+      $('calc-hint').textContent='';
+      $('inp-desc').focus();
+    }
+  }
+});
+
+$('inp-amount').addEventListener('blur',function(){
+  const {val,isExpr,err}=evalExpr(this.value);
+  if(isExpr&&!err&&val>0){
+    this.value=val.toLocaleString('ko-KR');
+    $('calc-hint').textContent='';
+  }
 });
 
 document.querySelectorAll('.quick-chip').forEach(b=>b.addEventListener('click',()=>{
   const i=$('inp-amount');
-  const cur=parseInput(i.value);
-  i.value=fmtInput(cur+parseInt(b.dataset.amt));
+  const {val}=evalExpr(i.value);
+  i.value=fmtInput(val+parseInt(b.dataset.amt));
+  $('calc-hint').textContent='';
 }));
 
-$('submit-btn').addEventListener('click',async()=>{
-  const amount=parseInput($('inp-amount').value),date=$('inp-date').value,desc=$('inp-desc').value.trim(),memo=$('inp-memo').value.trim();
-  if(!amount||amount<=0)return toast('금액을 입력해주세요');
-  if(!date)return toast('날짜를 선택해주세요');
-  if(!desc)return toast('내용을 입력해주세요');
+// ── 일괄추가 로직 ──
+let batchList=[];
+
+function getBatchItem(){
+  const {val,isExpr,err}=evalExpr($('inp-amount').value);
+  const amount=isExpr&&!err?val:parseInput($('inp-amount').value);
+  const date=$('inp-date').value,desc=$('inp-desc').value.trim(),memo=$('inp-memo').value.trim();
+  if(!amount||amount<=0){toast('금액을 입력해주세요');return null;}
+  if(!date){toast('날짜를 선택해주세요');return null;}
+  if(!desc){toast('내용을 입력해주세요');return null;}
+  return {type:cType,amount,date,desc,memo,category:aCat,who:cWho};
+}
+
+function clearInputFields(){
+  $('inp-amount').value='';$('inp-desc').value='';$('inp-memo').value='';
+  $('calc-hint').textContent='';
+}
+
+function renderBatchList(){
+  const sec=$('batch-section');
+  if(batchList.length===0){sec.classList.add('hidden');return;}
+  sec.classList.remove('hidden');
+  $('batch-count').textContent=batchList.length;
+  const total=batchList.reduce((s,it)=>s+it.amount,0);
+  $('batch-total').textContent=total.toLocaleString('ko-KR')+'원';
+  $('batch-list').innerHTML=batchList.map((it,i)=>{
+    const whoLabel=it.who==='kyungeun'?'🩷 경은':'💙 도훈';
+    const typeLabel=it.type==='expense'?'지출':'수입';
+    const color=it.type==='expense'?'var(--rose)':'var(--green)';
+    const catE=getE(it.category);
+    return `<div class="batch-item">
+      <div class="batch-item-info">
+        <div class="batch-item-desc">${catE} ${it.desc}</div>
+        <div class="batch-item-sub">${it.date} · ${typeLabel} · ${whoLabel}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="batch-item-amt" style="color:${color}">${it.amount.toLocaleString('ko-KR')}원</div>
+        <button class="batch-item-del" data-i="${i}">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  $('batch-list').querySelectorAll('.batch-item-del').forEach(btn=>btn.addEventListener('click',()=>{
+    batchList.splice(parseInt(btn.dataset.i),1);
+    renderBatchList();
+  }));
+}
+
+$('basket-btn').addEventListener('click',()=>{
+  const item=getBatchItem();
+  if(!item) return;
+  batchList.push(item);
+  renderBatchList();
+  clearInputFields();
+  toast('🧺 목록에 담겼어요!');
+});
+
+$('batch-clear-btn').addEventListener('click',()=>{
+  if(!confirm('담은 목록을 모두 삭제할까요?')) return;
+  batchList=[];renderBatchList();
+});
+
+$('batch-save-btn').addEventListener('click',async()=>{
+  if(batchList.length===0) return toast('담은 항목이 없어요');
+  $('batch-save-btn').textContent='저장 중...';
+  $('batch-save-btn').disabled=true;
   try{
-    await addDoc(txCol,{type:cType,amount,date,desc,memo,category:aCat,who:cWho,createdAt:new Date().toISOString()});
-    $('inp-amount').value='';$('inp-desc').value='';$('inp-memo').value='';
+    await Promise.all(batchList.map(it=>addDoc(txCol,{...it,createdAt:new Date().toISOString()})));
+    toast(`✅ ${batchList.length}건 저장됐어요!`);
+    batchList=[];renderBatchList();
+  }catch(e){toast('오류: '+e.message);}
+  finally{$('batch-save-btn').textContent='💾 일괄 저장하기';$('batch-save-btn').disabled=false;}
+});
+
+$('submit-btn').addEventListener('click',async()=>{
+  const item=getBatchItem();
+  if(!item) return;
+  try{
+    await addDoc(txCol,{...item,createdAt:new Date().toISOString()});
+    clearInputFields();
     toast('✅ 추가됐어요!');
   }catch(e){toast('오류: '+e.message);}
 });
