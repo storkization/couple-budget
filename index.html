@@ -2112,11 +2112,19 @@ document.querySelectorAll('.op-chip:not(#calc-equals-btn):not(#calc-reset-btn)')
 
 // = 버튼: 계산 확정
 $('calc-equals-btn').addEventListener('click',()=>{
+  const SYM={'+':'＋','-':'－','*':'×','/':'÷'};
+  const curInput=parseInput($('inp-amount').value);
   const total=finalizeCalc();
   if(total>0){
+    // 힌트에 전체 수식 표시
+    const partsStr=calcParts.map((p)=>`${p.num.toLocaleString('ko-KR')}${p.op?` ${SYM[p.op]||p.op} `:''}`).join('');
+    const lastOp=calcParts.length>0?calcParts[calcParts.length-1].op||'':'';
+    const suffix=curInput>0?curInput.toLocaleString('ko-KR'):'';
+    if(calcParts.length>0){
+      $('calc-hint').innerHTML=`🧮 ${partsStr}${suffix} ＝ <strong>${total.toLocaleString('ko-KR')}원</strong> ✓`;
+    }
     calcParts=[];
     $('inp-amount').value=total.toLocaleString('ko-KR');
-    $('calc-hint').textContent='';
   }
 });
 
