@@ -297,9 +297,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 <div id="app-screen" class="hidden">
   <div class="app-header">
     <div class="hdr-couple">
-      <span class="hdr-name-d">💙 도훈</span>
+      <span class="hdr-name-k">🩷 경은</span>
       <span class="hdr-amp">&</span>
-      <span class="hdr-name-k">경은 🩷</span>
+      <span class="hdr-name-d">도훈 💙</span>
       <span class="hdr-heart">💰</span>
     </div>
     <div class="hdr-right">
@@ -323,18 +323,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <span style="font-size:10px;color:var(--brown3);font-weight:500;margin-left:2px">— 지금 하고 싶은 말</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <!-- 도훈 말풍선 -->
-        <div style="display:flex;align-items:flex-end;gap:8px">
-          <div style="width:32px;height:32px;border-radius:50%;background:var(--dohun);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0">도</div>
-          <div style="flex:1">
-            <div style="font-size:10px;font-weight:700;color:var(--dohun);margin-bottom:3px">💙 도훈</div>
-            <div id="bubble-dohun-wrap" style="position:relative">
-              <div id="bubble-dohun-text" style="background:white;border:1.5px solid var(--dohun-light);border-radius:0 14px 14px 14px;padding:10px 14px;font-size:13px;color:var(--brown);line-height:1.5;min-height:40px;word-break:break-all;box-shadow:0 2px 8px rgba(74,127,168,0.08)">...</div>
-              <div id="bubble-dohun-ts" style="font-size:10px;color:var(--brown3);font-style:italic;margin-top:3px;padding-left:2px"></div>
-              <button id="bubble-dohun-edit" style="display:none;position:absolute;bottom:6px;right:8px;background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">✏️</button>
-            </div>
-          </div>
-        </div>
         <!-- 경은 말풍선 -->
         <div style="display:flex;align-items:flex-end;gap:8px;flex-direction:row-reverse">
           <div style="width:32px;height:32px;border-radius:50%;background:var(--kyungeun);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0">경</div>
@@ -344,6 +332,18 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <div id="bubble-kyungeun-text" style="background:white;border:1.5px solid var(--kyungeun-light);border-radius:14px 0 14px 14px;padding:10px 14px;font-size:13px;color:var(--brown);line-height:1.5;min-height:40px;word-break:break-all;box-shadow:0 2px 8px rgba(201,110,160,0.08)">...</div>
               <div id="bubble-kyungeun-ts" style="font-size:10px;color:var(--brown3);font-style:italic;margin-top:3px;padding-right:2px;text-align:right"></div>
               <button id="bubble-kyungeun-edit" style="display:none;position:absolute;bottom:6px;left:8px;background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">✏️</button>
+            </div>
+          </div>
+        </div>
+        <!-- 도훈 말풍선 -->
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--dohun);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0">도</div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;color:var(--dohun);margin-bottom:3px">💙 도훈</div>
+            <div id="bubble-dohun-wrap" style="position:relative">
+              <div id="bubble-dohun-text" style="background:white;border:1.5px solid var(--dohun-light);border-radius:0 14px 14px 14px;padding:10px 14px;font-size:13px;color:var(--brown);line-height:1.5;min-height:40px;word-break:break-all;box-shadow:0 2px 8px rgba(74,127,168,0.08)">...</div>
+              <div id="bubble-dohun-ts" style="font-size:10px;color:var(--brown3);font-style:italic;margin-top:3px;padding-left:2px"></div>
+              <button id="bubble-dohun-edit" style="display:none;position:absolute;bottom:6px;right:8px;background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">✏️</button>
             </div>
           </div>
         </div>
@@ -365,42 +365,29 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
     <div class="summary-table">
       <div class="sum-row header">
         <div class="sum-cell label"></div>
-        <div class="sum-cell hdr d-color">💙 도훈</div>
         <div class="sum-cell hdr k-color">🩷 경은</div>
+        <div class="sum-cell hdr d-color">💙 도훈</div>
         <div class="sum-cell hdr t-color">합계</div>
       </div>
       <div class="sum-row">
         <div class="sum-cell label">🎯 예산</div>
-        <div class="sum-cell sum-inc" id="d-bud">-</div>
         <div class="sum-cell sum-inc" id="k-bud">-</div>
+        <div class="sum-cell sum-inc" id="d-bud">-</div>
         <div class="sum-cell sum-inc" id="t-bud">-</div>
       </div>
       <div class="sum-row">
         <div class="sum-cell label">🌹 지출</div>
-        <div class="sum-cell sum-exp" id="d-exp">0</div><div class="sum-cell sum-exp" id="k-exp">0</div><div class="sum-cell sum-exp" id="t-exp">0</div>
+        <div class="sum-cell sum-exp" id="k-exp">0</div><div class="sum-cell sum-exp" id="d-exp">0</div><div class="sum-cell sum-exp" id="t-exp">0</div>
       </div>
       <div class="sum-row">
         <div class="sum-cell label">✨ 잔액</div>
-        <div class="sum-cell sum-bal" id="d-bal">-</div><div class="sum-cell sum-bal" id="k-bal">-</div><div class="sum-cell sum-bal" id="t-bal">-</div>
+        <div class="sum-cell sum-bal" id="k-bal">-</div><div class="sum-cell sum-bal" id="d-bal">-</div><div class="sum-cell sum-bal" id="t-bal">-</div>
       </div>
     </div>
 
     <!-- 예산 설정 카드 (도훈/경은 개별) -->
     <div class="budget-card">
       <div style="font-size:13px;font-weight:700;color:var(--brown2);margin-bottom:12px">🎯 이번 달 (<span id="budget-month-label"></span>) 예산 설정</div>
-
-      <!-- 도훈 예산 바 -->
-      <div style="margin-bottom:10px">
-        <div class="budget-top">
-          <span class="budget-label" style="color:var(--dohun)">💙 도훈</span>
-          <span class="budget-info" id="d-budget-info">미설정</span>
-        </div>
-        <div class="budget-bar-bg"><div class="budget-bar-fill safe-d" id="d-budget-bar" style="width:0%"></div></div>
-        <div class="budget-row" style="margin-top:6px">
-          <input class="budget-input" type="text" id="d-budget-input" placeholder="도훈 예산 (원)" inputmode="numeric">
-          <button class="budget-set-btn" id="d-budget-set-btn" style="background:var(--dohun)">설정</button>
-        </div>
-      </div>
 
       <!-- 경은 예산 바 -->
       <div style="margin-bottom:10px">
@@ -412,6 +399,19 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="budget-row" style="margin-top:6px">
           <input class="budget-input" type="text" id="k-budget-input" placeholder="경은 예산 (원)" inputmode="numeric">
           <button class="budget-set-btn" id="k-budget-set-btn" style="background:var(--kyungeun)">설정</button>
+        </div>
+      </div>
+
+      <!-- 도훈 예산 바 -->
+      <div style="margin-bottom:10px">
+        <div class="budget-top">
+          <span class="budget-label" style="color:var(--dohun)">💙 도훈</span>
+          <span class="budget-info" id="d-budget-info">미설정</span>
+        </div>
+        <div class="budget-bar-bg"><div class="budget-bar-fill safe-d" id="d-budget-bar" style="width:0%"></div></div>
+        <div class="budget-row" style="margin-top:6px">
+          <input class="budget-input" type="text" id="d-budget-input" placeholder="도훈 예산 (원)" inputmode="numeric">
+          <button class="budget-set-btn" id="d-budget-set-btn" style="background:var(--dohun)">설정</button>
         </div>
       </div>
 
@@ -447,8 +447,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <div class="form-card">
         <label class="form-label">👤 누가 냈어요?</label>
         <div class="who-toggle">
-          <button class="who-btn dohun active" id="who-dohun">💙 도훈</button>
           <button class="who-btn kyungeun" id="who-kyungeun">🩷 경은</button>
+          <button class="who-btn dohun active" id="who-dohun">💙 도훈</button>
         </div>
         <div id="add-who-summary" style="margin-top:8px;font-size:12px;color:var(--brown3);text-align:center;padding:6px 8px;background:var(--bg);border-radius:8px"></div>
       </div>
@@ -493,14 +493,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         </div>
         <div class="pie-wrap">
           <div class="pie-item">
-            <canvas id="pie-d" width="110" height="110"></canvas>
-            <div class="pie-label d">💙 도훈</div>
-            <div class="pie-pct" id="pie-d-pct">-</div>
-          </div>
-          <div class="pie-item">
             <canvas id="pie-k" width="110" height="110"></canvas>
             <div class="pie-label k">🩷 경은</div>
             <div class="pie-pct" id="pie-k-pct">-</div>
+          </div>
+          <div class="pie-item">
+            <canvas id="pie-d" width="110" height="110"></canvas>
+            <div class="pie-label d">💙 도훈</div>
+            <div class="pie-pct" id="pie-d-pct">-</div>
           </div>
         </div>
         <div class="pie-legend">
@@ -523,8 +523,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <span class="chart-title">📊 지출 통계</span>
           <select class="chart-filter" id="stat-filter">
             <option value="all">전체</option>
-            <option value="dohun">💙 도훈</option>
             <option value="kyungeun">🩷 경은</option>
+            <option value="dohun">💙 도훈</option>
           </select>
         </div>
         <div style="font-size:12px;font-weight:700;color:var(--brown2);margin-bottom:8px">카테고리별 지출</div>
@@ -535,8 +535,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <span style="font-size:12px;font-weight:700;color:var(--brown2)">📈 최근 4개월 지출</span>
           <select class="chart-filter" id="monthly-filter">
             <option value="all">전체</option>
-            <option value="dohun">💙 도훈</option>
             <option value="kyungeun">🩷 경은</option>
+            <option value="dohun">💙 도훈</option>
           </select>
         </div>
         <div class="monthly-bars" id="monthly-bars"></div>
@@ -576,8 +576,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       </div>
       <div class="cal-top-card">
         <div class="cal-month-summary">
-          <div class="cal-sum-cell"><div class="cal-sum-label d">💙 도훈</div><div class="cal-sum-val d" id="cal-d-exp">0원</div></div>
           <div class="cal-sum-cell"><div class="cal-sum-label k">🩷 경은</div><div class="cal-sum-val k" id="cal-k-exp">0원</div></div>
+          <div class="cal-sum-cell"><div class="cal-sum-label d">💙 도훈</div><div class="cal-sum-val d" id="cal-d-exp">0원</div></div>
           <div class="cal-sum-cell"><div class="cal-sum-label t">📊 합계</div><div class="cal-sum-val t" id="cal-t-exp">0원</div></div>
         </div>
       </div>
@@ -843,7 +843,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       </div>
       <div style="margin-bottom:10px">
         <label class="form-label">👤 누가</label>
-        <div class="who-toggle"><button class="who-btn dohun active" id="edit-who-dohun">💙 도훈</button><button class="who-btn kyungeun" id="edit-who-kyungeun">🩷 경은</button></div>
+        <div class="who-toggle"><button class="who-btn kyungeun" id="edit-who-kyungeun">🩷 경은</button><button class="who-btn dohun active" id="edit-who-dohun">💙 도훈</button></div>
       </div>
       <div class="row2">
         <div><label class="form-label">💰 금액</label><input class="form-input" type="number" id="edit-amount" inputmode="numeric"></div>
@@ -898,6 +898,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <input class="form-input" type="text" id="minor-emoji" placeholder="예: 🐾" maxlength="2">
         </div>
         <button class="submit-btn" id="minor-save-btn">소구분 추가</button>
+        <div style="margin-top:16px">
+          <div class="form-label" style="margin-bottom:8px">현재 소구분 목록</div>
+          <div id="minor-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1031,8 +1035,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <div style="margin-bottom:12px">
         <label class="form-label">👤 누구의 일정?</label>
         <div class="who-toggle">
-          <button class="who-btn dohun" id="ev-who-d">💙 도훈</button>
           <button class="who-btn kyungeun" id="ev-who-k">🩷 경은</button>
+          <button class="who-btn dohun" id="ev-who-d">💙 도훈</button>
           <button class="who-btn together active" id="ev-who-both">👫 함께</button>
         </div>
       </div>
@@ -1650,8 +1654,8 @@ function renderDailyList(){
       <thead>
         <tr style="border-bottom:2px solid var(--border)">
           <th style="padding:8px 4px;text-align:left;color:var(--brown2);font-weight:700">날짜</th>
-          <th style="padding:8px 4px;text-align:right;color:var(--dohun);font-weight:700">💙 도훈</th>
           <th style="padding:8px 4px;text-align:right;color:var(--kyungeun);font-weight:700">🩷 경은</th>
+          <th style="padding:8px 4px;text-align:right;color:var(--dohun);font-weight:700">💙 도훈</th>
           <th style="padding:8px 4px;text-align:right;color:var(--brown2);font-weight:700">합계</th>
         </tr>
       </thead>
@@ -1661,8 +1665,8 @@ function renderDailyList(){
           const bg=i%2===0?'transparent':'rgba(61,43,31,0.03)';
           return `<tr style="border-bottom:1px solid var(--border);background:${bg}">
             <td style="padding:8px 4px;font-weight:700;color:var(--brown)">${cMonth+1}/${d}</td>
-            <td style="padding:8px 4px;text-align:right;color:${dA?'var(--dohun)':'var(--brown3)'}">${dA?fmtFull(dA):'-'}</td>
             <td style="padding:8px 4px;text-align:right;color:${kA?'var(--kyungeun)':'var(--brown3)'}">${kA?fmtFull(kA):'-'}</td>
+            <td style="padding:8px 4px;text-align:right;color:${dA?'var(--dohun)':'var(--brown3)'}">${dA?fmtFull(dA):'-'}</td>
             <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--rose)">${fmtFull(total)}</td>
           </tr>`;
         }).join('')}
@@ -1670,8 +1674,8 @@ function renderDailyList(){
       <tfoot>
         <tr style="border-top:2px solid var(--border);background:var(--bg)">
           <td style="padding:8px 4px;font-weight:800;color:var(--brown)">합계</td>
-          <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--dohun)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].dohun||0),0))}</td>
           <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--kyungeun)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].kyungeun||0),0))}</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--dohun)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].dohun||0),0))}</td>
           <td style="padding:8px 4px;text-align:right;font-weight:800;color:var(--rose)">${fmtFull(days.reduce((s,d)=>s+(byDay[d].dohun||0)+(byDay[d].kyungeun||0),0))}</td>
         </tr>
       </tfoot>
@@ -1707,9 +1711,10 @@ function renderSummary(){
   };
   setbal('d-bal', dB, dE); setbal('k-bal', kB, kE); setbal('t-bal', tB, dE+kE);
 
-  // 예산 입력창에 기존값 표시 (천단위 콤마)
-  if(dB > 0) $('d-budget-input').value = dB.toLocaleString('ko-KR');
-  if(kB > 0) $('k-budget-input').value = kB.toLocaleString('ko-KR');
+  // 예산 입력창에 기존값 표시 (포커스 중이면 덮어쓰지 않음)
+  const focused = document.activeElement;
+  if(dB > 0 && focused !== $('d-budget-input')) $('d-budget-input').value = dB.toLocaleString('ko-KR');
+  if(kB > 0 && focused !== $('k-budget-input')) $('k-budget-input').value = kB.toLocaleString('ko-KR');
 
   // 바로미터 업데이트
   updateBudgetBar('d-budget-bar', 'd-budget-info', dE, dB, 'd');
@@ -1912,7 +1917,7 @@ $('tab-major').addEventListener('click',()=>{
 $('tab-minor').addEventListener('click',()=>{
   $('tab-minor').classList.add('active');$('tab-major').classList.remove('active');
   $('section-minor').classList.add('show');$('section-major').classList.remove('show');
-  renderMinorParent();
+  renderMinorParent(); renderMinorList();
 });
 // 대구분 추가
 $('major-save-btn').addEventListener('click',()=>{
@@ -1940,7 +1945,29 @@ function renderMajorList(){
 function renderMinorParent(){
   const sel=$('minor-parent');
   sel.innerHTML=CATS.expense.map((g,i)=>`<option value="${i}">${g.group}</option>`).join('');
+  renderMinorList();
 }
+function renderMinorList(){
+  const el=$('minor-list'); if(!el) return;
+  const gi=parseInt($('minor-parent').value);
+  const items=CATS.expense[gi]?.items||[];
+  if(!items.length){el.innerHTML='<div style="font-size:12px;color:var(--brown3);padding:8px 0">소구분이 없어요</div>';return;}
+  el.innerHTML=items.map((c,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px;font-weight:600">${c.e} ${c.k}</span>
+      <button style="background:var(--rose-light);border:none;border-radius:8px;padding:3px 8px;font-size:11px;color:var(--rose-dark);cursor:pointer;font-family:inherit" data-gi="${gi}" data-ii="${i}">삭제</button>
+    </div>`).join('');
+  el.querySelectorAll('button[data-ii]').forEach(btn=>btn.addEventListener('click',()=>{
+    const gi2=parseInt(btn.dataset.gi), ii=parseInt(btn.dataset.ii);
+    const name=CATS.expense[gi2].items[ii].k;
+    if(!confirm(`"${name}" 소구분을 삭제할까요?`)) return;
+    CATS.expense[gi2].items.splice(ii,1);
+    saveCats(CATS);
+    renderMinorList(); renderChips('cat-chips-add',cType,aCat);
+    toast('🗑️ 소구분이 삭제됐어요');
+  }));
+}
+$('minor-parent').addEventListener('change', renderMinorList);
 // 소구분 추가
 $('minor-save-btn').addEventListener('click',()=>{
   const gi=parseInt($('minor-parent').value);
@@ -1948,7 +1975,7 @@ $('minor-save-btn').addEventListener('click',()=>{
   if(!name) return toast('소구분 이름을 입력해주세요');
   CATS.expense[gi].items.push({k:name,e:emoji});
   saveCats(CATS); $('minor-name').value=''; $('minor-emoji').value='';
-  renderChips('cat-chips-add',cType,aCat);
+  renderMinorList(); renderChips('cat-chips-add',cType,aCat);
   toast('✅ 소구분이 추가됐어요!');
 });
 
@@ -1967,10 +1994,10 @@ function rChart(){
 
   // ── 파이차트 (예산 대비 지출) ──
   const dB=getBudget('dohun'), kB=getBudget('kyungeun');
-  drawPie('pie-d', dA, dB, 'd-budget-pct');
   drawPie('pie-k', kA, kB, 'k-budget-pct');
-  $('pie-d-pct').textContent = dB>0 ? `${Math.round(dA/dB*100)}% 사용` : '예산 미설정';
+  drawPie('pie-d', dA, dB, 'd-budget-pct');
   $('pie-k-pct').textContent = kB>0 ? `${Math.round(kA/kB*100)}% 사용` : '예산 미설정';
+  $('pie-d-pct').textContent = dB>0 ? `${Math.round(dA/dB*100)}% 사용` : '예산 미설정';
 
   // ── 지난달 대비 증감 ──
   let pm=cMonth-1, py=cYear; if(pm<0){pm=11;py--;}
@@ -1991,8 +2018,8 @@ function rChart(){
     </div>`;
   }
   $('mom-compare').innerHTML =
-    momRow('dohun','💙 도훈', dA, pdA) +
-    momRow('kyungeun','🩷 경은', kA, pkA);
+    momRow('kyungeun','🩷 경은', kA, pkA) +
+    momRow('dohun','💙 도훈', dA, pdA);
 
   // ── 카테고리별 지출 (통합 필터 적용) ──
   const filtExp = statFilter==='all' ? exp : exp.filter(t=>t.who===statFilter);
