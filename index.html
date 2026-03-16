@@ -622,14 +622,13 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
       <!-- 지난달 결과 카드 -->
       <div style="background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow-sm);margin-bottom:18px;overflow:hidden">
-        <button id="ch-prev-toggle" onclick="(function(){const el=document.getElementById('ch-prev-body');const arr=document.getElementById('ch-prev-arrow');const open=el.style.display==='block';el.style.display=open?'none':'block';arr.textContent=open?'▼':'▲';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--bg),#f0ebe5);border:none;padding:14px 16px;font-family:inherit;font-size:13px;font-weight:800;color:var(--brown);cursor:pointer">
+        <button id="ch-prev-toggle" onclick="(function(){const el=document.getElementById('ch-prev-body');const arr=document.getElementById('ch-prev-arrow');const open=el.style.display==='block';el.style.display=open?'none':'block';arr.textContent=open?'▼':'▲';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#3d2b1f,#7a5c4a);border:none;padding:14px 16px;font-family:inherit;font-size:13px;font-weight:800;color:white;cursor:pointer">
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:16px">📋</span>
-            <span id="ch-prev-label">지난달 결과</span>
+            <span id="ch-prev-label">🥇 지난달 결과</span>
           </div>
-          <span id="ch-prev-arrow">▼</span>
+          <span id="ch-prev-arrow" style="color:rgba(255,255,255,0.7)">▼</span>
         </button>
-        <div id="ch-prev-body" style="display:none;padding:12px 14px 14px"></div>
+        <div id="ch-prev-body" style="display:none;padding:12px 14px 14px;background:#e8e0d8"></div>
       </div>
 
       <!-- 👫 함께 섹션 -->
@@ -2757,8 +2756,8 @@ async function rChallenge(){
 function renderPrevChallenge(){
   let pm=cMonth-1, py=cYear; if(pm<0){pm=11;py--;}
   const prevMonthStr=`${py}-${String(pm+1).padStart(2,'0')}`;
-  const label=`${py}년 ${pm+1}월 결과`;
-  if($('ch-prev-label')) $('ch-prev-label').textContent=`📋 ${label}`;
+  const label=`지난달 (${py}년 ${pm+1}월) 결과`;
+  if($('ch-prev-label')) $('ch-prev-label').textContent=`🥇 ${label}`;
 
   const all=_challengeAll.filter(c=>c.month===prevMonthStr);
   const el=$('ch-prev-body'); if(!el) return;
@@ -2826,7 +2825,7 @@ function renderPrevChallenge(){
   // 경은 → 도훈 → 함께 순서
   const order=['kyungeun','dohun','both'];
   const nameMap={kyungeun:'🩷 경은',dohun:'💙 도훈',both:'👫 함께'};
-  const colorMap={kyungeun:'var(--kyungeun)',dohun:'var(--dohun)',both:'var(--gold)'};
+  const colorMap={kyungeun:'#c96ea0',dohun:'#4a7fa8',both:'#b8860b'};
 
   let html='';
   // 전체 달성률 요약
@@ -2841,7 +2840,7 @@ function renderPrevChallenge(){
   order.forEach(who=>{
     const items=all.filter(c=>c.who===who);
     if(!items.length) return;
-    html+=`<div style="font-size:11px;font-weight:800;color:${colorMap[who]};margin-bottom:6px;margin-top:4px">${nameMap[who]}</div>`;
+    html+=`<div style="font-size:12px;font-weight:800;color:white;background:${colorMap[who]};padding:6px 12px;border-radius:99px;display:inline-block;margin-bottom:8px;margin-top:6px">${nameMap[who]}</div>`;
     html+=items.map(renderPrevItem).join('');
   });
 
@@ -2927,7 +2926,7 @@ function renderSection(who, all){
   listEl.querySelectorAll('.ch-del').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('삭제할까요?')) return; await deleteDoc(doc(db,'challenges',btn.dataset.id)); toast('🗑️ 삭제됐어요'); }));
 }
 
-async function addSameChallenge(id){
+window.addSameChallenge = async function(id){
   const c=_challengeAll.find(x=>x.id===id); if(!c) return;
   const thisMonth=CH_MONTH();
   const already=_challengeAll.find(x=>x.month===thisMonth&&x.title===c.title&&x.who===c.who);
