@@ -178,7 +178,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 /* 일괄추가 버튼 행 */
 .add-btn-row{display:flex;gap:8px;margin-bottom:10px}
 .add-btn-row .submit-btn{flex:1}
-.basket-btn{flex:1;padding:14px;background:var(--green-light);color:var(--green-dark);border:2px solid var(--green);border-radius:14px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.basket-btn{flex:1;padding:12px 10px;background:var(--green-light);color:var(--green-dark);border:2px solid var(--green);border-radius:14px;font-family:inherit;cursor:pointer;transition:all 0.2s;white-space:normal;line-height:1.3;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .basket-btn:active{background:var(--green);color:white}
 /* 배치 리스트 */
 .batch-section{background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:10px}
@@ -486,6 +486,11 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <button class="quick-chip" data-amt="50000">+5만</button>
           <button class="quick-chip" data-amt="100000">+10만</button>
         </div>
+        <div class="quick-chips" style="margin-top:5px">
+          <button class="quick-chip op-chip" data-op="+">➕ 더하기</button>
+          <button class="quick-chip op-chip" data-op="-">➖ 빼기</button>
+          <button class="quick-chip op-chip" id="calc-reset-btn" style="color:var(--rose)">✕ 초기화</button>
+        </div>
         <div class="calc-hint" id="calc-hint"></div>
       </div>
       <div class="form-card">
@@ -515,7 +520,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       </div>
       <div class="add-btn-row">
         <button class="submit-btn" id="submit-btn">+ 추가하기</button>
-        <button class="basket-btn" id="basket-btn">🧺 담기</button>
+        <button class="basket-btn" id="basket-btn"><div style="font-size:14px;font-weight:700">🧺 계속해서 추가하기</div><div style="font-size:10px;font-weight:500;margin-top:2px;opacity:0.8">임시목록에 담고 한번에 저장</div></button>
       </div>
     </div>
   </div>
@@ -776,7 +781,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
             <div style="font-size:15px;font-weight:800;color:var(--brown)">리치 투게더 💕</div>
             <div style="font-size:11px;color:var(--brown3);margin-top:2px">Made with 💕 by Shawn Kim</div>
           </div>
-          <div style="background:var(--rose);color:white;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">v1.1</div>
+          <div style="background:var(--rose);color:white;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">v1.2</div>
         </div>
         <!-- 업데이트 내역 토글 -->
         <button id="changelog-toggle-btn" onclick="(function(){const el=document.getElementById('changelog-body');const arr=document.getElementById('changelog-arrow');const open=el.style.display==='flex';el.style.display=open?'none':'flex';arr.textContent=open?'▼':'▲';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:none;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:12px;font-weight:700;color:var(--brown2);cursor:pointer">
@@ -786,6 +791,16 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div id="changelog-body" style="display:none;margin-top:8px;flex-direction:column;gap:8px">
 
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--rose)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.2</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 금액 입력창 수식 계산기 (30000+15000 자동 계산)<br>
+              • 일괄추가 기능 (담기 → 목록 쌓기 → 일괄 저장)
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.1</span>
               
@@ -2010,70 +2025,108 @@ $('who-kyungeun').addEventListener('click',()=>{ cWho='kyungeun';$('who-kyungeun
 function fmtInput(v){ return (parseInt(String(v).replace(/,/g,''))||0).toLocaleString('ko-KR'); }
 function parseInput(v){ return parseInt(String(v).replace(/,/g,''))||0; }
 
-// ── 계산기: 수식 입력 지원 ──
-function evalExpr(raw){
-  // 숫자, +, -, *, /, (, ), 공백만 허용
-  const clean=raw.replace(/,/g,'').replace(/[^0-9+\-*/().\s]/g,'');
-  if(!clean) return {val:0,isExpr:false};
-  const isExpr=/[+\-*/()]/.test(clean);
-  if(!isExpr) return {val:parseInt(clean)||0,isExpr:false};
-  try{
-    const result=Function('"use strict";return ('+clean+')')();
-    return {val:Math.round(result)||0,isExpr:true};
-  }catch(e){return {val:0,isExpr:true,err:true};}
+// ── 계산기: 연산자 버튼 방식 (모바일 친화적) ──
+let calcParts = []; // [{num, op}] 형태로 누적
+// calcParts 예: [{num:20000,op:'+'},{num:15000,op:null}]
+
+function getCalcTotal(){
+  if(calcParts.length===0) return parseInput($('inp-amount').value);
+  let total=0;
+  calcParts.forEach((p,i)=>{
+    if(i===0){ total=p.num; }
+    else {
+      const prevOp=calcParts[i-1].op;
+      if(prevOp==='+') total+=p.num;
+      else if(prevOp==='-') total-=p.num;
+    }
+  });
+  return total;
 }
 
-$('inp-amount').addEventListener('input',function(){
-  const raw=this.value;
-  const isExpr=/[+\-*/()]/.test(raw.replace(/,/g,''));
-  if(isExpr){
-    // 수식 모드: 그대로 두고 힌트만 표시
-    const {val,err}=evalExpr(raw);
-    const hint=$('calc-hint');
-    if(err||!raw.trim()){ hint.textContent=''; }
-    else { hint.innerHTML=`= <strong>${val.toLocaleString('ko-KR')}원</strong> (Enter로 확정)`; }
-  } else {
-    // 일반 숫자 모드: 천단위 콤마
-    const num=parseInt(raw.replace(/[^0-9]/g,''))||0;
-    const oldLen=this.value.length;
-    this.value=num>0?num.toLocaleString('ko-KR'):'';
-    $('calc-hint').textContent='';
-  }
-});
+function updateCalcHint(){
+  if(calcParts.length===0){ $('calc-hint').textContent=''; return; }
+  const curInput=parseInput($('inp-amount').value);
+  const partsStr=calcParts.map((p,i)=>{
+    const opStr=i<calcParts.length-1?` ${calcParts[i].op} `:'';
+    return `${p.num.toLocaleString('ko-KR')}${opStr}`;
+  }).join('');
+  const lastOp=calcParts[calcParts.length-1].op||'';
+  const suffix=curInput>0?` ${lastOp} ${curInput.toLocaleString('ko-KR')}`:' ...';
+  let total=0;
+  calcParts.forEach((p,i)=>{
+    if(i===0){total=p.num;}
+    else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; }
+  });
+  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; }
+  $('calc-hint').innerHTML=`🧮 ${partsStr}${suffix} = <strong>${total.toLocaleString('ko-KR')}원</strong>`;
+}
 
-$('inp-amount').addEventListener('keydown',function(e){
-  if(e.key==='Enter'){
-    e.preventDefault();
-    const {val,isExpr,err}=evalExpr(this.value);
-    if(isExpr&&!err&&val>0){
-      this.value=val.toLocaleString('ko-KR');
-      $('calc-hint').textContent='';
-      $('inp-desc').focus();
-    }
-  }
-});
-
-$('inp-amount').addEventListener('blur',function(){
-  const {val,isExpr,err}=evalExpr(this.value);
-  if(isExpr&&!err&&val>0){
-    this.value=val.toLocaleString('ko-KR');
-    $('calc-hint').textContent='';
-  }
-});
-
-document.querySelectorAll('.quick-chip').forEach(b=>b.addEventListener('click',()=>{
-  const i=$('inp-amount');
-  const {val}=evalExpr(i.value);
-  i.value=fmtInput(val+parseInt(b.dataset.amt));
+function resetCalc(){
+  calcParts=[];
+  $('inp-amount').value='';
   $('calc-hint').textContent='';
+}
+
+function finalizeCalc(){
+  if(calcParts.length===0) return parseInput($('inp-amount').value);
+  const curInput=parseInput($('inp-amount').value);
+  const lastOp=calcParts[calcParts.length-1].op;
+  let total=0;
+  calcParts.forEach((p,i)=>{
+    if(i===0){total=p.num;}
+    else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; }
+  });
+  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; }
+  else if(!lastOp&&curInput>0){ total=curInput; }
+  return total;
+}
+
+// 연산자 버튼 클릭
+document.querySelectorAll('.op-chip').forEach(b=>b.addEventListener('click',()=>{
+  const op=b.dataset.op;
+  const cur=parseInput($('inp-amount').value);
+  if(cur<=0&&calcParts.length===0) return;
+  if(cur>0){
+    if(calcParts.length>0){
+      // 마지막 파트의 op 업데이트
+      calcParts[calcParts.length-1].op=op;
+      calcParts.push({num:cur,op:null});
+    } else {
+      calcParts.push({num:cur,op});
+    }
+    $('inp-amount').value='';
+  } else if(calcParts.length>0){
+    // 숫자 없이 연산자만 바꾸기
+    calcParts[calcParts.length-1].op=op;
+  }
+  updateCalcHint();
+  $('inp-amount').focus();
 }));
+
+// 초기화 버튼
+$('calc-reset-btn').addEventListener('click',()=>{ resetCalc(); });
+
+// 금액 입력: 숫자만 + 천단위 콤마
+$('inp-amount').addEventListener('input',function(){
+  const num=parseInt(this.value.replace(/[^0-9]/g,''))||0;
+  this.value=num>0?num.toLocaleString('ko-KR'):'';
+  if(calcParts.length>0) updateCalcHint();
+});
+
+// 퀵칩 (+1천 등)
+document.querySelectorAll('.quick-chip:not(.op-chip)').forEach(b=>b.addEventListener('click',()=>{
+  const i=$('inp-amount');
+  const cur=parseInput(i.value);
+  i.value=fmtInput(cur+parseInt(b.dataset.amt));
+  if(calcParts.length>0) updateCalcHint();
+}));
+
 
 // ── 일괄추가 로직 ──
 let batchList=[];
 
 function getBatchItem(){
-  const {val,isExpr,err}=evalExpr($('inp-amount').value);
-  const amount=isExpr&&!err?val:parseInput($('inp-amount').value);
+  const amount=finalizeCalc();
   const date=$('inp-date').value,desc=$('inp-desc').value.trim(),memo=$('inp-memo').value.trim();
   if(!amount||amount<=0){toast('금액을 입력해주세요');return null;}
   if(!date){toast('날짜를 선택해주세요');return null;}
@@ -2082,8 +2135,8 @@ function getBatchItem(){
 }
 
 function clearInputFields(){
-  $('inp-amount').value='';$('inp-desc').value='';$('inp-memo').value='';
-  $('calc-hint').textContent='';
+  resetCalc();
+  $('inp-desc').value='';$('inp-memo').value='';
 }
 
 function renderBatchList(){
