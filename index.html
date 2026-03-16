@@ -620,6 +620,18 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         </div>
       </div>
 
+      <!-- 지난달 결과 카드 -->
+      <div style="background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow-sm);margin-bottom:18px;overflow:hidden">
+        <button id="ch-prev-toggle" onclick="(function(){const el=document.getElementById('ch-prev-body');const arr=document.getElementById('ch-prev-arrow');const open=el.style.display==='block';el.style.display=open?'none':'block';arr.textContent=open?'▼':'▲';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--bg),#f0ebe5);border:none;padding:14px 16px;font-family:inherit;font-size:13px;font-weight:800;color:var(--brown);cursor:pointer">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">📋</span>
+            <span id="ch-prev-label">지난달 결과</span>
+          </div>
+          <span id="ch-prev-arrow">▼</span>
+        </button>
+        <div id="ch-prev-body" style="display:none;padding:12px 14px 14px"></div>
+      </div>
+
       <!-- 👫 함께 섹션 -->
       <div class="ch-section" style="border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm)">
         <div style="background:linear-gradient(135deg,#b8860b 0%,#daa520 60%,#f5c842 100%);padding:14px 16px">
@@ -739,7 +751,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--rose)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.1</span>
-              <span style="font-size:10px;color:var(--brown3)">2026.03</span>
+              
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
               • 경은 이름 순서 전체 변경<br>
@@ -752,7 +764,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.5</span>
-              <span style="font-size:10px;color:var(--brown3)">2026.03</span>
+              
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
               • 테마 컬러 4종 & 다크모드<br>
@@ -765,7 +777,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.4</span>
-              <span style="font-size:10px;color:var(--brown3)">2026.02</span>
+              
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
               • iOS PWA 구글 로그인 루프 수정<br>
@@ -776,7 +788,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.3</span>
-              <span style="font-size:10px;color:var(--brown3)">2026.01</span>
+              
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
               • 통계: 파이차트, 지난달 비교, 일별지출표<br>
@@ -789,7 +801,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.2</span>
-              <span style="font-size:10px;color:var(--brown3)">2025.12</span>
+              
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
               • 캘린더 탭 (일정 추가/수정/삭제)<br>
@@ -801,7 +813,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.1</span>
-              <span style="font-size:10px;color:var(--brown3)">2025.11</span>
+              
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
               • 최초 출시 🎉<br>
@@ -2739,6 +2751,99 @@ async function rChallenge(){
   renderSection('both', all);
   renderSection('kyungeun', all);
   renderSection('dohun', all);
+  renderPrevChallenge();
+}
+
+function renderPrevChallenge(){
+  let pm=cMonth-1, py=cYear; if(pm<0){pm=11;py--;}
+  const prevMonthStr=`${py}-${String(pm+1).padStart(2,'0')}`;
+  const label=`${py}년 ${pm+1}월 결과`;
+  if($('ch-prev-label')) $('ch-prev-label').textContent=`📋 ${label}`;
+
+  const all=_challengeAll.filter(c=>c.month===prevMonthStr);
+  const el=$('ch-prev-body'); if(!el) return;
+
+  if(!all.length){
+    el.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:12px">📭 지난달 챌린지가 없어요</div>`;
+    return;
+  }
+
+  const typeLabel={calendar:'📅 달력',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
+
+  function renderPrevItem(c){
+    const done=chIsDoneStrict(c);
+    const type=c.chType||'calendar';
+    const statusColor=done?'var(--green)':'var(--rose)';
+    const statusIcon=done?'✅ 달성':'❌ 실패';
+
+    // 목표 텍스트
+    let goalText='', resultText='';
+    if(type==='calendar'){
+      const totalDays=new Date(py,pm+1,0).getDate();
+      const calTargetPct=c.calTarget||80;
+      const calTargetDays=Math.ceil(totalDays*calTargetPct/100);
+      const checked=(c.calDays||[]).length;
+      goalText=`${calTargetDays}일 이상 체크 (${calTargetPct}%)`;
+      resultText=`${checked}일 체크`;
+    } else {
+      const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
+      const tgt=c.target||1;
+      const isAmt=type==='amount';
+      const unit=isAmt?'원':type==='accumulate'?(c.unit||''):'회';
+      const dir=c.dir==='under'?'이하':'이상';
+      goalText=`${isAmt?tgt.toLocaleString('ko-KR'):tgt}${unit} ${dir}`;
+      resultText=`${isAmt?Math.round(cur).toLocaleString('ko-KR'):cur}${unit}`;
+    }
+
+    const whoColor=c.who==='dohun'?'var(--dohun)':c.who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
+    const whoLabel=c.who==='dohun'?'💙 도훈':c.who==='kyungeun'?'🩷 경은':'👫 함께';
+
+    return `<div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid ${statusColor}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:800;color:var(--brown)">${CAT_EMOJI[c.category]||'📌'} ${c.title}</div>
+        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:${statusColor};color:white">${statusIcon}</span>
+      </div>
+      <div style="font-size:10px;color:var(--brown3);margin-bottom:6px">${typeLabel[type]} · <span style="color:${whoColor};font-weight:700">${whoLabel}</span></div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;background:white;border-radius:8px;padding:7px 10px">
+          <div style="font-size:9px;font-weight:700;color:var(--brown3);margin-bottom:2px">🎯 목표</div>
+          <div style="font-size:12px;font-weight:700;color:var(--brown)">${goalText}</div>
+        </div>
+        <div style="flex:1;background:white;border-radius:8px;padding:7px 10px">
+          <div style="font-size:9px;font-weight:700;color:var(--brown3);margin-bottom:2px">📌 결과</div>
+          <div style="font-size:12px;font-weight:700;color:${statusColor}">${resultText}</div>
+        </div>
+      </div>
+      ${(c.reward||c.penalty)?`<div style="display:flex;gap:6px;margin-top:7px">
+        ${c.reward?`<div style="flex:1;background:rgba(201,150,58,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:#b8860b"><span style="font-weight:700">🎁 보상</span> ${c.reward}</div>`:''}
+        ${c.penalty?`<div style="flex:1;background:rgba(232,120,90,0.1);border-radius:7px;padding:5px 8px;font-size:10px;color:var(--rose)"><span style="font-weight:700">💀 패널티</span> ${c.penalty}</div>`:''}
+      </div>`:''}
+    </div>`;
+  }
+
+  // 경은 → 도훈 → 함께 순서
+  const order=['kyungeun','dohun','both'];
+  const nameMap={kyungeun:'🩷 경은',dohun:'💙 도훈',both:'👫 함께'};
+  const colorMap={kyungeun:'var(--kyungeun)',dohun:'var(--dohun)',both:'var(--gold)'};
+
+  let html='';
+  // 전체 달성률 요약
+  const totalDone=all.filter(chIsDoneStrict).length;
+  const totalPct=all.length?Math.round(totalDone/all.length*100):0;
+  const summaryColor=totalPct>=80?'var(--green)':totalPct>=50?'var(--gold)':'var(--rose)';
+  html+=`<div style="background:linear-gradient(135deg,var(--bg),#f0ebe5);border-radius:12px;padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:12px;font-weight:700;color:var(--brown2)">전체 달성률</span>
+    <span style="font-size:18px;font-weight:800;color:${summaryColor}">${totalPct}% <span style="font-size:11px;color:var(--brown3)">(${totalDone}/${all.length})</span></span>
+  </div>`;
+
+  order.forEach(who=>{
+    const items=all.filter(c=>c.who===who);
+    if(!items.length) return;
+    html+=`<div style="font-size:11px;font-weight:800;color:${colorMap[who]};margin-bottom:6px;margin-top:4px">${nameMap[who]}</div>`;
+    html+=items.map(renderPrevItem).join('');
+  });
+
+  el.innerHTML=html;
 }
 
 function renderSection(who, all){
