@@ -178,8 +178,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 /* 일괄추가 버튼 행 */
 .add-btn-row{display:flex;gap:8px;margin-bottom:10px}
 .add-btn-row .submit-btn{flex:1}
-.basket-btn{flex:1;padding:12px 10px;background:var(--green-light);color:var(--green-dark);border:2px solid var(--green);border-radius:14px;font-family:inherit;cursor:pointer;transition:all 0.2s;white-space:normal;line-height:1.3;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.basket-btn:active{background:var(--green);color:white}
+.basket-btn{flex:1;padding:12px 10px;background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;border-radius:14px;font-family:inherit;cursor:pointer;transition:all 0.2s;white-space:normal;line-height:1.3;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(90,158,122,0.35)}
+.basket-btn:active{transform:scale(0.98)}
 /* 배치 리스트 */
 .batch-section{background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);margin-bottom:10px}
 .batch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -487,9 +487,12 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <button class="quick-chip" data-amt="100000">+10만</button>
         </div>
         <div class="quick-chips" style="margin-top:5px">
-          <button class="quick-chip op-chip" data-op="+">➕ 더하기</button>
-          <button class="quick-chip op-chip" data-op="-">➖ 빼기</button>
-          <button class="quick-chip op-chip" id="calc-reset-btn" style="color:var(--rose)">✕ 초기화</button>
+          <button class="quick-chip op-chip" data-op="+">＋</button>
+          <button class="quick-chip op-chip" data-op="-">－</button>
+          <button class="quick-chip op-chip" data-op="*">×</button>
+          <button class="quick-chip op-chip" data-op="/">÷</button>
+          <button class="quick-chip op-chip" id="calc-equals-btn" style="color:var(--green-dark);font-weight:800">＝</button>
+          <button class="quick-chip op-chip" id="calc-reset-btn" style="color:var(--rose)">✕</button>
         </div>
         <div class="calc-hint" id="calc-hint"></div>
       </div>
@@ -795,8 +798,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.2</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • 금액 입력창 수식 계산기 (30000+15000 자동 계산)<br>
-              • 일괄추가 기능 (담기 → 목록 쌓기 → 일괄 저장)
+              • 인라인 계산기 엔진 탑재 (＋－×÷ 연산 및 실시간 미리보기)<br>
+              • 트랜잭션 배치 큐 시스템 — 여러 항목을 임시 저장 후 일괄 커밋<br>
+              • Firebase 병렬 다중 쓰기 최적화 (Promise.all 처리)
             </div>
           </div>
 
@@ -2038,27 +2042,30 @@ function getCalcTotal(){
       const prevOp=calcParts[i-1].op;
       if(prevOp==='+') total+=p.num;
       else if(prevOp==='-') total-=p.num;
+      else if(prevOp==='*') total*=p.num;
+      else if(prevOp==='/') total=p.num!==0?total/p.num:total;
     }
   });
-  return total;
+  return Math.round(total);
 }
 
 function updateCalcHint(){
   if(calcParts.length===0){ $('calc-hint').textContent=''; return; }
   const curInput=parseInput($('inp-amount').value);
-  const partsStr=calcParts.map((p,i)=>{
-    const opStr=i<calcParts.length-1?` ${calcParts[i].op} `:'';
-    return `${p.num.toLocaleString('ko-KR')}${opStr}`;
+  const SYM={'+':'＋','-':'－','*':'×','/':'÷'};
+  const partsStr=calcParts.map((p)=>{
+    const op=p.op?` ${SYM[p.op]||p.op} `:'';
+    return `${p.num.toLocaleString('ko-KR')}${op}`;
   }).join('');
   const lastOp=calcParts[calcParts.length-1].op||'';
-  const suffix=curInput>0?` ${lastOp} ${curInput.toLocaleString('ko-KR')}`:' ...';
+  const suffix=curInput>0?`${curInput.toLocaleString('ko-KR')}`:' ...';
   let total=0;
   calcParts.forEach((p,i)=>{
     if(i===0){total=p.num;}
-    else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; }
+    else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; else if(op==='*')total*=p.num; else if(op==='/')total=p.num!==0?total/p.num:total; }
   });
-  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; }
-  $('calc-hint').innerHTML=`🧮 ${partsStr}${suffix} = <strong>${total.toLocaleString('ko-KR')}원</strong>`;
+  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; else if(lastOp==='*')total*=curInput; else if(lastOp==='/')total=curInput!==0?total/curInput:total; }
+  $('calc-hint').innerHTML=`🧮 ${partsStr}${suffix} ＝ <strong>${Math.round(total).toLocaleString('ko-KR')}원</strong>`;
 }
 
 function resetCalc(){
@@ -2074,15 +2081,15 @@ function finalizeCalc(){
   let total=0;
   calcParts.forEach((p,i)=>{
     if(i===0){total=p.num;}
-    else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; }
+    else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; else if(op==='*')total*=p.num; else if(op==='/')total=p.num!==0?total/p.num:total; }
   });
-  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; }
+  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; else if(lastOp==='*')total*=curInput; else if(lastOp==='/')total=curInput!==0?total/curInput:total; }
   else if(!lastOp&&curInput>0){ total=curInput; }
-  return total;
+  return Math.round(total);
 }
 
 // 연산자 버튼 클릭
-document.querySelectorAll('.op-chip').forEach(b=>b.addEventListener('click',()=>{
+document.querySelectorAll('.op-chip:not(#calc-equals-btn):not(#calc-reset-btn)').forEach(b=>b.addEventListener('click',()=>{
   const op=b.dataset.op;
   const cur=parseInput($('inp-amount').value);
   if(cur<=0&&calcParts.length===0) return;
@@ -2102,6 +2109,16 @@ document.querySelectorAll('.op-chip').forEach(b=>b.addEventListener('click',()=>
   updateCalcHint();
   $('inp-amount').focus();
 }));
+
+// = 버튼: 계산 확정
+$('calc-equals-btn').addEventListener('click',()=>{
+  const total=finalizeCalc();
+  if(total>0){
+    calcParts=[];
+    $('inp-amount').value=total.toLocaleString('ko-KR');
+    $('calc-hint').textContent='';
+  }
+});
 
 // 초기화 버튼
 $('calc-reset-btn').addEventListener('click',()=>{ resetCalc(); });
