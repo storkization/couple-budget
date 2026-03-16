@@ -3108,5 +3108,9 @@ $('csv-download-btn').addEventListener('click',()=>{
   toast(`📥 CSV 다운로드됐어요! (${rows.length}건)`);
 });
 </script>
+<script>
+if('serviceWorker' in navigator)
+  navigator.serviceWorker.register('sw.js');
+</script>
 </body>
 </html>
