@@ -799,9 +799,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.2</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • 인라인 계산기 엔진 탑재 — 사칙연산(＋－×÷) 및 실시간 수식 미리보기<br>
-              • 트랜잭션 배치 큐 시스템 — 다중 항목 임시 스택 적재 후 일괄 커밋<br>
-              • Firebase 병렬 다중 쓰기 최적화 (Promise.all 비동기 처리)
+              • 입력 탭 계산기 기능 추가 — ＋－×÷ 사칙연산 및 실시간 합계 미리보기<br>
+              • 일괄 입력 시스템 구현 — 여러 항목을 임시 목록에 쌓고 한 번에 저장<br>
+              • Firebase 다중 쓰기 병렬 처리로 저장 속도 개선
             </div>
           </div>
 
@@ -810,10 +810,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.1</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • UI 렌더링 순서 재정렬 — 사용자 컨텍스트 기반 네이밍 우선순위 조정<br>
-              • 예산 상태 동기화 버그 패치 — Firestore 실시간 리스너 race condition 수정<br>
-              • 카테고리 트리 구조 개선 — 소구분 노드 동적 삭제 지원<br>
-              • Service Worker 캐시 무효화 자동화 — PWA 강제 업데이트 플로우 구현
+              • 화면 내 이름 표시 순서 전면 변경 (경은 → 도훈 순)<br>
+              • 예산 저장 시 데이터 동기화 오류 수정<br>
+              • 카테고리 소구분 삭제 기능 추가<br>
+              • PWA 앱 업데이트 자동 반영 처리
             </div>
           </div>
 
@@ -822,10 +822,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.5</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • CSS 변수 기반 다중 테마 시스템 — 런타임 팔레트 스위칭 4종 지원<br>
-              • PIN 기반 로컬 인증 레이어 추가 — sessionStorage 상태 관리 연동<br>
-              • Intersection Observer 기반 Pull-to-Refresh — SVG 벡터 애니메이션 적용<br>
-              • Touch Event 감지 스와이프 제스처 — 모달 dismissal UX 개선
+              • 테마 컬러 4종 지원 — 앱 전체 색상을 런타임에서 즉시 전환<br>
+              • PIN 잠금 기능 — 앱 진입 시 4자리 비밀번호 인증 레이어 추가<br>
+              • Pull-to-Refresh — SVG 애니메이션 기반 당겨서 새로고침 구현<br>
+              • 스와이프 다운 제스처로 모달 닫기 지원
             </div>
           </div>
 
@@ -834,8 +834,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.4</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • iOS PWA 환경 Google OAuth 무한루프 버그 수정<br>
-              • User-Agent 분기 처리 — redirect / popup 인증 방식 자동 선택 로직 구현
+              • iOS PWA 환경에서 Google 로그인 무한루프 버그 수정<br>
+              • 기기 환경에 따라 redirect / popup 인증 방식 자동 분기 처리
             </div>
           </div>
 
@@ -844,10 +844,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.3</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • Chart.js 기반 도넛 차트 렌더링 — 예산 소진율 시각화 파이프라인 구축<br>
-              • MoM(전월 대비) 증감률 자동 산출 — 트랜잭션 집계 알고리즘 적용<br>
-              • Firestore 실시간 리스너 기반 공유 메시지 컴포넌트 구현<br>
-              • Firebase Storage 월별 파티셔닝 — 사진 데이터 동적 바인딩 처리
+              • 통계 탭 — 예산 대비 지출 파이차트, 전월 대비 증감, 일별 지출표 추가<br>
+              • 예산 소진율 실시간 바로미터 표시<br>
+              • 홈 탭 우리 한마디 말풍선 — Firestore 실시간 동기화 연동<br>
+              • Firebase Storage 월별 사진 업로드 및 자동 표시 구현
             </div>
           </div>
 
@@ -856,9 +856,9 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.2</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • 캘린더 모듈 구현 — CRUD 기반 일정 관리 및 월별 그리드 렌더링<br>
-              • 공공 API 연동 — 한국천문연구원 공휴일 데이터 파싱 및 마킹 처리<br>
-              • 챌린지 엔진 설계 — OX / 횟수 / 누적 / 금액 4가지 목표 타입 지원
+              • 캘린더 탭 추가 — 일정 등록 / 수정 / 삭제 및 월별 그리드 뷰<br>
+              • 한국천문연구원 공공 API 연동으로 공휴일 자동 표시<br>
+              • 챌린지 탭 추가 — OX / 횟수 / 누적 / 금액 4가지 목표 타입 지원
             </div>
           </div>
 
@@ -867,9 +867,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.1</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
-              • 최초 릴리즈 🎉 — Firebase Firestore 실시간 동기화 아키텍처 구축<br>
-              • Google OAuth 2.0 기반 화이트리스트 인증 시스템 설계<br>
-              • GitHub Pages 자동 배포 파이프라인 구성 및 PWA 매니페스트 설정
+              • 최초 릴리즈 🎉<br>
+              • 수입 / 지출 입력 및 Firebase Firestore 실시간 동기화 구축<br>
+              • Google 로그인 + 허용된 계정만 접근 가능한 인증 시스템 설계<br>
+              • GitHub Pages 배포 및 PWA 홈 화면 추가 지원
             </div>
           </div>
 
