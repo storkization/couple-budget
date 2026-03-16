@@ -722,10 +722,94 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <!-- 앱 정보 -->
       <div style="background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)">
         <div style="font-size:12px;font-weight:700;color:var(--brown3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">ℹ️ 앱 정보</div>
-        <div style="font-size:13px;color:var(--brown2);line-height:1.8">
-          <div>리치 투게더 💕</div>
-          <div style="font-size:11px;color:var(--brown3)">버전 1.0 · Made with 💕</div>
-          <div style="font-size:11px;color:var(--brown3)">Created by Shawn Kim</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--brown)">리치 투게더 💕</div>
+            <div style="font-size:11px;color:var(--brown3);margin-top:2px">Made with 💕 by Shawn Kim</div>
+          </div>
+          <div style="background:var(--rose);color:white;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">v1.1</div>
+        </div>
+        <!-- 업데이트 내역 토글 -->
+        <button id="changelog-toggle-btn" onclick="(function(){const el=document.getElementById('changelog-body');const arr=document.getElementById('changelog-arrow');const open=el.style.display==='flex';el.style.display=open?'none':'flex';arr.textContent=open?'▼':'▲';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:none;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:12px;font-weight:700;color:var(--brown2);cursor:pointer">
+          <span>📋 업데이트 내역</span>
+          <span id="changelog-arrow">▼</span>
+        </button>
+        <div id="changelog-body" style="display:none;margin-top:8px;flex-direction:column;gap:8px">
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--rose)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.1</span>
+              <span style="font-size:10px;color:var(--brown3)">2026.03</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 경은 이름 순서 전체 변경<br>
+              • 예산 설정 버그 수정<br>
+              • 소구분 카테고리 삭제 기능<br>
+              • PWA 자동 업데이트
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.5</span>
+              <span style="font-size:10px;color:var(--brown3)">2026.03</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 테마 컬러 4종 & 다크모드<br>
+              • PIN 앱 잠금<br>
+              • Pull to refresh (SVG 애니메이션)<br>
+              • 스와이프로 모달 닫기
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.4</span>
+              <span style="font-size:10px;color:var(--brown3)">2026.02</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • iOS PWA 구글 로그인 루프 수정<br>
+              • redirect / popup 방식 개선
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.3</span>
+              <span style="font-size:10px;color:var(--brown3)">2026.01</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 통계: 파이차트, 지난달 비교, 일별지출표<br>
+              • 예산 바로미터<br>
+              • 한마디 말풍선<br>
+              • 사진 Firebase Storage 연동
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.2</span>
+              <span style="font-size:10px;color:var(--brown3)">2025.12</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 캘린더 탭 (일정 추가/수정/삭제)<br>
+              • 공휴일 API 연동<br>
+              • 챌린지 탭 (OX/횟수/누적/금액)
+            </div>
+          </div>
+
+          <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--brown3)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.0.1</span>
+              <span style="font-size:10px;color:var(--brown3)">2025.11</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 최초 출시 🎉<br>
+              • 수입/지출 입력, Firebase 연동<br>
+              • Google 로그인, PWA 설정
+            </div>
+          </div>
+
         </div>
       </div>
 
