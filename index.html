@@ -2030,24 +2030,8 @@ function fmtInput(v){ return (parseInt(String(v).replace(/,/g,''))||0).toLocaleS
 function parseInput(v){ return parseInt(String(v).replace(/,/g,''))||0; }
 
 // ── 계산기: 연산자 버튼 방식 (모바일 친화적) ──
-let calcParts = []; // [{num, op}] 형태로 누적
-// calcParts 예: [{num:20000,op:'+'},{num:15000,op:null}]
-
-function getCalcTotal(){
-  if(calcParts.length===0) return parseInput($('inp-amount').value);
-  let total=0;
-  calcParts.forEach((p,i)=>{
-    if(i===0){ total=p.num; }
-    else {
-      const prevOp=calcParts[i-1].op;
-      if(prevOp==='+') total+=p.num;
-      else if(prevOp==='-') total-=p.num;
-      else if(prevOp==='*') total*=p.num;
-      else if(prevOp==='/') total=p.num!==0?total/p.num:total;
-    }
-  });
-  return Math.round(total);
-}
+let calcParts = [];
+let lastPressedOp = '+'; // 마지막으로 누른 연산자 기억
 
 function updateCalcHint(){
   if(calcParts.length===0){ $('calc-hint').textContent=''; return; }
@@ -2057,19 +2041,22 @@ function updateCalcHint(){
     const op=p.op?` ${SYM[p.op]||p.op} `:'';
     return `${p.num.toLocaleString('ko-KR')}${op}`;
   }).join('');
-  const lastOp=calcParts[calcParts.length-1].op||'';
-  const suffix=curInput>0?`${curInput.toLocaleString('ko-KR')}`:' ...';
+  // 마지막 숫자 다음에 연산자 + 현재 입력값 표시
+  const pendingOpStr=` ${SYM[lastPressedOp]||lastPressedOp} `;
+  const suffix=curInput>0?`${pendingOpStr}${curInput.toLocaleString('ko-KR')}`:' ...';
+  // 미리보기 합계 계산
   let total=0;
   calcParts.forEach((p,i)=>{
     if(i===0){total=p.num;}
     else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; else if(op==='*')total*=p.num; else if(op==='/')total=p.num!==0?total/p.num:total; }
   });
-  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; else if(lastOp==='*')total*=curInput; else if(lastOp==='/')total=curInput!==0?total/curInput:total; }
+  if(curInput>0){ if(lastPressedOp==='+')total+=curInput; else if(lastPressedOp==='-')total-=curInput; else if(lastPressedOp==='*')total*=curInput; else if(lastPressedOp==='/')total=curInput!==0?total/curInput:total; }
   $('calc-hint').innerHTML=`🧮 ${partsStr}${suffix} ＝ <strong>${Math.round(total).toLocaleString('ko-KR')}원</strong>`;
 }
 
 function resetCalc(){
   calcParts=[];
+  lastPressedOp='+';
   $('inp-amount').value='';
   $('calc-hint').textContent='';
 }
@@ -2077,14 +2064,13 @@ function resetCalc(){
 function finalizeCalc(){
   if(calcParts.length===0) return parseInput($('inp-amount').value);
   const curInput=parseInput($('inp-amount').value);
-  const lastOp=calcParts[calcParts.length-1].op;
   let total=0;
   calcParts.forEach((p,i)=>{
     if(i===0){total=p.num;}
     else{ const op=calcParts[i-1].op; if(op==='+')total+=p.num; else if(op==='-')total-=p.num; else if(op==='*')total*=p.num; else if(op==='/')total=p.num!==0?total/p.num:total; }
   });
-  if(lastOp&&curInput>0){ if(lastOp==='+')total+=curInput; else if(lastOp==='-')total-=curInput; else if(lastOp==='*')total*=curInput; else if(lastOp==='/')total=curInput!==0?total/curInput:total; }
-  else if(!lastOp&&curInput>0){ total=curInput; }
+  // 마지막으로 누른 연산자로 현재 입력값 처리
+  if(curInput>0){ if(lastPressedOp==='+')total+=curInput; else if(lastPressedOp==='-')total-=curInput; else if(lastPressedOp==='*')total*=curInput; else if(lastPressedOp==='/')total=curInput!==0?total/curInput:total; }
   return Math.round(total);
 }
 
@@ -2092,10 +2078,10 @@ function finalizeCalc(){
 document.querySelectorAll('.op-chip:not(#calc-equals-btn):not(#calc-reset-btn)').forEach(b=>b.addEventListener('click',()=>{
   const op=b.dataset.op;
   const cur=parseInput($('inp-amount').value);
+  lastPressedOp=op; // 항상 기억
   if(cur<=0&&calcParts.length===0) return;
   if(cur>0){
     if(calcParts.length>0){
-      // 마지막 파트의 op 업데이트
       calcParts[calcParts.length-1].op=op;
       calcParts.push({num:cur,op:null});
     } else {
@@ -2103,7 +2089,6 @@ document.querySelectorAll('.op-chip:not(#calc-equals-btn):not(#calc-reset-btn)')
     }
     $('inp-amount').value='';
   } else if(calcParts.length>0){
-    // 숫자 없이 연산자만 바꾸기
     calcParts[calcParts.length-1].op=op;
   }
   updateCalcHint();
@@ -2116,14 +2101,14 @@ $('calc-equals-btn').addEventListener('click',()=>{
   const curInput=parseInput($('inp-amount').value);
   const total=finalizeCalc();
   if(total>0){
-    // 힌트에 전체 수식 표시
     const partsStr=calcParts.map((p)=>`${p.num.toLocaleString('ko-KR')}${p.op?` ${SYM[p.op]||p.op} `:''}`).join('');
-    const lastOp=calcParts.length>0?calcParts[calcParts.length-1].op||'':'';
-    const suffix=curInput>0?curInput.toLocaleString('ko-KR'):'';
+    const pendingOpStr=calcParts.length>0&&curInput>0?` ${SYM[lastPressedOp]||lastPressedOp} `:'';
+    const suffix=curInput>0?`${pendingOpStr}${curInput.toLocaleString('ko-KR')}`:' ';
     if(calcParts.length>0){
       $('calc-hint').innerHTML=`🧮 ${partsStr}${suffix} ＝ <strong>${total.toLocaleString('ko-KR')}원</strong> ✓`;
     }
     calcParts=[];
+    lastPressedOp='+';
     $('inp-amount').value=total.toLocaleString('ko-KR');
   }
 });
