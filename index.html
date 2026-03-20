@@ -3054,7 +3054,8 @@ function openProgressModal(c){
     addSwipeToClose($('ch-progress-modal').querySelector('.modal-sheet'),'ch-progress-modal');
     $('ch-pm-close').addEventListener('click',()=>$('ch-progress-modal').remove());
     $('ch-progress-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.remove(); });
-    $('ch-pm-save').addEventListener('click',async()=>{\n      if(isAmt){
+    $('ch-pm-save').addEventListener('click',async()=>{
+      if(isAmt){
         const add=parseInt($('ch-pm-input').value)||0;
         if(add<=0) return toast('금액을 입력해주세요');
         await updateDoc(doc(db,'challenges',c.id),{records:[...records,{value:add,date:todayStr}]});
