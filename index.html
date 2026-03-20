@@ -2990,33 +2990,81 @@ function openProgressModal(c){
     const records=c.records||[];
     const weeks=getMonthWeeks(cYear,cMonth);
     const thisWeek=weeks.find(w=>w.start<=today&&w.end>=today);
+    const lastWeek=weeks[weeks.indexOf(thisWeek)-1]||null;
     const tgt=c.target||1;
     const isAmt=c.weeklyMode==='amount';
     const isUnder=c.dir==='under';
     const weekRecs=thisWeek?records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=thisWeek.start&&d<=thisWeek.end; }):[];
     const weekVal=isAmt?weekRecs.reduce((s,r)=>s+(r.value||0),0):weekRecs.length;
-    const alreadyToday=!isAmt&&records.some(r=>r.date===todayStr);
-    const wDone=isAmt?(isUnder?weekVal<=tgt:weekVal>=tgt):weekVal>=tgt;
+    const wDone=isAmt?(isUnder?weekVal<=tgt:weekVal>=tgt):(c.dir==='under'?weekVal<=tgt:weekVal>=tgt);
     const valStr=isAmt?weekVal.toLocaleString('ko-KR')+'원':weekVal+'회';
-    const tgtStr=isAmt?tgt.toLocaleString('ko-KR')+'원 '+(isUnder?'이하':'이상'):`주 ${tgt}회`;
-    const recentHTML=records.length?`<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:6px">📋 기록 내역 (탭하면 삭제)</div>${[...records].reverse().map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:var(--bg);border-radius:8px;margin-bottom:4px"><span style="font-size:12px;color:var(--brown)">${isAmt?(r.value||0).toLocaleString('ko-KR')+'원':'✓ 달성'}</span><span style="font-size:10px;color:var(--brown3)">${r.date||''}</span><button onclick="deleteRecord('${c.id}',${records.length-1-i})" style="background:none;border:none;font-size:13px;cursor:pointer;opacity:0.5">🗑️</button></div>`).join('')}</div>`:'';
+    const tgtStr=isAmt?tgt.toLocaleString('ko-KR')+'원 '+(isUnder?'이하':'이상'):`주 ${tgt}회 ${c.dir==='under'?'이하':'이상'}`;
+
+    // 지난주 기록 섹션
+    let lastWeekHTML='';
+    if(lastWeek){
+      const lwRecs=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=lastWeek.start&&d<=lastWeek.end; });
+      const lwLabel=`지난주 (${lastWeek.label})`;
+      if(isAmt){
+        const lwVal=lwRecs.reduce((s,r)=>s+(r.value||0),0);
+        lastWeekHTML=`<div style="margin-bottom:12px;background:var(--bg);border-radius:10px;padding:10px 12px">
+          <div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:4px">📋 ${lwLabel}</div>
+          ${lwRecs.length?lwRecs.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--brown)">${(r.value||0).toLocaleString('ko-KR')}원</span><span style="font-size:10px;color:var(--brown3)">${r.date}</span><button onclick="deleteRecord('${c.id}',${records.indexOf(r)})" style="background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">🗑️</button></div>`).join('')+`<div style="font-size:11px;font-weight:800;color:var(--brown2);margin-top:4px">합계: ${lwVal.toLocaleString('ko-KR')}원</div>`:`<div style="font-size:11px;color:var(--brown3)">미설정</div>`}
+        </div>`;
+      } else {
+        lastWeekHTML=`<div style="margin-bottom:12px;background:var(--bg);border-radius:10px;padding:10px 12px">
+          <div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:6px">📋 ${lwLabel}</div>
+          ${lwRecs.length?lwRecs.map((r,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--brown)">✓</span><span style="font-size:10px;color:var(--brown3)">${r.date}</span><button onclick="deleteRecord('${c.id}',${records.indexOf(r)})" style="background:none;border:none;font-size:12px;cursor:pointer;opacity:0.5">🗑️</button></div>`).join(''):`<div style="font-size:11px;color:var(--brown3)">미설정</div>`}
+        </div>`;
+      }
+    }
+
+    // 입력 섹션
     const quickBtns=isAmt?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${[1000,5000,10000,50000].map(v=>`<button onclick="var i=document.getElementById('ch-pm-input');i.value=((parseInt(i.value)||0)+${v}).toString()" style="flex:1;padding:7px 4px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:11px;font-weight:700;color:var(--brown2);cursor:pointer">+${v>=10000?v/10000+'만':v/1000+'천'}원</button>`).join('')}</div>`:'';
-    const inputHTML=isAmt?`<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input class="form-input" type="number" id="ch-pm-input" placeholder="이번 주 지출 금액" min="0" style="flex:1;font-size:20px;font-weight:700;text-align:center"><span style="font-size:14px;font-weight:600;color:var(--brown2)">원</span></div>${quickBtns}<button class="submit-btn" id="ch-pm-save">기록하기</button>`:`<button class="submit-btn" id="ch-pm-save" ${alreadyToday?'disabled style="opacity:0.5"':''}>${alreadyToday?'오늘은 이미 기록했어요 ✓':'오늘 기록하기 ✓'}</button>`;
+
+    // 횟수 모드: 날짜 선택 드롭다운 (이번 달 전체, 이미 기록한 날 비활성)
+    let inputHTML='';
+    if(isAmt){
+      inputHTML=`<label class="form-label">+ 기록 추가</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <input class="form-input" type="number" id="ch-pm-input" placeholder="금액" min="0" style="flex:1;font-size:20px;font-weight:700;text-align:center">
+          <span style="font-size:14px;font-weight:600;color:var(--brown2)">원</span>
+        </div>${quickBtns}<button class="submit-btn" id="ch-pm-save">기록하기</button>`;
+    } else {
+      // 이번 달 날짜 옵션 생성
+      const totalDays=new Date(cYear,cMonth+1,0).getDate();
+      const recordedDates=new Set(records.map(r=>r.date));
+      let dateOptions='';
+      for(let d=1;d<=totalDays;d++){
+        const ds=`${cYear}-${String(cMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dayOfWeek=['일','월','화','수','목','금','토'][new Date(ds+'T00:00:00').getDay()];
+        const already=recordedDates.has(ds);
+        const isFuture=new Date(ds+'T00:00:00')>today;
+        dateOptions+=`<option value="${ds}" ${ds===todayStr?'selected':''} ${already||isFuture?'disabled':''} style="${already?'color:var(--brown3)':''}">${cMonth+1}/${d} (${dayOfWeek})${already?' ✓':''}</option>`;
+      }
+      inputHTML=`<label class="form-label">+ 날짜 선택해서 기록</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <select class="form-select" id="ch-pm-date" style="flex:1;font-size:14px">${dateOptions}</select>
+          <button class="submit-btn" id="ch-pm-save" style="width:80px;margin:0;padding:10px 0">기록 ✓</button>
+        </div>`;
+    }
+
     let pm=$('ch-progress-modal'); if(pm) pm.remove();
-    document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay open" id="ch-progress-modal" style="z-index:9999"><div class="modal-sheet" style="padding-bottom:30px"><div class="modal-handle"></div><div class="modal-header"><h3 style="font-size:14px">${CAT_EMOJI[c.category]||'📌'} ${c.title}</h3><button class="modal-close" id="ch-pm-close">✕</button></div><div class="modal-body"><div style="text-align:center;margin-bottom:16px"><div style="font-size:13px;color:var(--brown3);margin-bottom:4px">이번 주 목표: ${tgtStr}</div><div style="font-size:36px;font-weight:800;color:var(--brown)">${valStr}</div><div style="font-size:11px;color:${wDone?'var(--green)':'var(--brown3)'};margin-top:4px">${wDone?'이번 주 달성! 🎉':'아직 달성 전이에요'}</div></div>${inputHTML}${recentHTML}</div></div></div>`);
+    document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay open" id="ch-progress-modal" style="z-index:9999"><div class="modal-sheet" style="padding-bottom:30px"><div class="modal-handle"></div><div class="modal-header"><h3 style="font-size:14px">${CAT_EMOJI[c.category]||'📌'} ${c.title}</h3><button class="modal-close" id="ch-pm-close">✕</button></div><div class="modal-body"><div style="text-align:center;margin-bottom:16px"><div style="font-size:13px;color:var(--brown3);margin-bottom:4px">이번 주 목표: ${tgtStr}</div><div style="font-size:36px;font-weight:800;color:var(--brown)">${valStr}</div><div style="font-size:11px;color:${wDone?'var(--green)':'var(--brown3)'};margin-top:4px">${wDone?'이번 주 달성! 🎉':'아직 달성 전이에요'}</div></div>${inputHTML}${lastWeekHTML}</div></div></div>`);
     addSwipeToClose($('ch-progress-modal').querySelector('.modal-sheet'),'ch-progress-modal');
     $('ch-pm-close').addEventListener('click',()=>$('ch-progress-modal').remove());
     $('ch-progress-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.remove(); });
-    $('ch-pm-save').addEventListener('click',async()=>{
-      if(isAmt){
+    $('ch-pm-save').addEventListener('click',async()=>{\n      if(isAmt){
         const add=parseInt($('ch-pm-input').value)||0;
         if(add<=0) return toast('금액을 입력해주세요');
         await updateDoc(doc(db,'challenges',c.id),{records:[...records,{value:add,date:todayStr}]});
         $('ch-progress-modal').remove(); toast('📝 기록됐어요!');
       } else {
-        if(alreadyToday) return;
-        await updateDoc(doc(db,'challenges',c.id),{records:[...records,{value:1,date:todayStr}]});
-        $('ch-progress-modal').remove(); toast('✅ 오늘 기록됐어요!');
+        const selDate=$('ch-pm-date').value;
+        if(!selDate) return toast('날짜를 선택해주세요');
+        if(records.some(r=>r.date===selDate)) return toast('이미 기록된 날이에요');
+        await updateDoc(doc(db,'challenges',c.id),{records:[...records,{value:1,date:selDate}]});
+        $('ch-progress-modal').remove(); toast('✅ 기록됐어요!');
       }
     });
     return;
