@@ -808,7 +808,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               • 일괄 입력 기능 추가 (여러 항목 담아두고 한 번에 저장)<br>
               • 다중 저장 병렬 처리로 속도 개선<br>
               • 챌린지 달력에 요일 헤더 추가 (일~토 표시)<br>
-              • 캘린더 "확인해 주세요" 기능 추가 (상대방 일정 체크)
+              • 캘린더 "확인해 주세요" 기능 개선 (전체 일정 표시, 체크 여부 상호 공유)
             </div>
           </div>
 
@@ -3250,15 +3250,8 @@ function renderPendingConfirm(){
   const user=auth.currentUser; if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
   const myKey=isD?'dohun':'kyungeun';
-  // 상대방이 등록한 일정 중 내가 확인 안 한 것
+  // 오늘 이후 전체 일정
   const pending=evts.filter(e=>{
-    // 내가 등록한 일정은 제외
-    if(isD && e.who==='dohun') return false;
-    if(!isD && e.who==='kyungeun') return false;
-    // 이미 확인한 일정 제외
-    const confirmed=e.confirmedBy||[];
-    if(confirmed.includes(myKey)) return false;
-    // 오늘 이후 일정만
     const d=new Date(e.date+'T00:00:00'); d.setHours(0,0,0,0);
     const today=new Date(); today.setHours(0,0,0,0);
     return d>=today;
@@ -3275,8 +3268,29 @@ function renderPendingConfirm(){
     const whoColor=e.who==='dohun'?'var(--dohun)':e.who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
     const whoLabel=e.who==='dohun'?'도훈':e.who==='kyungeun'?'경은':'함께';
     const timeStr=e.allday?'하루종일':(e.time||'');
+    const confirmed=e.confirmedBy||[];
+    const isMyEvent=(isD && e.who==='dohun')||(!isD && e.who==='kyungeun');
+    const otherKey=isD?'kyungeun':'dohun';
+    const iConfirmed=confirmed.includes(myKey);
+    const otherConfirmed=confirmed.includes(otherKey);
+    let checkBtn='';
+    if(isMyEvent){
+      // 내 일정: 상대방이 확인했는지 표시 (읽기전용)
+      if(otherConfirmed){
+        checkBtn=`<div title="상대방이 확인함" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:white">✓</div>`;
+      } else {
+        checkBtn=`<div title="아직 미확인" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--brown3)">？</div>`;
+      }
+    } else {
+      // 상대방 일정: 내가 체크 가능
+      if(iConfirmed){
+        checkBtn=`<div style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:white">✓</div>`;
+      } else {
+        checkBtn=`<button onclick="confirmEvent('${e.id}')" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;transition:all 0.2s">✓</button>`;
+      }
+    }
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <button onclick="confirmEvent('${e.id}')" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;transition:all 0.2s">✓</button>
+      ${checkBtn}
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.desc}</div>
         <div style="font-size:11px;color:var(--brown3)">${dateStr} ${timeStr}</div>
