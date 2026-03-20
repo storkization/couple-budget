@@ -3356,12 +3356,9 @@ function renderSection(who, all){
       const records=c.records||[];
       const isAmt=c.weeklyMode==='amount';
       const isUnder=c.dir==='under';
-      // 지난주 + 이번주만 표시
-      const visibleWeeks=weeks.filter(w=>{
-        const isCurrent=w.start<=today&&w.end>=today;
-        const isLastWeek=w.end<today&&weeks[weeks.indexOf(w)+1]?.start<=today;
-        return isCurrent||isLastWeek;
-      });
+      // 지난주 + 이번주만 표시 (인덱스 기반)
+      const currentIdx=weeks.findIndex(w=>w.start<=today&&w.end>=today);
+      const visibleWeeks=weeks.filter((_,i)=>i===currentIdx||(currentIdx>0&&i===currentIdx-1));
       let weeklyHTML='<div style="margin-top:7px;display:flex;flex-direction:column;gap:6px">';
       visibleWeeks.forEach(w=>{
         const weekRecs=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; });
