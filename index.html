@@ -808,7 +808,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               • 일괄 입력 기능 추가 (여러 항목 담아두고 한 번에 저장)<br>
               • 다중 저장 병렬 처리로 속도 개선<br>
               • 챌린지 달력에 요일 헤더 추가 (일~토 표시)<br>
-              • 캘린더 "확인해 주세요" 기능 개선 (전체 일정 표시, 체크 여부 상호 공유)
+              • 캘린더 "확인해 주세요" 기능 개선 (경은/도훈 확인 열 분리, 체크 버그 수정)
             </div>
           </div>
 
@@ -3249,61 +3249,72 @@ function renderPendingConfirm(){
   if(!wrap||!el) return;
   const user=auth.currentUser; if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
-  const myKey=isD?'dohun':'kyungeun';
+
   // 오늘 이후 전체 일정
   const pending=evts.filter(e=>{
     const d=new Date(e.date+'T00:00:00'); d.setHours(0,0,0,0);
     const today=new Date(); today.setHours(0,0,0,0);
     return d>=today;
   }).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  
-  if(!pending.length){
-    wrap.style.display='none';
-    return;
-  }
+
+  if(!pending.length){ wrap.style.display='none'; return; }
   wrap.style.display='block';
-  el.innerHTML=pending.map(e=>{
+
+  // 열 헤더
+  let html=`<div style="display:grid;grid-template-columns:1fr 38px 38px;gap:4px;padding:4px 0 8px;border-bottom:2px solid var(--border);margin-bottom:2px">
+    <div style="font-size:10px;font-weight:700;color:var(--brown3)">일정</div>
+    <div style="font-size:10px;font-weight:700;color:var(--kyungeun);text-align:center">경은✓</div>
+    <div style="font-size:10px;font-weight:700;color:var(--dohun);text-align:center">도훈✓</div>
+  </div>`;
+
+  html += pending.map(e=>{
     const d=new Date(e.date+'T00:00:00');
     const dateStr=`${d.getMonth()+1}/${d.getDate()}`;
-    const whoColor=e.who==='dohun'?'var(--dohun)':e.who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
-    const whoLabel=e.who==='dohun'?'도훈':e.who==='kyungeun'?'경은':'함께';
     const timeStr=e.allday?'하루종일':(e.time||'');
     const confirmed=e.confirmedBy||[];
-    const isMyEvent=(isD && e.who==='dohun')||(!isD && e.who==='kyungeun');
-    const otherKey=isD?'kyungeun':'dohun';
-    const iConfirmed=confirmed.includes(myKey);
-    const otherConfirmed=confirmed.includes(otherKey);
-    let checkBtn='';
-    if(isMyEvent){
-      // 내 일정: 상대방이 확인했는지 표시 (읽기전용)
-      if(otherConfirmed){
-        checkBtn=`<div title="상대방이 확인함" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:white">✓</div>`;
+    const kChecked=confirmed.includes('kyungeun');
+    const dChecked=confirmed.includes('dohun');
+    const whoColor=e.who==='dohun'?'var(--dohun)':e.who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
+    const whoLabel=e.who==='dohun'?'도훈':e.who==='kyungeun'?'경은':'함께';
+
+    // 경은 열: 도훈 일정 or 함께 일정에만 체크 의미 있음
+    // 도훈 열: 경은 일정 or 함께 일정에만 체크 의미 있음
+    const kRelevant = e.who==='dohun' || e.who==='together';
+    const dRelevant = e.who==='kyungeun' || e.who==='together';
+
+    function cell(relevant, checked, key, color){
+      if(!relevant) return `<div style="width:38px;text-align:center;font-size:14px;color:var(--border)">—</div>`;
+      const canClick = (!isD && key==='kyungeun') || (isD && key==='dohun');
+      if(checked){
+        return `<div style="width:38px;height:38px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:16px;color:white;margin:auto">✓</div>`;
+      } else if(canClick){
+        return `<button onclick="confirmEvent('${e.id}','${key}')" style="width:38px;height:38px;border-radius:50%;border:2px solid ${color};background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:${color};margin:auto;transition:all 0.2s">✓</button>`;
       } else {
-        checkBtn=`<div title="아직 미확인" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--brown3)">？</div>`;
-      }
-    } else {
-      // 상대방 일정: 내가 체크 가능
-      if(iConfirmed){
-        checkBtn=`<div style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:white">✓</div>`;
-      } else {
-        checkBtn=`<button onclick="confirmEvent('${e.id}')" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;transition:all 0.2s">✓</button>`;
+        return `<div style="width:38px;height:38px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--brown3);margin:auto">？</div>`;
       }
     }
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      ${checkBtn}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.desc}</div>
+
+    return `<div style="display:grid;grid-template-columns:1fr 38px 38px;gap:4px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="min-width:0">
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:13px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.desc}</span>
+          <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:99px;color:white;background:${whoColor};flex-shrink:0">${whoLabel}</span>
+        </div>
         <div style="font-size:11px;color:var(--brown3)">${dateStr} ${timeStr}</div>
       </div>
-      <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;color:white;background:${whoColor};flex-shrink:0">${whoLabel}</span>
+      ${cell(kRelevant, kChecked, 'kyungeun', 'var(--kyungeun)')}
+      ${cell(dRelevant, dChecked, 'dohun', 'var(--dohun)')}
     </div>`;
   }).join('');
+
+  el.innerHTML=html;
 }
 
-async function confirmEvent(id){
+async function confirmEvent(id, key){
   const user=auth.currentUser; if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
   const myKey=isD?'dohun':'kyungeun';
+  if(key !== myKey) return; // 본인 키만 체크 가능
   const ev=evts.find(e=>e.id===id); if(!ev) return;
   const confirmed=ev.confirmedBy||[];
   if(!confirmed.includes(myKey)){
