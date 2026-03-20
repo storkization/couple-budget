@@ -3356,27 +3356,43 @@ function renderSection(who, all){
       const records=c.records||[];
       const isAmt=c.weeklyMode==='amount';
       const isUnder=c.dir==='under';
+      // 지난주 + 이번주만 표시
+      const visibleWeeks=weeks.filter(w=>w.end<=today||( w.start<=today&&w.end>=today));
       let weeklyHTML='<div style="margin-top:7px;display:flex;flex-direction:column;gap:6px">';
-      weeks.forEach(w=>{
+      visibleWeeks.forEach(w=>{
         const weekRecs=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; });
         const val=isAmt?weekRecs.reduce((s,r)=>s+(r.value||0),0):weekRecs.length;
         const isPast=w.end<today;
         const isCurrent=w.start<=today&&w.end>=today;
+        const hasRecord=weekRecs.length>0;
         const wDone=isAmt?(isUnder?val<=tgt:val>=tgt):(c.dir==='under'?val<=tgt:val>=tgt);
-        const barColor=wDone?'var(--green)':isPast?'var(--rose)':accentColor;
-        const barW=isAmt?(isUnder?Math.min(100,Math.round(val/tgt*100)):Math.min(100,Math.round(val/tgt*100))):Math.min(100,Math.round(val/tgt*100));
-        const valStr=isAmt?val.toLocaleString('ko-KR')+'원':val+'회';
-        const tgtStr=isAmt?tgt.toLocaleString('ko-KR')+'원 '+(isUnder?'이하':'이상'):val+'/'+tgt+'회';
-        const statusTxt=wDone?'달성 🎉':(isAmt?`${val.toLocaleString('ko-KR')}원 / ${tgt.toLocaleString('ko-KR')}원`:`${val}/${tgt}회`);
+        // 초과 여부 (이하 목표인데 넘었을 때)
+        const isOver=isUnder&&val>tgt;
+
+        let statusTxt, barColor, barW;
+        if(!hasRecord && !isPast){
+          // 이번 주, 아직 기록 없음
+          statusTxt='달성 중'; barColor='var(--brown3)'; barW=0;
+        } else if(!hasRecord && isPast){
+          // 지난 주, 기록 없음
+          statusTxt='미설정'; barColor='var(--border)'; barW=0;
+        } else if(isPast){
+          // 지난 주, 기록 있음
+          statusTxt=wDone?'달성 🎉':'실패 ❌'; barColor=wDone?'var(--green)':'var(--rose)'; barW=Math.min(100,Math.round(val/tgt*100));
+        } else {
+          // 이번 주, 기록 있음
+          if(isOver){ statusTxt='초과 ❌'; barColor='var(--rose)'; barW=100; }
+          else if(wDone){ statusTxt='달성 🎉'; barColor='var(--green)'; barW=100; }
+          else { statusTxt=isAmt?`${val.toLocaleString('ko-KR')}원`:`${val}/${tgt}회`; barColor=accentColor; barW=Math.min(100,Math.round(val/tgt*100)); }
+        }
+
         const label=isCurrent?`✦ 이번 주 (${w.label})`:w.label;
-        weeklyHTML+=`<div style="opacity:${!isPast&&!isCurrent?'0.4':'1'}">
+        weeklyHTML+=`<div>
           <div style="display:flex;justify-content:space-between;margin-bottom:2px">
             <span style="font-size:10px;color:var(--brown3);font-weight:${isCurrent?'800':'400'}">${label}</span>
             <span style="font-size:10px;font-weight:800;color:${barColor}">${statusTxt}</span>
           </div>
-          <div style="background:var(--bg);border-radius:99px;height:5px;overflow:hidden">
-            <div style="height:100%;border-radius:99px;background:${barColor};width:${barW}%;transition:width 0.4s"></div>
-          </div>
+          ${barW>0?`<div style="background:var(--bg);border-radius:99px;height:5px;overflow:hidden"><div style="height:100%;border-radius:99px;background:${barColor};width:${barW}%;transition:width 0.4s"></div></div>`:''}
         </div>`;
       });
       weeklyHTML+='</div>';
