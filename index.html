@@ -791,7 +791,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
             <div style="font-size:15px;font-weight:800;color:var(--brown)">리치 투게더 💕</div>
             <div style="font-size:11px;color:var(--brown3);margin-top:2px">Made with 💕 by Shawn Kim</div>
           </div>
-          <div style="background:var(--rose);color:white;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">v1.2</div>
+          <div style="background:var(--rose);color:white;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px">v1.3</div>
         </div>
         <!-- 업데이트 내역 토글 -->
         <button id="changelog-toggle-btn" onclick="(function(){const el=document.getElementById('changelog-body');const arr=document.getElementById('changelog-arrow');const open=el.style.display==='flex';el.style.display=open?'none':'flex';arr.textContent=open?'▼':'▲';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:none;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:12px;font-weight:700;color:var(--brown2);cursor:pointer">
@@ -802,6 +802,18 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
           <div style="background:var(--bg);border-radius:12px;padding:10px 12px;border-left:3px solid var(--rose)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.3</span>
+            </div>
+            <div style="font-size:11px;color:var(--brown2);line-height:1.8">
+              • 챌린지 주 단위 타입 추가 (주N회 목표, 일~토 기준)<br>
+              • 확인해 주세요 개선 (경은이가/도훈이가 열 분리, 체크 토글, 질문 기능)<br>
+              • 일정 입력 종료 시간 유효성 검사 추가<br>
+              • 캘린더 확인란 수정 클릭 기능 추가
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <span style="font-size:12px;font-weight:800;color:var(--brown)">v1.2</span>
             </div>
             <div style="font-size:11px;color:var(--brown2);line-height:1.8">
@@ -1230,10 +1242,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       </div>
       <div style="margin-bottom:12px">
         <label class="form-label">🎯 달성 타입</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="ch-type-btns">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="ch-type-btns">
           <button class="ch-type-btn active" data-type="calendar" style="padding:10px 6px;border-radius:12px;border:2px solid var(--rose);background:var(--rose);color:white;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
             <div style="font-size:18px">📅</div><div>달력</div>
             <div style="font-size:10px;opacity:0.85;font-weight:500">매일 체크</div>
+          </button>
+          <button class="ch-type-btn" data-type="weekly" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
+            <div style="font-size:18px">📆</div><div>주 단위</div>
+            <div style="font-size:10px;opacity:0.85;font-weight:500">주N회 목표</div>
           </button>
           <button class="ch-type-btn" data-type="count" style="padding:10px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg);color:var(--brown3);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center">
             <div style="font-size:18px">🔢</div><div>횟수</div>
@@ -1248,6 +1264,16 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
             <div style="font-size:10px;opacity:0.85;font-weight:500">N원 이상/이하</div>
           </button>
         </div>
+      </div>
+
+      <!-- 주 단위 -->
+      <div id="ch-type-weekly" style="margin-bottom:12px;display:none">
+        <label class="form-label">🎯 주당 목표 횟수</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="form-input" type="number" id="ch-modal-weekly-target" placeholder="예: 3" min="1" style="flex:1;font-size:16px;font-weight:700;text-align:center">
+          <span style="font-size:14px;font-weight:700;color:var(--brown2)">회 / 주</span>
+        </div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:5px">매주 목표 횟수를 채우면 그 주는 달성이에요</div>
       </div>
 
       <!-- 달력 타입 -->
@@ -2832,7 +2858,7 @@ document.addEventListener('input', e=>{
 });
 function setChModalType(t){
   chModalType = t;
-  const colors = {calendar:'var(--rose)', count:'var(--dohun)', accumulate:'var(--green)', amount:'var(--gold)'};
+  const colors = {calendar:'var(--rose)', weekly:'var(--kyungeun)', count:'var(--dohun)', accumulate:'var(--green)', amount:'var(--gold)'};
   document.querySelectorAll('.ch-type-btn').forEach(b=>{
     const active = b.dataset.type === t;
     const c = colors[b.dataset.type];
@@ -2840,7 +2866,7 @@ function setChModalType(t){
     b.style.color = active ? 'white' : 'var(--brown3)';
     b.style.borderColor = active ? c : 'var(--border)';
   });
-  ['calendar','count','accumulate','amount'].forEach(tp=>{
+  ['calendar','weekly','count','accumulate','amount'].forEach(tp=>{
     const el = document.getElementById('ch-type-'+tp);
     if(el) el.style.display = tp===t ? 'block' : 'none';
   });
@@ -2860,6 +2886,7 @@ function openChModal(who, editData=null){
   const t = editData?.chType||'calendar';
   setChModalType(t);
   if(t==='calendar'){ const ct=editData?.calTarget||80; $('ch-modal-cal-target').value=ct; updateCalDaysHint(); }
+  if(t==='weekly'){ $('ch-modal-weekly-target').value=editData?.target||''; }
   if(t==='count'){ $('ch-modal-target').value=editData?.target||''; $('ch-modal-count-dir').value=editData?.dir||'over'; }
   if(t==='accumulate'){ $('ch-modal-target-acc').value=editData?.target||''; $('ch-modal-unit').value=editData?.unit||''; $('ch-modal-acc-dir').value=editData?.dir||'over'; }
   if(t==='amount'){ $('ch-modal-target-amt').value=editData?.target||''; $('ch-modal-amount-dir').value=editData?.dir||'under'; }
@@ -2875,7 +2902,12 @@ $('ch-modal-save').addEventListener('click',async()=>{
   const base = { title, who:chAddWho, category:$('ch-modal-category').value,
     month:CH_MONTH(), chType:chModalType,
     reward:$('ch-modal-reward').value.trim(), penalty:$('ch-modal-penalty').value.trim() };
-  if(chModalType==='count'){
+  if(chModalType==='weekly'){
+    const t=parseInt($('ch-modal-weekly-target').value)||0;
+    if(!t) return toast('주당 목표 횟수를 입력해주세요');
+    base.target=t;
+    if(!chEditId) base.records=[];
+  } else if(chModalType==='count'){
     const t=parseInt($('ch-modal-target').value)||0;
     if(!t) return toast('목표 횟수를 입력해주세요');
     base.target=t; base.dir=$('ch-modal-count-dir').value;
@@ -2910,6 +2942,29 @@ document.querySelectorAll('.ch-add-inline-btn').forEach(btn=>{
 
 // 진행값 기록 모달
 function openProgressModal(c){
+  // 주 단위는 별도 처리
+  if(c.chType==='weekly'){
+    const today=new Date(); today.setHours(0,0,0,0);
+    const todayStr=new Date().toISOString().split('T')[0];
+    const records=c.records||[];
+    const weeks=getMonthWeeks(cYear,cMonth);
+    const thisWeek=weeks.find(w=>w.start<=today&&w.end>=today);
+    const alreadyToday=records.some(r=>r.date===todayStr);
+    const weekCount=thisWeek?records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=thisWeek.start&&d<=thisWeek.end; }).length:0;
+    const tgt=c.target||1;
+    const recentHTML=records.length?`<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--brown3);margin-bottom:6px">📋 기록 내역 (탭하면 삭제)</div>${[...records].reverse().map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:var(--bg);border-radius:8px;margin-bottom:4px"><span style="font-size:12px;color:var(--brown)">✓ 달성</span><span style="font-size:10px;color:var(--brown3)">${r.date||''}</span><button onclick="deleteRecord('${c.id}',${records.length-1-i})" style="background:none;border:none;font-size:13px;cursor:pointer;opacity:0.5">🗑️</button></div>`).join('')}</div>`:'';
+    let pm=$('ch-progress-modal'); if(pm) pm.remove();
+    document.body.insertAdjacentHTML('beforeend',`<div class="modal-overlay open" id="ch-progress-modal" style="z-index:9999"><div class="modal-sheet" style="padding-bottom:30px"><div class="modal-handle"></div><div class="modal-header"><h3 style="font-size:14px">${CAT_EMOJI[c.category]||'📌'} ${c.title}</h3><button class="modal-close" id="ch-pm-close">✕</button></div><div class="modal-body"><div style="text-align:center;margin-bottom:16px"><div style="font-size:13px;color:var(--brown3);margin-bottom:4px">이번 주 목표: 주 ${tgt}회</div><div style="font-size:36px;font-weight:800;color:var(--brown)">${weekCount}<span style="font-size:16px;color:var(--brown3)"> / ${tgt}회</span></div><div style="font-size:11px;color:${weekCount>=tgt?'var(--green)':'var(--brown3)'};margin-top:4px">${weekCount>=tgt?'이번 주 달성! 🎉':'아직 달성 전이에요'}</div></div><button class="submit-btn" id="ch-pm-save" ${alreadyToday?'disabled style="opacity:0.5"':''}>${alreadyToday?'오늘은 이미 기록했어요 ✓':'오늘 기록하기 ✓'}</button>${recentHTML}</div></div></div>`);
+    addSwipeToClose($('ch-progress-modal').querySelector('.modal-sheet'),'ch-progress-modal');
+    $('ch-pm-close').addEventListener('click',()=>$('ch-progress-modal').remove());
+    $('ch-progress-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.remove(); });
+    $('ch-pm-save').addEventListener('click',async()=>{
+      if(alreadyToday) return;
+      await updateDoc(doc(db,'challenges',c.id),{records:[...records,{value:1,date:todayStr}]});
+      $('ch-progress-modal').remove(); toast('✅ 오늘 기록됐어요!');
+    });
+    return;
+  }
   const isAmt = c.chType==='amount';
   const isAcc = c.chType==='accumulate';
   const records = c.records||[];
@@ -2965,8 +3020,38 @@ window.toggleCalDay = async function(id, day){
 function chIsDoneStrict(c){
   const t=c.chType||'calendar';
   if(t==='calendar'){ const tgt=c.calTarget||80; return (c.calDays||[]).length >= Math.ceil(DAYS_IN_MONTH()*tgt/100); }
+  if(t==='weekly'){
+    const weeks=getMonthWeeks(cYear,cMonth);
+    const today=new Date(); today.setHours(0,0,0,0);
+    const pastWeeks=weeks.filter(w=>w.end<=today);
+    if(!pastWeeks.length) return false;
+    return pastWeeks.every(w=>{
+      const cnt=(c.records||[]).filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; }).length;
+      return cnt>=(c.target||1);
+    });
+  }
   const cur = (c.records||[]).reduce((s,r)=>s+(r.value||0),0);
   return c.dir==='under' ? cur <= (c.target||0) && (c.records||[]).length > 0 : cur >= (c.target||1);
+}
+
+// 이달 주 목록 반환 (일~토 기준)
+function getMonthWeeks(year, month){
+  const weeks=[];
+  const firstDay=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0);
+  // 첫 주 시작: 해당 월 1일이 속한 주의 일요일
+  let weekStart=new Date(firstDay);
+  weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+  while(weekStart<=lastDay){
+    const weekEnd=new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+    // 이 달과 겹치는 주만
+    const s=weekStart<firstDay?firstDay:new Date(weekStart);
+    const e=weekEnd>lastDay?lastDay:new Date(weekEnd);
+    s.setHours(0,0,0,0); e.setHours(23,59,59,999);
+    weeks.push({start:new Date(s),end:new Date(e),label:`${s.getMonth()+1}/${s.getDate()}~${e.getMonth()+1}/${e.getDate()}`});
+    weekStart.setDate(weekStart.getDate()+7);
+  }
+  return weeks;
 }
 
 async function rChallenge(){
@@ -2998,11 +3083,22 @@ function renderPrevChallenge(){
     return;
   }
 
-  const typeLabel={calendar:'📅 달력',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
+  const typeLabel={calendar:'📅 달력',weekly:'📆 주 단위',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
 
   function renderPrevItem(c){
-    const done=chIsDoneStrict(c);
     const type=c.chType||'calendar';
+    let done;
+    if(type==='weekly'){
+      const weeks=getMonthWeeks(py,pm);
+      const tgt=c.target||1;
+      const records=c.records||[];
+      done=weeks.length>0&&weeks.every(w=>{
+        const cnt=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; }).length;
+        return cnt>=tgt;
+      });
+    } else {
+      done=chIsDoneStrict(c);
+    }
     const statusColor=done?'#2ecc71':'#e74c3c';
     const statusBg=done?'rgba(46,204,113,0.12)':'rgba(231,76,60,0.12)';
     const statusIcon=done?'✅ 달성':'❌ 실패';
@@ -3015,6 +3111,16 @@ function renderPrevChallenge(){
       const checked=(c.calDays||[]).length;
       goalText=`${calTargetDays}일 이상 (${calTargetPct}%)`;
       resultText=`${checked}일 체크`;
+    } else if(type==='weekly'){
+      const weeks=getMonthWeeks(py,pm);
+      const tgt=c.target||1;
+      const records=c.records||[];
+      const doneWeeks=weeks.filter(w=>{
+        const cnt=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; }).length;
+        return cnt>=tgt;
+      }).length;
+      goalText=`주 ${tgt}회 목표`;
+      resultText=`${doneWeeks}/${weeks.length}주 달성`;
     } else {
       const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
       const tgt=c.target||1;
@@ -3091,7 +3197,7 @@ function renderSection(who, all){
   if(filtered.length===0){ listEl.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:12px">📭 챌린지가 없어요</div>`; return; }
   let banner='';
   if(doneList.length===filtered.length&&filtered.length>0){ banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)"><div style="font-size:22px">🎉</div><div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div></div>`; }
-  const typeLabel={calendar:'📅 달력',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
+  const typeLabel={calendar:'📅 달력',weekly:'📆 주 단위',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
   listEl.innerHTML = banner + filtered.map(c=>{
     const done = chIsDoneStrict(c);
     const type = c.chType||'calendar';
@@ -3131,6 +3237,33 @@ function renderSection(who, all){
           </div>
         </div>`;
       cardBody=calHTML;
+    } else if(type==='weekly'){
+      const weeks=getMonthWeeks(cYear,cMonth);
+      const today=new Date(); today.setHours(0,0,0,0);
+      const tgt=c.target||1;
+      const records=c.records||[];
+      let weeklyHTML='<div style="margin-top:7px;display:flex;flex-direction:column;gap:6px">';
+      weeks.forEach(w=>{
+        const cnt=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; }).length;
+        const isPast=w.end<today;
+        const isCurrent=w.start<=today&&w.end>=today;
+        const wDone=cnt>=tgt;
+        const barColor=wDone?'var(--green)':isPast?'var(--rose)':accentColor;
+        const barW=Math.min(100,Math.round(cnt/tgt*100));
+        const label=isCurrent?`✦ 이번 주 (${w.label})`:w.label;
+        const statusTxt=wDone?'달성 🎉':`${cnt}/${tgt}회`;
+        weeklyHTML+=`<div style="opacity:${!isPast&&!isCurrent?'0.4':'1'}">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:10px;color:var(--brown3);font-weight:${isCurrent?'800':'400'}">${label}</span>
+            <span style="font-size:10px;font-weight:800;color:${barColor}">${statusTxt}</span>
+          </div>
+          <div style="background:var(--bg);border-radius:99px;height:5px;overflow:hidden">
+            <div style="height:100%;border-radius:99px;background:${barColor};width:${barW}%;transition:width 0.4s"></div>
+          </div>
+        </div>`;
+      });
+      weeklyHTML+='</div>';
+      cardBody=weeklyHTML;
     } else {
       const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
       const tgt=c.target||1;
