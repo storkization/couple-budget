@@ -808,7 +808,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               • 일괄 입력 기능 추가 (여러 항목 담아두고 한 번에 저장)<br>
               • 다중 저장 병렬 처리로 속도 개선<br>
               • 챌린지 달력에 요일 헤더 추가 (일~토 표시)<br>
-              • 캘린더 "확인해 주세요" 기능 개선 (경은/도훈 확인 열 분리, 체크 버그 수정)
+              • 캘린더 "확인해 주세요" 기능 추가 (상대방 일정 체크)
             </div>
           </div>
 
@@ -3260,11 +3260,15 @@ function renderPendingConfirm(){
   if(!pending.length){ wrap.style.display='none'; return; }
   wrap.style.display='block';
 
-  // 열 헤더
-  let html=`<div style="display:grid;grid-template-columns:1fr 38px 38px;gap:4px;padding:4px 0 8px;border-bottom:2px solid var(--border);margin-bottom:2px">
-    <div style="font-size:10px;font-weight:700;color:var(--brown3)">일정</div>
-    <div style="font-size:10px;font-weight:700;color:var(--kyungeun);text-align:center">경은✓</div>
-    <div style="font-size:10px;font-weight:700;color:var(--dohun);text-align:center">도훈✓</div>
+  // 헤더: [확인 했어요] / 경은이가  도훈이가
+  let html=`
+  <div style="margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr 52px 52px;gap:4px;align-items:center">
+      <div style="font-size:12px;font-weight:800;color:var(--brown)">✅ 확인 했어요</div>
+      <div style="font-size:11px;font-weight:700;color:var(--kyungeun);text-align:center">경은이가</div>
+      <div style="font-size:11px;font-weight:700;color:var(--dohun);text-align:center">도훈이가</div>
+    </div>
+    <div style="height:1px;background:var(--border);margin-top:6px"></div>
   </div>`;
 
   html += pending.map(e=>{
@@ -3277,24 +3281,24 @@ function renderPendingConfirm(){
     const whoColor=e.who==='dohun'?'var(--dohun)':e.who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
     const whoLabel=e.who==='dohun'?'도훈':e.who==='kyungeun'?'경은':'함께';
 
-    // 경은 열: 도훈 일정 or 함께 일정에만 체크 의미 있음
-    // 도훈 열: 경은 일정 or 함께 일정에만 체크 의미 있음
+    // 경은 열: 도훈 or 함께 일정만 체크 의미 있음
+    // 도훈 열: 경은 or 함께 일정만 체크 의미 있음
     const kRelevant = e.who==='dohun' || e.who==='together';
     const dRelevant = e.who==='kyungeun' || e.who==='together';
 
     function cell(relevant, checked, key, color){
-      if(!relevant) return `<div style="width:38px;text-align:center;font-size:14px;color:var(--border)">—</div>`;
+      if(!relevant) return `<div style="width:52px;text-align:center;color:var(--border);font-size:16px">—</div>`;
       const canClick = (!isD && key==='kyungeun') || (isD && key==='dohun');
       if(checked){
-        return `<div style="width:38px;height:38px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:16px;color:white;margin:auto">✓</div>`;
+        return `<div style="width:44px;height:44px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:18px;color:white;margin:auto">✓</div>`;
       } else if(canClick){
-        return `<button onclick="confirmEvent('${e.id}','${key}')" style="width:38px;height:38px;border-radius:50%;border:2px solid ${color};background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:${color};margin:auto;transition:all 0.2s">✓</button>`;
+        return `<button onclick="confirmEvent('${e.id}','${key}')" style="width:44px;height:44px;border-radius:50%;border:2px solid ${color};background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:${color};margin:auto;transition:all 0.2s">✓</button>`;
       } else {
-        return `<div style="width:38px;height:38px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--brown3);margin:auto">？</div>`;
+        return `<div style="width:44px;height:44px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--brown3);margin:auto">？</div>`;
       }
     }
 
-    return `<div style="display:grid;grid-template-columns:1fr 38px 38px;gap:4px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+    return `<div style="display:grid;grid-template-columns:1fr 52px 52px;gap:4px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
       <div style="min-width:0">
         <div style="display:flex;align-items:center;gap:4px">
           <span style="font-size:13px;font-weight:700;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.desc}</span>
@@ -3314,7 +3318,7 @@ async function confirmEvent(id, key){
   const user=auth.currentUser; if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
   const myKey=isD?'dohun':'kyungeun';
-  if(key !== myKey) return; // 본인 키만 체크 가능
+  if(key !== myKey) return;
   const ev=evts.find(e=>e.id===id); if(!ev) return;
   const confirmed=ev.confirmedBy||[];
   if(!confirmed.includes(myKey)){
