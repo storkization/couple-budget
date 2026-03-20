@@ -3323,10 +3323,15 @@ function renderPendingConfirm(){
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:8px 8px 8px 0">
         <div style="display:flex;align-items:center;gap:4px">
-          <span style="font-size:13px;font-weight:700;color:var(--brown)">${e.desc}</span>
+          <span onclick="editFromConfirm('${e.id}')" style="font-size:13px;font-weight:700;color:var(--brown);cursor:pointer;text-decoration:underline dotted">${e.desc}</span>
           <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:99px;color:white;background:${whoColor};flex-shrink:0">${whoLabel}</span>
+          <button onclick="askQuestion('${e.id}')" style="margin-left:2px;background:none;border:none;cursor:pointer;font-size:14px;padding:0;line-height:1" title="질문하기">${e.question?'💬':'🗨️'}</button>
         </div>
-        <div style="font-size:11px;color:var(--brown3)">${dateStr} ${timeStr}</div>
+        ${e.question?`<div style="margin-top:4px;background:var(--rose-light);border-radius:8px;padding:5px 8px;font-size:11px;color:var(--brown2);display:flex;align-items:center;gap:6px">
+          <span style="flex:1">❓ ${e.question.text} <span style="color:var(--brown3);font-size:10px">(${e.question.from==='dohun'?'도훈':'경은'})</span></span>
+          ${(isD && e.question.from==='dohun')||(!isD && e.question.from==='kyungeun')?`<button onclick="deleteQuestion('${e.id}')" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--brown3);padding:0">✕</button>`:''}
+        </div>`:''}
+        <div style="font-size:11px;color:var(--brown3);margin-top:2px">${dateStr} ${timeStr}</div>
       </td>
       ${cell(kRelevant, kChecked, 'kyungeun', 'var(--kyungeun)')}
       ${cell(dRelevant, dChecked, 'dohun', 'var(--dohun)')}
@@ -3355,6 +3360,39 @@ async function confirmEvent(id, key){
   }
 }
 window.confirmEvent = confirmEvent;
+
+window.editFromConfirm = function(id){
+  const user=auth.currentUser; if(!user) return;
+  const isD=user.email==='ventisummer@gmail.com';
+  const ev=evts.find(e=>e.id===id); if(!ev) return;
+  const isMyEvent=(isD && ev.who==='dohun')||(!isD && ev.who==='kyungeun')||(ev.who==='both');
+  if(!isMyEvent){ toast('🔒 수정 권한이 없어요'); return; }
+  openEvEditModal(ev, false);
+};
+
+window.askQuestion = async function(id){
+  const user=auth.currentUser; if(!user) return;
+  const isD=user.email==='ventisummer@gmail.com';
+  const myKey=isD?'dohun':'kyungeun';
+  const ev=evts.find(e=>e.id===id); if(!ev) return;
+  // 이미 질문 있으면 삭제 여부 확인
+  if(ev.question){
+    if(confirm('기존 질문을 삭제할까요?')){
+      await updateDoc(doc(db,'events',id),{question:null});
+      toast('질문을 삭제했어요');
+    }
+    return;
+  }
+  const text=prompt('질문을 입력해 주세요 💬');
+  if(!text||!text.trim()) return;
+  await updateDoc(doc(db,'events',id),{question:{text:text.trim(),from:myKey,createdAt:new Date().toISOString()}});
+  toast('💬 질문을 남겼어요!');
+};
+
+window.deleteQuestion = async function(id){
+  await updateDoc(doc(db,'events',id),{question:null});
+  toast('질문을 삭제했어요');
+};
 
 // ── THEME ──
 const THEMES = [
