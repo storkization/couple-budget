@@ -1269,10 +1269,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div id="weekly-count-section">
           <label class="form-label">🎯 주당 목표 횟수</label>
           <div style="display:flex;align-items:center;gap:8px">
+            <select class="form-select" id="ch-modal-weekly-count-dir" style="width:80px">
+              <option value="over">이상</option>
+              <option value="under">이하</option>
+            </select>
             <input class="form-input" type="number" id="ch-modal-weekly-target" placeholder="예: 3" min="1" style="flex:1;font-size:16px;font-weight:700;text-align:center">
             <span style="font-size:14px;font-weight:700;color:var(--brown2)">회 / 주</span>
           </div>
-          <div style="font-size:11px;color:var(--brown3);margin-top:5px">매주 목표 횟수를 채우면 그 주는 달성이에요</div>
+          <div style="font-size:11px;color:var(--brown3);margin-top:5px">이상: 많을수록 좋아요 · 이하: 적을수록 좋아요</div>
         </div>
         <div id="weekly-amount-section" style="display:none">
           <label class="form-label">🎯 주당 목표 금액</label>
@@ -2915,7 +2919,7 @@ function openChModal(who, editData=null){
   if(t==='weekly'){
     const wmode=editData?.weeklyMode||'count';
     setWeeklyMode(wmode);
-    if(wmode==='count'){ $('ch-modal-weekly-target').value=editData?.target||''; }
+    if(wmode==='count'){ $('ch-modal-weekly-target').value=editData?.target||''; $('ch-modal-weekly-count-dir').value=editData?.dir||'over'; }
     else { $('ch-modal-weekly-amount').value=editData?.target||''; $('ch-modal-weekly-dir').value=editData?.dir||'under'; }
   }
   if(t==='count'){ $('ch-modal-target').value=editData?.target||''; $('ch-modal-count-dir').value=editData?.dir||'over'; }
@@ -2937,7 +2941,7 @@ $('ch-modal-save').addEventListener('click',async()=>{
     if(_weeklyMode==='count'){
       const t=parseInt($('ch-modal-weekly-target').value)||0;
       if(!t) return toast('주당 목표 횟수를 입력해주세요');
-      base.target=t; base.weeklyMode='count';
+      base.target=t; base.weeklyMode='count'; base.dir=$('ch-modal-weekly-count-dir').value;
     } else {
       const t=parseInt($('ch-modal-weekly-amount').value)||0;
       if(!t) return toast('주당 목표 금액을 입력해주세요');
@@ -3082,7 +3086,8 @@ function chIsDoneStrict(c){
     return pastWeeks.every(w=>{
       const recs=(c.records||[]).filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; });
       const val=isAmt?recs.reduce((s,r)=>s+(r.value||0),0):recs.length;
-      return isAmt?(isUnder?val<=c.target:val>=c.target):val>=(c.target||1);
+      const isUnderW=c.dir==='under';
+      return isAmt?(isUnderW?val<=c.target:val>=c.target):(isUnderW?val<=c.target:val>=(c.target||1));
     });
   }
   const cur = (c.records||[]).reduce((s,r)=>s+(r.value||0),0);
@@ -3175,9 +3180,9 @@ function renderPrevChallenge(){
       const doneWeeks=weeks.filter(w=>{
         const recs=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; });
         const val=isAmt?recs.reduce((s,r)=>s+(r.value||0),0):recs.length;
-        return isAmt?(isUnder?val<=tgt:val>=tgt):val>=tgt;
+        return isAmt?(isUnder?val<=tgt:val>=tgt):(c.dir==='under'?val<=tgt:val>=tgt);
       }).length;
-      goalText=isAmt?`주 ${tgt.toLocaleString('ko-KR')}원 ${isUnder?'이하':'이상'}`:`주 ${tgt}회 목표`;
+      goalText=isAmt?`주 ${tgt.toLocaleString('ko-KR')}원 ${isUnder?'이하':'이상'}`:`주 ${tgt}회 ${c.dir==='under'?'이하':'이상'}`;
       resultText=`${doneWeeks}/${weeks.length}주 달성`;
     } else {
       const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
@@ -3308,7 +3313,7 @@ function renderSection(who, all){
         const val=isAmt?weekRecs.reduce((s,r)=>s+(r.value||0),0):weekRecs.length;
         const isPast=w.end<today;
         const isCurrent=w.start<=today&&w.end>=today;
-        const wDone=isAmt?(isUnder?val<=tgt:val>=tgt):val>=tgt;
+        const wDone=isAmt?(isUnder?val<=tgt:val>=tgt):(c.dir==='under'?val<=tgt:val>=tgt);
         const barColor=wDone?'var(--green)':isPast?'var(--rose)':accentColor;
         const barW=isAmt?(isUnder?Math.min(100,Math.round(val/tgt*100)):Math.min(100,Math.round(val/tgt*100))):Math.min(100,Math.round(val/tgt*100));
         const valStr=isAmt?val.toLocaleString('ko-KR')+'원':val+'회';
