@@ -2721,11 +2721,15 @@ $('event-save-btn').addEventListener('click',async()=>{
 
   if(mode==='edit' && _editEvId){
     await updateDoc(doc(db,'events',_editEvId),{desc,date,time,timeEnd,place,memo,evType,who:wm[evWho],allday});
-    const fromDay=parseInt($('event-save-btn').dataset.fromDay)||parseInt(date.split('-')[2]);
+    const fromDay=parseInt($('event-save-btn').dataset.fromDay)||0;
     closeM('event-modal'); resetEventModal();
     toast('✅ 일정 수정됐어요!');
-    selDay=fromDay; rCal();
-    setTimeout(()=>openDayModal(fromDay),300);
+    if(fromDay){
+      selDay=fromDay; rCal();
+      setTimeout(()=>openDayModal(fromDay),300);
+    } else {
+      rCal();
+    }
   } else {
     await addDoc(evCol,{desc,date,time,timeEnd,place,memo,evType,who:wm[evWho],allday,createdAt:new Date().toISOString()});
     closeM('event-modal'); resetEventModal();
