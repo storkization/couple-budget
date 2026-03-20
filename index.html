@@ -2716,6 +2716,12 @@ $('event-save-btn').addEventListener('click',async()=>{
   const timeEnd=(!allday&&evEndEnabled)?getTimeVal($('event-ampm-end').value,$('event-hour-end').value,$('event-min-end').value):'';
   const place=$('event-place').value.trim();
   const memo=$('event-memo').value.trim();
+  // 시간 유효성 검사
+  if(!allday && time && timeEnd){
+    const [sh,sm]=time.split(':').map(Number);
+    const [eh,em]=timeEnd.split(':').map(Number);
+    if(eh*60+em <= sh*60+sm) return toast('⚠️ 종료 시간이 시작 시간보다 빠를 수 없어요');
+  }
   const wm={d:'dohun',k:'kyungeun',both:'both'};
   const mode=$('event-save-btn').dataset.mode||'add';
 
