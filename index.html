@@ -3295,12 +3295,19 @@ function renderPendingConfirm(){
     function cell(relevant, checked, key, color){
       if(!relevant) return `<td style="width:52px;text-align:center;color:var(--border);font-size:16px;padding:6px 0">—</td>`;
       const canClick = (!isD && key==='kyungeun') || (isD && key==='dohun');
+      if(!canClick){
+        // 상대방 체크 현황만 보여줌 (클릭 불가)
+        if(checked){
+          return `<td style="width:52px;padding:6px 0"><div style="width:40px;height:40px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:18px;color:white;margin:auto">✓</div></td>`;
+        } else {
+          return `<td style="width:52px;padding:6px 0"><div style="width:40px;height:40px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--brown3);margin:auto">？</div></td>`;
+        }
+      }
+      // 내가 클릭 가능한 셀 - 체크/미체크 모두 버튼
       if(checked){
-        return `<td style="width:52px;padding:6px 0"><div style="width:40px;height:40px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:18px;color:white;margin:auto">✓</div></td>`;
-      } else if(canClick){
-        return `<td style="width:52px;padding:6px 0"><button onclick="confirmEvent('${e.id}','${key}')" style="width:40px;height:40px;border-radius:50%;border:2px solid ${color};background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:${color};margin:auto;transition:all 0.2s">✓</button></td>`;
+        return `<td style="width:52px;padding:6px 0"><button onclick="confirmEvent('${e.id}','${key}')" style="width:40px;height:40px;border-radius:50%;border:none;background:${color};cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;margin:auto;transition:all 0.2s">✓</button></td>`;
       } else {
-        return `<td style="width:52px;padding:6px 0"><div style="width:40px;height:40px;border-radius:50%;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--brown3);margin:auto">？</div></td>`;
+        return `<td style="width:52px;padding:6px 0"><button onclick="confirmEvent('${e.id}','${key}')" style="width:40px;height:40px;border-radius:50%;border:2px solid ${color};background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:${color};margin:auto;transition:all 0.2s">✓</button></td>`;
       }
     }
 
