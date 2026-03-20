@@ -3376,7 +3376,7 @@ function renderSection(who, all){
         let statusTxt, barColor, barW;
         if(!hasRecord && !isPast){
           // 이번 주, 아직 기록 없음
-          statusTxt='달성 중'; barColor='var(--brown3)'; barW=0;
+          statusTxt='미설정'; barColor='var(--border)'; barW=0;
         } else if(!hasRecord && isPast){
           // 지난 주, 기록 없음
           statusTxt='미설정'; barColor='var(--border)'; barW=0;
@@ -3385,7 +3385,7 @@ function renderSection(who, all){
           statusTxt=wDone?'달성 🎉':'실패 ❌'; barColor=wDone?'var(--green)':'var(--rose)'; barW=Math.min(100,Math.round(val/tgt*100));
         } else {
           // 이번 주, 기록 있음
-          if(isOver){ barColor='#f5a623'; statusTxt=isAmt?`달성 중 (+${(val-tgt).toLocaleString('ko-KR')}원 초과)`:`달성 중 (${val}/${tgt}회 초과)`; barW=100; }
+          if(isOver){ barColor='var(--rose)'; statusTxt=isAmt?`실패 (${val.toLocaleString('ko-KR')}원 / ${tgt.toLocaleString('ko-KR')}원 초과)`:`실패 (${val}/${tgt}회 초과)`; barW=100; }
           else if(wDone){ statusTxt='달성 🎉'; barColor='var(--green)'; barW=100; }
           else { statusTxt=isAmt?`달성 중 (${val.toLocaleString('ko-KR')}원 / ${tgt.toLocaleString('ko-KR')}원)`:`달성 중 (${val}/${tgt}회)`; barColor=accentColor; barW=Math.min(100,Math.round(val/tgt*100)); }
         }
