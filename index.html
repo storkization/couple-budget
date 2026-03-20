@@ -3357,7 +3357,11 @@ function renderSection(who, all){
       const isAmt=c.weeklyMode==='amount';
       const isUnder=c.dir==='under';
       // 지난주 + 이번주만 표시
-      const visibleWeeks=weeks.filter(w=>w.end<=today||( w.start<=today&&w.end>=today));
+      const visibleWeeks=weeks.filter(w=>{
+        const isCurrent=w.start<=today&&w.end>=today;
+        const isLastWeek=w.end<today&&weeks[weeks.indexOf(w)+1]?.start<=today;
+        return isCurrent||isLastWeek;
+      });
       let weeklyHTML='<div style="margin-top:7px;display:flex;flex-direction:column;gap:6px">';
       visibleWeeks.forEach(w=>{
         const weekRecs=records.filter(r=>{ const d=new Date(r.date+'T00:00:00'); return d>=w.start&&d<=w.end; });
@@ -3381,9 +3385,9 @@ function renderSection(who, all){
           statusTxt=wDone?'달성 🎉':'실패 ❌'; barColor=wDone?'var(--green)':'var(--rose)'; barW=Math.min(100,Math.round(val/tgt*100));
         } else {
           // 이번 주, 기록 있음
-          if(isOver){ statusTxt='초과 ❌'; barColor='var(--rose)'; barW=100; }
+          if(isOver){ barColor='#f5a623'; statusTxt=isAmt?`달성 중 (+${(val-tgt).toLocaleString('ko-KR')}원 초과)`:`달성 중 (${val}/${tgt}회 초과)`; barW=100; }
           else if(wDone){ statusTxt='달성 🎉'; barColor='var(--green)'; barW=100; }
-          else { statusTxt=isAmt?`${val.toLocaleString('ko-KR')}원`:`${val}/${tgt}회`; barColor=accentColor; barW=Math.min(100,Math.round(val/tgt*100)); }
+          else { statusTxt=isAmt?`달성 중 (${val.toLocaleString('ko-KR')}원 / ${tgt.toLocaleString('ko-KR')}원)`:`달성 중 (${val}/${tgt}회)`; barColor=accentColor; barW=Math.min(100,Math.round(val/tgt*100)); }
         }
 
         const label=isCurrent?`✦ 이번 주 (${w.label})`:w.label;
@@ -3401,22 +3405,41 @@ function renderSection(who, all){
       const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
       const tgt=c.target||1;
       const isAmt=type==='amount';
+      const isAcc=type==='accumulate';
+      const isCnt=type==='count';
       const isUnder=c.dir==='under';
-      const unit=isAmt?'원':type==='accumulate'?(c.unit||''):'회';
-      const curStr=isAmt?Math.round(cur).toLocaleString('ko-KR'):cur;
+      const unit=isAmt?'원':isAcc?(c.unit||''):'회';
+      const curStr=isAmt?Math.round(cur).toLocaleString('ko-KR'):isAcc?cur:cur;
       const tgtStr=isAmt?tgt.toLocaleString('ko-KR'):tgt;
       const pctVal=Math.round((cur/tgt)*100);
-      const over=isUnder&&cur>tgt;
+      // 이번 달이 아직 진행 중인지
+      const todayNow=new Date(); todayNow.setHours(0,0,0,0);
+      const monthEnd=new Date(cYear,cMonth+1,0); monthEnd.setHours(23,59,59,999);
+      const isOngoing=todayNow<=monthEnd;
       let barC,statusStr;
       if(isUnder){
-        if(over){ barC='var(--rose)'; statusStr=`${isAmt?(Math.round(cur-tgt)).toLocaleString('ko-KR'):(cur-tgt)}${unit} 초과 ❌`; }
-        else if(pctVal>=80){ barC='#f5a623'; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 여유 ⚠️`; }
-        else { barC='var(--green)'; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 여유 ✅`; }
+        // 이하 목표 (적을수록 좋음)
+        if(done){ barC='var(--green)'; statusStr=`달성! 🎉`; }
+        else if(cur>tgt){
+          // 초과 - 진행 중이면 "달성 중", 월말이면 "초과 ❌"
+          if(isOngoing){ barC='#f5a623'; statusStr=`달성 중 (+${isAmt?(Math.round(cur-tgt)).toLocaleString('ko-KR'):(cur-tgt)}${unit} 초과)`; }
+          else { barC='var(--rose)'; statusStr=`초과 ❌`; }
+        } else {
+          const rem=tgt-cur;
+          barC='var(--green)'; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 여유 ✅`;
+        }
       } else {
-        if(done){ barC='var(--green)'; statusStr='달성! 🎉'; }
-        else { barC=accentColor; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 남음`; }
+        // 이상 목표 (많을수록 좋음)
+        if(isCnt){
+          // 횟수: N/M회 표시
+          if(done){ barC='var(--green)'; statusStr=`${cur}/${tgt}회 달성! 🎉`; }
+          else { barC=accentColor; statusStr=`${cur}/${tgt}회`; }
+        } else {
+          if(done){ barC='var(--green)'; statusStr='달성! 🎉'; }
+          else { barC=accentColor; const rem=tgt-cur; statusStr=`${isAmt?Math.round(rem).toLocaleString('ko-KR'):rem}${unit} 남음`; }
+        }
       }
-      cardBody=`<div style="margin-top:7px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--brown3)">${curStr}${unit} / ${tgtStr}${unit} ${isUnder?'이하':'이상'}</span><span style="font-size:11px;font-weight:800;color:${barC}">${statusStr}</span></div><div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden"><div style="height:100%;border-radius:99px;background:${barC};width:${Math.min(100,pctVal)}%;transition:width 0.4s"></div></div></div>`;
+      cardBody=`<div style="margin-top:7px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--brown3)">${isAmt?Math.round(cur).toLocaleString('ko-KR'):cur}${unit} / ${tgtStr}${unit} ${isUnder?'이하':'이상'}</span><span style="font-size:11px;font-weight:800;color:${barC}">${statusStr}</span></div><div style="background:var(--bg);border-radius:99px;height:6px;overflow:hidden"><div style="height:100%;border-radius:99px;background:${barC};width:${Math.min(100,pctVal)}%;transition:width 0.4s"></div></div></div>`;
       actionHTML=''; // 기록버튼은 카드 하단에 별도 배치
     }
     const hasRP=c.reward||c.penalty;
