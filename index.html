@@ -3325,13 +3325,17 @@ async function confirmEvent(id, key){
   const user=auth.currentUser; if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
   const myKey=isD?'dohun':'kyungeun';
-  if(key !== myKey) return;
   const ev=evts.find(e=>e.id===id); if(!ev) return;
-  const confirmed=ev.confirmedBy||[];
-  if(!confirmed.includes(myKey)){
+  const confirmed=[...(ev.confirmedBy||[])];
+  const idx=confirmed.indexOf(myKey);
+  if(idx===-1){
     confirmed.push(myKey);
     await updateDoc(doc(db,'events',id),{confirmedBy:confirmed});
     toast('✅ 확인했어요!');
+  } else {
+    confirmed.splice(idx,1);
+    await updateDoc(doc(db,'events',id),{confirmedBy:confirmed});
+    toast('↩️ 확인 취소했어요');
   }
 }
 
