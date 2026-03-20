@@ -1306,6 +1306,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
       <!-- 횟수 -->
       <div id="ch-type-count" style="margin-bottom:12px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--rose);margin-bottom:8px">📅 한 달 단위 목표예요</div>
         <label class="form-label">🎯 목표 횟수 & 방향</label>
         <div style="display:flex;align-items:center;gap:8px">
           <select class="form-select" id="ch-modal-count-dir" style="width:80px">
@@ -1320,6 +1321,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
       <!-- 누적 -->
       <div id="ch-type-accumulate" style="margin-bottom:12px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--rose);margin-bottom:8px">📅 한 달 단위 목표예요</div>
         <label class="form-label">🎯 목표량 & 방향</label>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <select class="form-select" id="ch-modal-acc-dir" style="width:80px">
@@ -1334,6 +1336,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
       <!-- 금액 -->
       <div id="ch-type-amount" style="margin-bottom:12px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--rose);margin-bottom:8px">📅 한 달 단위 목표예요</div>
         <label class="form-label">🎯 목표 금액 & 방향</label>
         <div style="display:flex;align-items:center;gap:8px">
           <select class="form-select" id="ch-modal-amount-dir" style="width:80px">
@@ -3192,7 +3195,7 @@ function renderPrevChallenge(){
     return;
   }
 
-  const typeLabel={calendar:'📅 달력',weekly:'📆 주 단위',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
+  const mPeriod=`한 달 단위, ${cMonth+1}/1 ~ ${cMonth+1}/${new Date(cYear,cMonth+1,0).getDate()}`; const typeLabel={calendar:'📅 달력',weekly:'📆 주 단위',count:`🔢 횟수 (${mPeriod})`,accumulate:`📊 누적 (${mPeriod})`,amount:`💰 금액 (${mPeriod})`};
 
   function renderPrevItem(c){
     const type=c.chType||'calendar';
@@ -3309,7 +3312,7 @@ function renderSection(who, all){
   if(filtered.length===0){ listEl.innerHTML=`<div style="text-align:center;padding:16px 0;color:var(--brown3);font-size:12px">📭 챌린지가 없어요</div>`; return; }
   let banner='';
   if(doneList.length===filtered.length&&filtered.length>0){ banner=`<div style="background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:12px;padding:12px;text-align:center;margin-bottom:8px;border:1.5px solid var(--gold)"><div style="font-size:22px">🎉</div><div style="font-size:13px;font-weight:800;color:var(--brown);margin-top:2px">모두 달성!</div></div>`; }
-  const typeLabel={calendar:'📅 달력',weekly:'📆 주 단위',count:'🔢 횟수',accumulate:'📊 누적',amount:'💰 금액'};
+  const mPeriod=`한 달 단위, ${cMonth+1}/1 ~ ${cMonth+1}/${new Date(cYear,cMonth+1,0).getDate()}`; const typeLabel={calendar:'📅 달력',weekly:'📆 주 단위',count:`🔢 횟수 (${mPeriod})`,accumulate:`📊 누적 (${mPeriod})`,amount:`💰 금액 (${mPeriod})`};
   listEl.innerHTML = banner + filtered.map(c=>{
     const done = chIsDoneStrict(c);
     const type = c.chType||'calendar';
