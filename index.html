@@ -807,8 +807,8 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
               • 입력 탭 계산기 기능 추가 (사칙연산 ＋－×÷ 및 버그 수정)<br>
               • 일괄 입력 기능 추가 (여러 항목 담아두고 한 번에 저장)<br>
               • 다중 저장 병렬 처리로 속도 개선<br>
-              • 챌린지 달력에 요일 헤더 추가 (일~토 표시)<br>
-              • 캘린더 "확인해 주세요" 기능 추가 (상대방 일정 체크)
+              • 챌린지 달력 요일 헤더 추가 (일~토, 시작 요일 정렬)<br>
+              • 캘린더 "확인해 주세요" 개선 (경은이가/도훈이가 열 분리, 함께 일정 양쪽 체크)
             </div>
           </div>
 
@@ -3098,6 +3098,13 @@ function renderSection(who, all){
       const mLabel=`${cMonth+1}월 1일 ~ ${cMonth+1}월 ${totalDays}일`;
       let calHTML=`<div style="font-size:10px;color:var(--brown3);margin-top:6px;margin-bottom:4px">📆 기간: ${mLabel}</div>`;
       calHTML+=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">`;
+      // 요일 헤더
+      ['일','월','화','수','목','금','토'].forEach(day=>{
+        calHTML+=`<div style="text-align:center;font-size:9px;font-weight:800;color:var(--brown3);padding-bottom:2px">${day}</div>`;
+      });
+      // 1일 시작 요일 빈칸
+      const startDay=new Date(cYear,cMonth,1).getDay();
+      for(let i=0;i<startDay;i++) calHTML+=`<div></div>`;
       for(let d=1;d<=totalDays;d++){
         const isChk=checked.includes(d);
         calHTML+=`<div onclick="toggleCalDay('${c.id}',${d})" style="aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;background:${isChk?calColor:'var(--surface)'};color:${isChk?'white':'var(--brown3)'};border:1px solid ${isChk?calColor:'var(--border)'};user-select:none;transition:all 0.15s">${d}</div>`;
@@ -3250,7 +3257,6 @@ function renderPendingConfirm(){
   const user=auth.currentUser; if(!user) return;
   const isD=user.email==='ventisummer@gmail.com';
 
-  // 오늘 이후 전체 일정
   const pending=evts.filter(e=>{
     const d=new Date(e.date+'T00:00:00'); d.setHours(0,0,0,0);
     const today=new Date(); today.setHours(0,0,0,0);
@@ -3260,15 +3266,12 @@ function renderPendingConfirm(){
   if(!pending.length){ wrap.style.display='none'; return; }
   wrap.style.display='block';
 
-  // 헤더: [확인 했어요] / 경은이가  도훈이가
+  // 헤더: 경은이가 / 도훈이가 먼저, 그 아래 구분선
   let html=`
-  <div style="margin-bottom:10px">
-    <div style="display:grid;grid-template-columns:1fr 52px 52px;gap:4px;align-items:center">
-      <div style="font-size:12px;font-weight:800;color:var(--brown)">✅ 확인 했어요</div>
-      <div style="font-size:11px;font-weight:700;color:var(--kyungeun);text-align:center">경은이가</div>
-      <div style="font-size:11px;font-weight:700;color:var(--dohun);text-align:center">도훈이가</div>
-    </div>
-    <div style="height:1px;background:var(--border);margin-top:6px"></div>
+  <div style="display:grid;grid-template-columns:1fr 52px 52px;gap:4px;align-items:center;padding-bottom:6px;border-bottom:2px solid var(--border);margin-bottom:4px">
+    <div style="font-size:11px;font-weight:800;color:var(--brown2)">✅ 확인 했어요</div>
+    <div style="font-size:11px;font-weight:700;color:var(--kyungeun);text-align:center">경은이가</div>
+    <div style="font-size:11px;font-weight:700;color:var(--dohun);text-align:center">도훈이가</div>
   </div>`;
 
   html += pending.map(e=>{
@@ -3281,8 +3284,8 @@ function renderPendingConfirm(){
     const whoColor=e.who==='dohun'?'var(--dohun)':e.who==='kyungeun'?'var(--kyungeun)':'var(--gold)';
     const whoLabel=e.who==='dohun'?'도훈':e.who==='kyungeun'?'경은':'함께';
 
-    // 경은 열: 도훈 or 함께 일정만 체크 의미 있음
-    // 도훈 열: 경은 or 함께 일정만 체크 의미 있음
+    // 경은 열: 도훈 or 함께 일정에서 경은이 체크
+    // 도훈 열: 경은 or 함께 일정에서 도훈이 체크
     const kRelevant = e.who==='dohun' || e.who==='together';
     const dRelevant = e.who==='kyungeun' || e.who==='together';
 
