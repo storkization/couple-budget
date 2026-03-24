@@ -1452,6 +1452,16 @@ async function loadCatsFromFirestore(){
       localStorage.setItem('custom_cats',snap.data().data);
     }
   } catch(e){}
+  const DEFS=[{k:'환급/환불',e:'🔄'},{k:'송금 받음',e:'💸'}];
+  let changed=false;
+  DEFS.forEach(di=>{
+    const exists=CATS.income.some(g=>g.items.some(i=>i.k===di.k));
+    if(!exists){
+      const g=CATS.income.find(g=>g.group==='💵 수입');
+      if(g){g.items.splice(-1,0,di);changed=true;}
+    }
+  });
+  if(changed)saveCats(CATS);
 }
 
 const allItems = () => [...CATS.expense, ...CATS.income].flatMap(g => g.items);
@@ -2214,8 +2224,10 @@ function renderBatchList(){
   if(batchList.length===0){sec.classList.add('hidden');return;}
   sec.classList.remove('hidden');
   $('batch-count').textContent=batchList.length;
-  const total=batchList.reduce((s,it)=>s+it.amount,0);
-  $('batch-total').textContent=total.toLocaleString('ko-KR')+'원';
+  const total=batchList.reduce((s,it)=>s+(it.type==='expense'?it.amount:-it.amount),0);
+  const totalColor=total>=0?'var(--rose)':'var(--green)';
+  $('batch-total').textContent=(total<0?'-':'')+Math.abs(total).toLocaleString('ko-KR')+'원';
+  $('batch-total').style.color=totalColor;
   $('batch-list').innerHTML=batchList.map((it,i)=>{
     const whoLabel=it.who==='kyungeun'?'🩷 경은':'💙 도훈';
     const typeLabel=it.type==='expense'?'지출':'수입';
