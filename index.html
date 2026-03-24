@@ -1971,22 +1971,30 @@ function txH(tx){
 function renderTxList(){
   const sort = ($('tx-sort')||{value:'date-desc'}).value;
   let mt = mTx();
-  if(sort==='date-desc') mt.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  else if(sort==='date-asc') mt.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  // 정렬
+  if(sort==='date-desc') mt.sort((a,b)=>b.date.localeCompare(a.date)||((b.createdAt||'').localeCompare(a.createdAt||'')));
+  else if(sort==='date-asc') mt.sort((a,b)=>a.date.localeCompare(b.date)||((a.createdAt||'').localeCompare(b.createdAt||'')));
   else mt.sort((a,b)=>(b.createdAt||b.date).localeCompare(a.createdAt||a.date));
   const c=$('tx-list');
   if(!mt.length){c.innerHTML='<div class="empty-state"><div class="empty-emoji">📭</div><div class="empty-text">이번 달 내역이 없어요<br>+ 버튼으로 추가해보세요</div></div>';return;}
-  const g={};mt.forEach(tx=>{if(!g[tx.date])g[tx.date]=[];g[tx.date].push(tx);});
-  c.innerHTML=Object.entries(g).map(([d,items])=>{
+  // 날짜 그룹 (정렬 순서 유지)
+  const dateOrder=[];
+  const g={};
+  mt.forEach(tx=>{
+    if(!g[tx.date]){g[tx.date]=[];dateOrder.push(tx.date);}
+    g[tx.date].push(tx);
+  });
+  c.innerHTML=dateOrder.map(d=>{
+    const items=g[d];
     const dayExp=items.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
     const dayInc=items.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
     const dayNet=dayInc-dayExp;
-    const netColor=dayNet>=0?'var(--green)':'var(--rose)';
+    const netColor=dayNet>=0?'var(--green-dark)':'var(--brown2)';
     const netStr=(dayNet>0?'+':'')+dayNet.toLocaleString('ko-KR')+'원';
     return `<div class="date-group">
-      <div class="date-label" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="date-label" style="display:flex;align-items:center;gap:8px">
         <span>${fmtDate(d)}</span>
-        <span style="font-size:11px;font-weight:700;color:${netColor}">${netStr}</span>
+        <span style="font-size:11px;font-weight:600;color:${netColor};opacity:0.85">${netStr}</span>
       </div>
       ${items.map(tx=>txH(tx)).join('')}
     </div>`;
