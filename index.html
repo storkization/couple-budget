@@ -3076,7 +3076,7 @@ function openProgressModal(c){
   const isAmt = c.chType==='amount';
   const isAcc = c.chType==='accumulate';
   const records = c.records||[];
-  const cur = records.reduce((s,r)=>s+(r.value||0),0);
+  const cur = isAcc ? (records.length ? records[records.length-1].value||0 : 0) : records.reduce((s,r)=>s+(r.value||0),0);
   const unit = isAmt?'원':isAcc?(c.unit||''):'회';
   const isUnder = c.dir==='under';
   const dirLabel = isUnder?'이하':'이상';
@@ -3142,8 +3142,9 @@ function chIsDoneStrict(c){
       return isAmt?(isUnderW?val<=c.target:val>=c.target):(isUnderW?val<=c.target:val>=(c.target||1));
     });
   }
-  const cur = (c.records||[]).reduce((s,r)=>s+(r.value||0),0);
-  return c.dir==='under' ? cur <= (c.target||0) && (c.records||[]).length > 0 : cur >= (c.target||1);
+  const _recs = c.records||[];
+  const cur = c.chType==='accumulate' ? (_recs.length ? _recs[_recs.length-1].value||0 : 0) : _recs.reduce((s,r)=>s+(r.value||0),0);
+  return c.dir==='under' ? cur <= (c.target||0) && _recs.length > 0 : cur >= (c.target||1);
 }
 
 // 이달 주 목록 반환 (일~토 기준)
@@ -3237,7 +3238,8 @@ function renderPrevChallenge(){
       goalText=isAmt?`주 ${tgt.toLocaleString('ko-KR')}원 ${isUnder?'이하':'이상'}`:`주 ${tgt}회 ${c.dir==='under'?'이하':'이상'}`;
       resultText=`${doneWeeks}/${weeks.length}주 달성`;
     } else {
-      const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
+      const _r3=(c.records||[]);
+      const cur=type==='accumulate'?(_r3.length?_r3[_r3.length-1].value||0:0):_r3.reduce((s,r)=>s+(r.value||0),0);
       const tgt=c.target||1;
       const isAmt=type==='amount';
       const unit=isAmt?'원':type==='accumulate'?(c.unit||''):'회';
@@ -3402,10 +3404,11 @@ function renderSection(who, all){
       weeklyHTML+='</div>';
       cardBody=weeklyHTML;
     } else {
-      const cur=(c.records||[]).reduce((s,r)=>s+(r.value||0),0);
+      const _r4=(c.records||[]);
+      const isAcc=type==='accumulate';
+      const cur=isAcc?(_r4.length?_r4[_r4.length-1].value||0:0):_r4.reduce((s,r)=>s+(r.value||0),0);
       const tgt=c.target||1;
       const isAmt=type==='amount';
-      const isAcc=type==='accumulate';
       const isCnt=type==='count';
       const isUnder=c.dir==='under';
       const unit=isAmt?'원':isAcc?(c.unit||''):'회';
