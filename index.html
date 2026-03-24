@@ -459,7 +459,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         </div>
       </div>
     </div>
-    <div class="section-head">이번 달 내역</div>
+    <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;padding-right:16px">
+      <span>이번 달 내역</span>
+      <select id="tx-sort" onchange="renderTxList()" style="font-family:inherit;font-size:11px;font-weight:600;color:var(--brown2);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;outline:none">
+        <option value="date-desc">날짜 최신순</option>
+        <option value="date-asc">날짜 오래된순</option>
+        <option value="created-desc">등록순</option>
+      </select>
+    </div>
     <div class="tx-list" id="tx-list"><div class="empty-state"><div class="empty-emoji">📭</div><div class="empty-text">내역을 불러오는 중...</div></div></div>
   </div>
 
@@ -1962,11 +1969,28 @@ function txH(tx){
   </div>`;
 }
 function renderTxList(){
-  const mt=mTx().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const sort = ($('tx-sort')||{value:'date-desc'}).value;
+  let mt = mTx();
+  if(sort==='date-desc') mt.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  else if(sort==='date-asc') mt.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  else mt.sort((a,b)=>(b.createdAt||b.date).localeCompare(a.createdAt||a.date));
   const c=$('tx-list');
   if(!mt.length){c.innerHTML='<div class="empty-state"><div class="empty-emoji">📭</div><div class="empty-text">이번 달 내역이 없어요<br>+ 버튼으로 추가해보세요</div></div>';return;}
   const g={};mt.forEach(tx=>{if(!g[tx.date])g[tx.date]=[];g[tx.date].push(tx);});
-  c.innerHTML=Object.entries(g).map(([d,items])=>`<div class="date-group"><div class="date-label">${fmtDate(d)}</div>${items.map(tx=>txH(tx)).join('')}</div>`).join('');
+  c.innerHTML=Object.entries(g).map(([d,items])=>{
+    const dayExp=items.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+    const dayInc=items.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+    const dayNet=dayInc-dayExp;
+    const netColor=dayNet>=0?'var(--green)':'var(--rose)';
+    const netStr=(dayNet>0?'+':'')+dayNet.toLocaleString('ko-KR')+'원';
+    return `<div class="date-group">
+      <div class="date-label" style="display:flex;justify-content:space-between;align-items:center">
+        <span>${fmtDate(d)}</span>
+        <span style="font-size:11px;font-weight:700;color:${netColor}">${netStr}</span>
+      </div>
+      ${items.map(tx=>txH(tx)).join('')}
+    </div>`;
+  }).join('');
   c.querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>openDetail(el.dataset.id)));
 }
 function renderAll(){ renderSummary(); renderTxList(); updateWhoSummary(); if(!$('page-chart').classList.contains('hidden')) renderDailyList(); }
