@@ -402,6 +402,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="sum-cell sum-exp" id="k-exp">0</div><div class="sum-cell sum-exp" id="d-exp">0</div><div class="sum-cell sum-exp" id="t-exp">0</div>
       </div>
       <div class="sum-row">
+        <div class="sum-cell label">🔄 환급</div>
+        <div class="sum-cell" id="k-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="d-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="t-ref" style="color:var(--green);font-weight:700">0</div>
+      </div>
+      <div class="sum-row">
         <div class="sum-cell label">✨ 잔액</div>
         <div class="sum-cell sum-bal" id="k-bal">-</div><div class="sum-cell sum-bal" id="d-bal">-</div><div class="sum-cell sum-bal" id="t-bal">-</div>
       </div>
@@ -1424,7 +1428,7 @@ const DEFAULT_CATS = {
     {group:'📦 기타',       items:[{k:'구독/멤버십',e:'📺'},{k:'교육',e:'📚'},{k:'경조사',e:'🎁'},{k:'기타',e:'📦'}]}
   ],
   income:[
-    {group:'💵 수입', items:[{k:'월급',e:'💵'},{k:'용돈',e:'🎁'},{k:'부수입',e:'💼'},{k:'이자/배당',e:'📈'},{k:'환급',e:'🔄'},{k:'기타수입',e:'💫'}]}
+    {group:'💵 수입', items:[{k:'월급',e:'💵'},{k:'용돈',e:'🎁'},{k:'부수입',e:'💼'},{k:'이자/배당',e:'📈'},{k:'환급/환불',e:'🔄'},{k:'송금 받음',e:'💸'},{k:'기타수입',e:'💫'}]}
   ]
 };
 
@@ -1886,6 +1890,9 @@ function renderSummary(){
   const mt = mTx();
   const calc = (who, type) => mt.filter(t=>t.who===who&&t.type===type).reduce((s,t)=>s+Number(t.amount),0);
   const dE = calc('dohun','expense'), kE = calc('kyungeun','expense');
+  // 환급 수입 (잔액 계산 시 지출에서 차감)
+  const refund = (who) => mt.filter(t=>t.who===who&&t.type==='income'&&(t.category==='환급/환불'||t.category==='송금 받음')).reduce((s,t)=>s+Number(t.amount),0);
+  const dR = refund('dohun'), kR = refund('kyungeun');
 
   // 예산 불러오기
   const dB = getBudget('dohun'), kB = getBudget('kyungeun');
@@ -1894,15 +1901,19 @@ function renderSummary(){
   // 요약 테이블 업데이트
   $('d-exp').textContent = fmt(dE); $('k-exp').textContent = fmt(kE); $('t-exp').textContent = fmt(dE+kE);
 
+  // 환급 셀
+  const fmtRef = v => v > 0 ? '+'+fmt(v) : '0';
+  $('d-ref').textContent = fmtRef(dR); $('k-ref').textContent = fmtRef(kR); $('t-ref').textContent = fmtRef(dR+kR);
+
   // 예산 셀
   $('d-bud').textContent = dB > 0 ? fmt(dB) : '-';
   $('k-bud').textContent = kB > 0 ? fmt(kB) : '-';
   $('t-bud').textContent = tB > 0 ? fmt(tB) : '-';
 
-  // 잔액 = 예산 - 지출 (예산 미설정 시 '-')
-  const setbal = (id, budget, exp) => {
+  // 잔액 = 예산 - 지출 + 환급 (예산 미설정 시 '-')
+  const setbal = (id, budget, exp, ref=0) => {
     if(budget > 0){
-      const v = budget - exp;
+      const v = budget - exp + ref;
       $(id).textContent = fmt(v);
       $(id).style.color = v >= 0 ? 'var(--green)' : 'var(--rose)';
     } else {
@@ -1910,7 +1921,7 @@ function renderSummary(){
       $(id).style.color = 'var(--brown3)';
     }
   };
-  setbal('d-bal', dB, dE); setbal('k-bal', kB, kE); setbal('t-bal', tB, dE+kE);
+  setbal('d-bal', dB, dE, dR); setbal('k-bal', kB, kE, kR); setbal('t-bal', tB, dE+kE, dR+kR);
 
   // 예산 입력창에 기존값 표시 (포커스 중이면 덮어쓰지 않음)
   const focused = document.activeElement;
@@ -1918,9 +1929,9 @@ function renderSummary(){
   if(kB > 0 && focused !== $('k-budget-input')) $('k-budget-input').value = kB.toLocaleString('ko-KR');
 
   // 바로미터 업데이트
-  updateBudgetBar('d-budget-bar', 'd-budget-info', dE, dB, 'd');
-  updateBudgetBar('k-budget-bar', 'k-budget-info', kE, kB, 'k');
-  updateBudgetBar('t-budget-bar', 't-budget-info', dE+kE, tB, 't');
+  updateBudgetBar('d-budget-bar', 'd-budget-info', dE-dR, dB, 'd');
+  updateBudgetBar('k-budget-bar', 'k-budget-info', kE-kR, kB, 'k');
+  updateBudgetBar('t-budget-bar', 't-budget-info', dE+kE-dR-kR, tB, 't');
 }
 
 // ── TX HTML ──
