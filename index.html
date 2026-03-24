@@ -1891,7 +1891,7 @@ function renderSummary(){
   const calc = (who, type) => mt.filter(t=>t.who===who&&t.type===type).reduce((s,t)=>s+Number(t.amount),0);
   const dE = calc('dohun','expense'), kE = calc('kyungeun','expense');
   // 환급 수입 (잔액 계산 시 지출에서 차감)
-  const refund = (who) => mt.filter(t=>t.who===who&&t.type==='income'&&(t.category==='환급/환불'||t.category==='송금 받음')).reduce((s,t)=>s+Number(t.amount),0);
+  const refund = (who) => mt.filter(t=>t.who===who&&t.type==='income'&&(t.category==='환급/환불'||t.category==='환급'||t.category==='송금 받음')).reduce((s,t)=>s+Number(t.amount),0);
   const dR = refund('dohun'), kR = refund('kyungeun');
 
   // 예산 불러오기
