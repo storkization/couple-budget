@@ -402,7 +402,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="sum-cell sum-exp" id="k-exp">0</div><div class="sum-cell sum-exp" id="d-exp">0</div><div class="sum-cell sum-exp" id="t-exp">0</div>
       </div>
       <div class="sum-row">
-        <div class="sum-cell label">🔄 환급</div>
+        <div class="sum-cell label">🔄 환급/환불</div>
         <div class="sum-cell" id="k-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="d-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="t-ref" style="color:var(--green);font-weight:700">0</div>
       </div>
       <div class="sum-row">
@@ -1452,8 +1452,11 @@ async function loadCatsFromFirestore(){
       localStorage.setItem('custom_cats',snap.data().data);
     }
   } catch(e){}
+  // 기본 항목 누락 시 자동 보완 + 구버전 '환급' → '환급/환불' 마이그레이션
   const DEFS=[{k:'환급/환불',e:'🔄'},{k:'송금 받음',e:'💸'}];
   let changed=false;
+  // '환급' 항목이 있으면 '환급/환불'로 이름 변경
+  CATS.income.forEach(g=>g.items.forEach(i=>{ if(i.k==='환급'){i.k='환급/환불';i.e='🔄';changed=true;} }));
   DEFS.forEach(di=>{
     const exists=CATS.income.some(g=>g.items.some(i=>i.k===di.k));
     if(!exists){
