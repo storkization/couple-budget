@@ -406,6 +406,10 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="sum-cell" id="k-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="d-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="t-ref" style="color:var(--green);font-weight:700">0</div>
       </div>
       <div style="text-align:right;font-size:9px;color:var(--brown3);padding:0 10px 4px">※ 환급/환불·송금받음 → 지출에서 차감</div>
+      <div class="sum-row" style="border-top:2px solid var(--border);padding-top:4px">
+        <div class="sum-cell label">✅ 실지출</div>
+        <div class="sum-cell" id="k-net" style="color:var(--rose);font-weight:800">0</div><div class="sum-cell" id="d-net" style="color:var(--rose);font-weight:800">0</div><div class="sum-cell" id="t-net" style="color:var(--rose);font-weight:800">0</div>
+      </div>
       <div class="sum-row">
         <div class="sum-cell label">✨ 잔액</div>
         <div class="sum-cell sum-bal" id="k-bal">-</div><div class="sum-cell sum-bal" id="d-bal">-</div><div class="sum-cell sum-bal" id="t-bal">-</div>
@@ -1383,6 +1387,38 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
   </div>
 </div>
 
+<!-- 환급/송금 기존내역 연결 모달 -->
+<div class="modal-overlay" id="refund-link-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="refund-link-title">🔄 기존 내역 연결</h3>
+      <button class="modal-close" id="refund-link-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:13px;color:var(--brown2);font-weight:700" id="refund-link-desc">환급받은 기존 지출 내역이 있나요?</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <button id="refund-link-yes" style="flex:1;padding:12px;background:var(--rose);color:white;border:none;border-radius:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">📋 네, 불러올게요</button>
+        <button id="refund-link-no" style="flex:1;padding:12px;background:var(--bg);color:var(--brown);border:1.5px solid var(--border);border-radius:12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">✏️ 직접 입력</button>
+      </div>
+      <div id="refund-link-list-area" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:12px;font-weight:700;color:var(--brown2)">지출 내역</span>
+          <select id="refund-link-period" style="font-family:inherit;font-size:11px;font-weight:600;color:var(--brown2);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer">
+            <option value="1">최근 1개월</option>
+            <option value="2">최근 2개월</option>
+            <option value="3">최근 3개월</option>
+            <option value="6">최근 6개월</option>
+          </select>
+        </div>
+        <div id="refund-link-items" style="max-height:300px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1515,11 +1551,83 @@ function renderChips(containerId, typeKey, activeKey) {
     b.addEventListener('click', () => {
       const key = b.dataset.key;
       const cid = b.dataset.container;
-      if(cid === 'cat-chips-add') { aCat = key; renderChips('cat-chips-add', cType, aCat); }
+      if(cid === 'cat-chips-add') {
+        aCat = key; renderChips('cat-chips-add', cType, aCat);
+        if(key==='환급/환불'||key==='송금 받음') openRefundLinkModal(key);
+      }
       else if(cid === 'cat-chips-edit') { eCat = key; renderChips('cat-chips-edit', eType, eCat); }
     });
   });
 }
+
+// ── 환급/송금 기존내역 연결 ──
+function openRefundLinkModal(catKey){
+  const isRefCat = catKey==='환급/환불';
+  $('refund-link-title').textContent = isRefCat ? '🔄 환급/환불 입력' : '💸 송금받음 입력';
+  $('refund-link-desc').textContent = isRefCat ? '환급받은 기존 지출 내역이 있나요?' : '송금받은 기존 지출 내역이 있나요?';
+  $('refund-link-list-area').style.display='none';
+  $('refund-link-modal').classList.add('open');
+
+  $('refund-link-no').onclick=()=>{
+    closeM('refund-link-modal');
+  };
+
+  $('refund-link-yes').onclick=()=>{
+    $('refund-link-list-area').style.display='block';
+    renderRefundLinkItems();
+  };
+
+  $('refund-link-period').onchange=()=>renderRefundLinkItems();
+}
+
+function renderRefundLinkItems(){
+  const months=parseInt($('refund-link-period').value)||1;
+  const now=new Date();
+  const cutoff=new Date(now.getFullYear(), now.getMonth()-months, now.getDate());
+  const items=txs.filter(t=>{
+    if(t.type!=='expense') return false;
+    const d=new Date(t.date);
+    return d>=cutoff && d<=now;
+  }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  if(!items.length){
+    $('refund-link-items').innerHTML='<div style="text-align:center;padding:20px;font-size:12px;color:var(--brown3)">해당 기간 지출 내역이 없어요</div>';
+    return;
+  }
+
+  $('refund-link-items').innerHTML=items.map(tx=>{
+    const wl=tx.who==='kyungeun'?'경은':'도훈';
+    const wc=tx.who==='kyungeun'?'var(--kyungeun)':'var(--dohun)';
+    return `<div class="refund-link-item" data-id="${tx.id}" style="display:flex;align-items:center;justify-content:space-between;padding:10px;margin-bottom:6px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--brown)">${getE(tx.category)} ${tx.desc}</div>
+        <div style="font-size:11px;color:var(--brown3);margin-top:2px">${fmtDate(tx.date)} · ${tx.category} · <span style="color:${wc};font-weight:600">${wl}</span></div>
+      </div>
+      <div style="font-size:13px;font-weight:800;color:var(--rose)">${fmtFull(Number(tx.amount))}</div>
+    </div>`;
+  }).join('');
+
+  $('refund-link-items').querySelectorAll('.refund-link-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const tx=txs.find(t=>t.id===el.dataset.id);
+      if(!tx) return;
+      // 금액, 내용, 날짜, 누가 자동 채움
+      resetCalc();
+      $('inp-amount').value=Number(tx.amount).toLocaleString('ko-KR');
+      $('inp-desc').value=tx.desc;
+      $('inp-date').value=new Date().toISOString().split('T')[0];
+      $('inp-memo').value=`${tx.category} 환급 (${fmtDate(tx.date)})`;
+      // 누가 맞추기
+      if(tx.who==='kyungeun'&&cWho!=='kyungeun') $('who-kyungeun').click();
+      if(tx.who==='dohun'&&cWho!=='dohun') $('who-dohun').click();
+      closeM('refund-link-modal');
+      toast('✅ 내역이 채워졌어요!');
+    });
+  });
+}
+
+$('refund-link-close').addEventListener('click',()=>closeM('refund-link-modal'));
+$('refund-link-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('refund-link-modal');});
 
 // ── PHOTOS (Firebase Storage 연동 - 달별 저장) ──
 let _photoYear = new Date().getFullYear();
@@ -1936,6 +2044,11 @@ function renderSummary(){
   const fmtRef = v => v > 0 ? '+'+fmt(v) : '0';
   $('d-ref').textContent = fmtRef(dR); $('k-ref').textContent = fmtRef(kR); $('t-ref').textContent = fmtRef(dR+kR);
 
+  // 실지출 셀 (지출 - 환급)
+  $('d-net').textContent = fmt(dE - dR);
+  $('k-net').textContent = fmt(kE - kR);
+  $('t-net').textContent = fmt(dE + kE - dR - kR);
+
   // 예산 셀
   $('d-bud').textContent = dB > 0 ? fmt(dB) : '-';
   $('k-bud').textContent = kB > 0 ? fmt(kB) : '-';
@@ -2110,7 +2223,7 @@ function addSwipeToClose(sheetEl, overlayId){
   });
 }
 // 고정 모달들에 스와이프 적용
-['detail-modal','edit-modal','cat-edit-modal','day-modal','event-modal','ch-modal'].forEach(id=>{
+['detail-modal','edit-modal','cat-edit-modal','day-modal','event-modal','ch-modal','refund-link-modal'].forEach(id=>{
   const overlay=$(id); if(!overlay) return;
   const sheet=overlay.querySelector('.modal-sheet');
   if(sheet) addSwipeToClose(sheet, id);
