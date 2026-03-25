@@ -405,6 +405,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="sum-cell label">🔄 환급/환불</div>
         <div class="sum-cell" id="k-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="d-ref" style="color:var(--green);font-weight:700">0</div><div class="sum-cell" id="t-ref" style="color:var(--green);font-weight:700">0</div>
       </div>
+      <div style="text-align:right;font-size:9px;color:var(--brown3);padding:0 10px 4px">※ 환급/환불·송금받음 → 지출에서 차감</div>
       <div class="sum-row">
         <div class="sum-cell label">✨ 잔액</div>
         <div class="sum-cell sum-bal" id="k-bal">-</div><div class="sum-cell sum-bal" id="d-bal">-</div><div class="sum-cell sum-bal" id="t-bal">-</div>
@@ -1465,6 +1466,21 @@ async function loadCatsFromFirestore(){
       if(g){g.items.splice(-1,0,di);changed=true;}
     }
   });
+  // 중복 항목 제거 (같은 카테고리명이 2개 이상 있으면 하나만 유지)
+  CATS.income.forEach(g=>{
+    const seen=new Set();
+    g.items=g.items.filter(i=>{
+      if(seen.has(i.k)) return false;
+      seen.add(i.k); return true;
+    });
+  });
+  CATS.expense.forEach(g=>{
+    const seen=new Set();
+    g.items=g.items.filter(i=>{
+      if(seen.has(i.k)) return false;
+      seen.add(i.k); return true;
+    });
+  });
   if(changed)saveCats(CATS);
 }
 
@@ -1494,7 +1510,7 @@ function renderChips(containerId, typeKey, activeKey) {
       <div class="cat-chips">${g.items.map(c =>
         `<button class="cat-chip${c.k===activeKey?' active':''}" data-key="${c.k}" data-container="${containerId}">${c.e} ${c.k}</button>`
       ).join('')}</div>
-    </div>`).join('');
+    </div>`).join('') + (typeKey==='income' ? `<div style="font-size:10px;color:var(--brown3);margin-top:6px;padding:4px 8px;background:var(--bg);border-radius:8px">ℹ️ <b>환급/환불</b>과 <b>송금받음</b>은 지출에서 차감됩니다</div>` : '');
   el.querySelectorAll('.cat-chip').forEach(b => {
     b.addEventListener('click', () => {
       const key = b.dataset.key;
@@ -1780,10 +1796,11 @@ async function loadBudgetsFromFirestore(){
 function updateBudgetBar(barId, infoId, expense, budget, who){
   const sfx = who==='d'?'-d': who==='k'?'-k':'';
   if(budget > 0){
-    const pct = Math.min(100, Math.round(expense / budget * 100));
-    $(infoId).textContent = `${fmtFull(expense)} / ${fmtFull(budget)} (${pct}%)`;
-    $(barId).style.width = pct + '%';
-    $(barId).className = 'budget-bar-fill ' + (pct>=100?'over'+sfx:pct>=80?'warn'+sfx:'safe'+sfx);
+    const rawPct = Math.round(expense / budget * 100);
+    const barPct = Math.min(100, rawPct);
+    $(infoId).textContent = `${fmtFull(expense)} / ${fmtFull(budget)} (${rawPct}%)`;
+    $(barId).style.width = barPct + '%';
+    $(barId).className = 'budget-bar-fill ' + (rawPct>=100?'over'+sfx:rawPct>=80?'warn'+sfx:'safe'+sfx);
   } else {
     $(infoId).textContent = '미설정';
     $(barId).style.width = '0%';
@@ -2419,21 +2436,28 @@ const CAT_COLORS = ['#e8785a','#4a7fa8','#c96ea0','#5a9e7a','#c9963a','#7a6ac9',
 function rChart(){
   const mt=mTx();
   const exp=mt.filter(t=>t.type==='expense');
+  const isRefund=t=>t.type==='income'&&(t.category==='환급/환불'||t.category==='환급'||t.category==='송금 받음');
   const dA=exp.filter(t=>t.who==='dohun').reduce((s,t)=>s+Number(t.amount),0);
   const kA=exp.filter(t=>t.who==='kyungeun').reduce((s,t)=>s+Number(t.amount),0);
+  const dRef=mt.filter(t=>t.who==='dohun'&&isRefund(t)).reduce((s,t)=>s+Number(t.amount),0);
+  const kRef=mt.filter(t=>t.who==='kyungeun'&&isRefund(t)).reduce((s,t)=>s+Number(t.amount),0);
+  const dNet=dA-dRef, kNet=kA-kRef;
 
-  // ── 파이차트 (예산 대비 지출) ──
+  // ── 파이차트 (예산 대비 실지출 = 지출 - 환급) ──
   const dB=getBudget('dohun'), kB=getBudget('kyungeun');
-  drawPie('pie-k', kA, kB, 'k-budget-pct');
-  drawPie('pie-d', dA, dB, 'd-budget-pct');
-  $('pie-k-pct').textContent = kB>0 ? `${Math.round(kA/kB*100)}% 사용` : '예산 미설정';
-  $('pie-d-pct').textContent = dB>0 ? `${Math.round(dA/dB*100)}% 사용` : '예산 미설정';
+  drawPie('pie-k', kNet, kB, 'k-budget-pct');
+  drawPie('pie-d', dNet, dB, 'd-budget-pct');
+  $('pie-k-pct').textContent = kB>0 ? `${Math.round(kNet/kB*100)}% 사용` : '예산 미설정';
+  $('pie-d-pct').textContent = dB>0 ? `${Math.round(dNet/dB*100)}% 사용` : '예산 미설정';
 
-  // ── 지난달 대비 증감 ──
+  // ── 지난달 대비 증감 (실지출 기준) ──
   let pm=cMonth-1, py=cYear; if(pm<0){pm=11;py--;}
-  const prevExp=txs.filter(t=>{const d=new Date(t.date);return d.getFullYear()===py&&d.getMonth()===pm&&t.type==='expense';});
+  const prevMt=txs.filter(t=>{const d=new Date(t.date);return d.getFullYear()===py&&d.getMonth()===pm;});
+  const prevExp=prevMt.filter(t=>t.type==='expense');
   const pdA=prevExp.filter(t=>t.who==='dohun').reduce((s,t)=>s+Number(t.amount),0);
   const pkA=prevExp.filter(t=>t.who==='kyungeun').reduce((s,t)=>s+Number(t.amount),0);
+  const pdRef=prevMt.filter(t=>t.who==='dohun'&&isRefund(t)).reduce((s,t)=>s+Number(t.amount),0);
+  const pkRef=prevMt.filter(t=>t.who==='kyungeun'&&isRefund(t)).reduce((s,t)=>s+Number(t.amount),0);
 
   function momRow(who, label, cur, prev){
     const diff=cur-prev;
@@ -2448,10 +2472,10 @@ function rChart(){
     </div>`;
   }
   $('mom-compare').innerHTML =
-    momRow('kyungeun','🩷 경은', kA, pkA) +
-    momRow('dohun','💙 도훈', dA, pdA);
+    momRow('kyungeun','🩷 경은', kNet, pkA-pkRef) +
+    momRow('dohun','💙 도훈', dNet, pdA-pdRef);
 
-  // ── 카테고리별 지출 (3열 테이블) ──
+  // ── 카테고리별 지출 (3열 테이블 + 환급 차감) ──
   const allCats={}, kCats={}, dCats={};
   exp.forEach(t=>{
     const a=Number(t.amount);
@@ -2462,6 +2486,7 @@ function rChart(){
   const allTotal=Object.values(allCats).reduce((s,v)=>s+v,0);
   const kTotal=Object.values(kCats).reduce((s,v)=>s+v,0);
   const dTotal=Object.values(dCats).reduce((s,v)=>s+v,0);
+  const totalRef=dRef+kRef;
   const sorted=Object.entries(allCats).sort((a,b)=>b[1]-a[1]);
 
   if(!sorted.length){
@@ -2487,24 +2512,45 @@ function rChart(){
         <td style="text-align:right;padding:8px 4px;color:var(--brown)"><div style="font-weight:600">${fmtC(dAmt)}</div><div style="font-size:10px;color:var(--brown3)">${dAmt?pct(dAmt,dTotal)+'%':'–'}</div></td>
       </tr>`;
     });
+    // 지출 소계
     tableHTML+=`<tr style="border-top:2px solid var(--border);background:var(--bg)">
-      <td style="padding:8px 6px;font-weight:800;color:var(--brown)">합계</td>
+      <td style="padding:8px 6px;font-weight:800;color:var(--brown)">지출 소계</td>
       <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--brown)">${fmtC(allTotal)}</td>
       <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--rose)">${fmtC(kTotal)}</td>
       <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--dohun)">${fmtC(dTotal)}</td>
     </tr>`;
+    // 환급/환불 차감
+    if(totalRef>0){
+      tableHTML+=`<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 6px;font-weight:700;color:#1a8c5e;white-space:nowrap">🔄 환급/환불</td>
+        <td style="text-align:right;padding:8px 4px;font-weight:700;color:#1a8c5e">-${fmtC(totalRef)}</td>
+        <td style="text-align:right;padding:8px 4px;font-weight:600;color:#1a8c5e">${kRef?'-'+fmtC(kRef):'–'}</td>
+        <td style="text-align:right;padding:8px 4px;font-weight:600;color:#1a8c5e">${dRef?'-'+fmtC(dRef):'–'}</td>
+      </tr>`;
+    }
+    // 실지출 합계
+    tableHTML+=`<tr style="border-top:2px solid var(--brown3)">
+      <td style="padding:8px 6px;font-weight:800;color:var(--brown)">✅ 실지출</td>
+      <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--rose)">${fmtC(allTotal-totalRef)}</td>
+      <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--rose)">${fmtC(kTotal-kRef)}</td>
+      <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--rose)">${fmtC(dTotal-dRef)}</td>
+    </tr>`;
     tableHTML+=`</tbody></table></div>`;
+    if(totalRef>0) tableHTML+=`<div style="font-size:10px;color:var(--brown3);margin-top:6px;text-align:right">※ 환급/환불·송금받음은 지출에서 차감됩니다</div>`;
     $('cat-chart').innerHTML=tableHTML;
   }
 
-  // ── 최근 4개월 (월별 필터 적용) ──
+  // ── 최근 4개월 (월별 필터 적용, 환급 차감) ──
   const months=[];
   for(let i=3;i>=0;i--){
     let m=cMonth-i,y=cYear; if(m<0){m+=12;y--;}
-    const src=txs.filter(tx=>{const d=new Date(tx.date);return d.getFullYear()===y&&d.getMonth()===m&&tx.type==='expense';});
+    const mTxs=txs.filter(tx=>{const d=new Date(tx.date);return d.getFullYear()===y&&d.getMonth()===m;});
+    const src=mTxs.filter(t=>t.type==='expense');
+    const ref=mTxs.filter(t=>isRefund(t));
     const fSrc = monthlyFilter==='all' ? src : src.filter(t=>t.who===monthlyFilter);
-    const e=fSrc.reduce((s,t)=>s+Number(t.amount),0);
-    months.push({label:`${m+1}월`,exp:e,cur:i===0});
+    const fRef = monthlyFilter==='all' ? ref : ref.filter(t=>t.who===monthlyFilter);
+    const e=fSrc.reduce((s,t)=>s+Number(t.amount),0) - fRef.reduce((s,t)=>s+Number(t.amount),0);
+    months.push({label:`${m+1}월`,exp:Math.max(0,e),cur:i===0});
   }
   const mx=Math.max(...months.map(m=>m.exp),1);
   const barColors=['#c9963a','#5a9e7a','#4a7fa8','#e8785a'];
@@ -2528,7 +2574,8 @@ function drawPie(canvasId, spent, budget, _){
     ctx.fillText('미설정',cx,cy); return;
   }
 
-  const pct=Math.min(1,spent/budget);
+  const rawPct=spent/budget;
+  const pct=Math.min(1,rawPct);
   const startAngle=-Math.PI/2;
 
   // 잔여 (파랑)
@@ -2538,12 +2585,12 @@ function drawPie(canvasId, spent, budget, _){
   // 지출 (빨강)
   if(pct>0){
     ctx.beginPath();ctx.arc(cx,cy,r,startAngle,startAngle+Math.PI*2*pct);
-    ctx.strokeStyle=pct>=1?'#c0392b':'#e8785a';ctx.lineWidth=lw;ctx.lineCap='round';ctx.stroke();
+    ctx.strokeStyle=rawPct>=1?'#c0392b':'#e8785a';ctx.lineWidth=lw;ctx.lineCap='round';ctx.stroke();
   }
 
-  // 중앙 텍스트
-  ctx.fillStyle='#3d2b1f';ctx.font='bold 14px Pretendard,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(`${Math.round(pct*100)}%`,cx,cy);
+  // 중앙 텍스트 (100% 초과 시 실제 수치 표시)
+  ctx.fillStyle=rawPct>=1?'#c0392b':'#3d2b1f';ctx.font='bold 14px Pretendard,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(`${Math.round(rawPct*100)}%`,cx,cy);
 }
 
 // ── CALENDAR ──
