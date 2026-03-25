@@ -461,7 +461,7 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
     </div>
     <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;padding-right:16px">
       <span>이번 달 내역</span>
-      <select id="tx-sort" onchange="renderTxList()" style="font-family:inherit;font-size:11px;font-weight:600;color:var(--brown2);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;outline:none">
+      <select id="tx-sort" style="font-family:inherit;font-size:11px;font-weight:600;color:var(--brown2);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;outline:none">
         <option value="date-desc">날짜 최신순</option>
         <option value="date-asc">날짜 오래된순</option>
         <option value="created-desc">등록순</option>
@@ -2019,6 +2019,7 @@ function renderTxList(){
   c.querySelectorAll('.tx-item').forEach(el=>el.addEventListener('click',()=>openDetail(el.dataset.id)));
 }
 function renderAll(){ renderSummary(); renderTxList(); updateWhoSummary(); if(!$('page-chart').classList.contains('hidden')) renderDailyList(); }
+$('tx-sort').addEventListener('change', renderTxList);
 
 // ── DETAIL ──
 function openDetail(id){
