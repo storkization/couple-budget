@@ -579,11 +579,6 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
       <div class="chart-card">
         <div class="chart-title-row">
           <span class="chart-title">📊 지출 통계</span>
-          <select class="chart-filter" id="stat-filter">
-            <option value="all">전체</option>
-            <option value="kyungeun">🩷 경은</option>
-            <option value="dohun">💙 도훈</option>
-          </select>
         </div>
         <div style="font-size:12px;font-weight:700;color:var(--brown2);margin-bottom:8px">카테고리별 지출</div>
         <div id="cat-chart"></div>
@@ -1419,7 +1414,6 @@ let cType='expense', cWho='dohun', cYear=new Date().getFullYear(), cMonth=new Da
 let txs=[], evts=[], unsubTx=null, unsubEv=null, unsubBudget=null, unsubAppCfg=null, unsubPhotos=null, unsubChallenge=null;
 let editId=null, eType='expense', eWho='dohun', eCat='';
 let aCat='', selDay=null, evWho='both';
-let statFilter='all';
 let _appConfig = {};
 let _challengeAll = [];
 let _budgetCache = {};
@@ -2418,7 +2412,6 @@ $('minor-save-btn').addEventListener('click',()=>{
 
 // ── CHART (드롭다운 통합) ──
 let monthlyFilter = 'all';
-$('stat-filter').addEventListener('change',()=>{ statFilter=$('stat-filter').value; rChart(); });
 $('monthly-filter').addEventListener('change',()=>{ monthlyFilter=$('monthly-filter').value; rChart(); });
 
 const CAT_COLORS = ['#e8785a','#4a7fa8','#c96ea0','#5a9e7a','#c9963a','#7a6ac9','#e87a3a','#3ab8c9','#c94a6e','#6ac95a'];
@@ -2458,16 +2451,51 @@ function rChart(){
     momRow('kyungeun','🩷 경은', kA, pkA) +
     momRow('dohun','💙 도훈', dA, pdA);
 
-  // ── 카테고리별 지출 (통합 필터 적용) ──
-  const filtExp = statFilter==='all' ? exp : exp.filter(t=>t.who===statFilter);
-  const cats={};
-  filtExp.forEach(t=>{cats[t.category]=(cats[t.category]||0)+Number(t.amount);});
-  const total=Object.values(cats).reduce((s,v)=>s+v,0);
-  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
-  $('cat-chart').innerHTML=sorted.map(([cat,amt],i)=>{
-    const color=CAT_COLORS[i%CAT_COLORS.length];
-    return `<div class="cat-bar"><div class="cat-bar-head"><span>${getE(cat)} ${cat}</span><span>${fmtFull(amt)} (${total?Math.round(amt/total*100):0}%)</span></div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${total?amt/total*100:0}%;background:${color}"></div></div></div>`;
-  }).join('')||'<div class="empty-state"><div class="empty-emoji">📊</div><div class="empty-text">데이터가 없어요</div></div>';
+  // ── 카테고리별 지출 (3열 테이블) ──
+  const allCats={}, kCats={}, dCats={};
+  exp.forEach(t=>{
+    const a=Number(t.amount);
+    allCats[t.category]=(allCats[t.category]||0)+a;
+    if(t.who==='kyungeun') kCats[t.category]=(kCats[t.category]||0)+a;
+    else dCats[t.category]=(dCats[t.category]||0)+a;
+  });
+  const allTotal=Object.values(allCats).reduce((s,v)=>s+v,0);
+  const kTotal=Object.values(kCats).reduce((s,v)=>s+v,0);
+  const dTotal=Object.values(dCats).reduce((s,v)=>s+v,0);
+  const sorted=Object.entries(allCats).sort((a,b)=>b[1]-a[1]);
+
+  if(!sorted.length){
+    $('cat-chart').innerHTML='<div class="empty-state"><div class="empty-emoji">📊</div><div class="empty-text">데이터가 없어요</div></div>';
+  } else {
+    const pct=(v,t)=>t?Math.round(v/t*100):0;
+    const fmtC=v=>v?v.toLocaleString('ko-KR'):'–';
+    let tableHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr style="border-bottom:2px solid var(--border)">
+          <th style="text-align:left;padding:8px 6px;font-weight:800;color:var(--brown);white-space:nowrap">카테고리</th>
+          <th style="text-align:right;padding:8px 4px;font-weight:800;color:var(--brown);white-space:nowrap">전체</th>
+          <th style="text-align:right;padding:8px 4px;font-weight:800;color:var(--rose);white-space:nowrap">🩷 경은</th>
+          <th style="text-align:right;padding:8px 4px;font-weight:800;color:var(--dohun);white-space:nowrap">💙 도훈</th>
+        </tr></thead><tbody>`;
+    sorted.forEach(([cat,amt],i)=>{
+      const kAmt=kCats[cat]||0, dAmt=dCats[cat]||0;
+      const bg=i%2===0?'transparent':'var(--bg)';
+      tableHTML+=`<tr style="border-bottom:1px solid var(--border);background:${bg}">
+        <td style="padding:8px 6px;font-weight:700;color:var(--brown);white-space:nowrap">${getE(cat)} ${cat}</td>
+        <td style="text-align:right;padding:8px 4px;color:var(--brown)"><div style="font-weight:700">${fmtC(amt)}</div><div style="font-size:10px;color:var(--brown3)">${pct(amt,allTotal)}%</div></td>
+        <td style="text-align:right;padding:8px 4px;color:var(--brown)"><div style="font-weight:600">${fmtC(kAmt)}</div><div style="font-size:10px;color:var(--brown3)">${kAmt?pct(kAmt,kTotal)+'%':'–'}</div></td>
+        <td style="text-align:right;padding:8px 4px;color:var(--brown)"><div style="font-weight:600">${fmtC(dAmt)}</div><div style="font-size:10px;color:var(--brown3)">${dAmt?pct(dAmt,dTotal)+'%':'–'}</div></td>
+      </tr>`;
+    });
+    tableHTML+=`<tr style="border-top:2px solid var(--border);background:var(--bg)">
+      <td style="padding:8px 6px;font-weight:800;color:var(--brown)">합계</td>
+      <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--brown)">${fmtC(allTotal)}</td>
+      <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--rose)">${fmtC(kTotal)}</td>
+      <td style="text-align:right;padding:8px 4px;font-weight:800;color:var(--dohun)">${fmtC(dTotal)}</td>
+    </tr>`;
+    tableHTML+=`</tbody></table></div>`;
+    $('cat-chart').innerHTML=tableHTML;
+  }
 
   // ── 최근 4개월 (월별 필터 적용) ──
   const months=[];
