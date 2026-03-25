@@ -1986,7 +1986,7 @@ function renderTxList(){
     } else {
       const ca = a.createdAt||'0000';
       const cb = b.createdAt||'0000';
-      return cb > ca ? -1 : cb < ca ? 1 : 0;
+      return cb > ca ? 1 : cb < ca ? -1 : 0;
     }
   });
 
@@ -2006,12 +2006,12 @@ function renderTxList(){
     const dayExp=items.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
     const dayInc=items.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
     const dayNet=dayInc-dayExp;
-    const netColor=dayNet>=0?'var(--green-dark)':'var(--brown2)';
+    const netColor=dayNet>=0?'#1a8c5e':'var(--rose)';
     const netStr=(dayNet>0?'+':'')+dayNet.toLocaleString('ko-KR')+'원';
     return `<div class="date-group">
       <div class="date-label" style="display:flex;align-items:center;gap:8px">
         <span>${fmtDate(d)}</span>
-        <span style="font-size:11px;font-weight:600;color:${netColor};opacity:0.85">${netStr}</span>
+        <span style="font-size:11px;font-weight:700;color:${netColor}">${netStr}</span>
       </div>
       ${items.map(tx=>txH(tx)).join('')}
     </div>`;
