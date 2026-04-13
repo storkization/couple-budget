@@ -524,6 +524,14 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
           <div id="cat-chips-add"></div>
         </div>
         <div class="row1"><label class="form-label">💬 메모 (선택)</label><textarea class="form-textarea" id="inp-memo" placeholder="메모..."></textarea></div>
+        <div class="row1">
+          <label class="form-label">💳 할부 (선택)</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="form-input" type="number" id="inp-installment" placeholder="1" min="1" max="36" value="1" inputmode="numeric" style="width:90px">
+            <span style="font-size:12px;color:var(--brown3)">개월 (1 = 일시불)</span>
+          </div>
+          <div id="installment-hint" style="margin-top:6px;font-size:11px;color:var(--brown2);min-height:14px"></div>
+        </div>
       </div>
       <!-- 배치 리스트 -->
       <div class="batch-section hidden" id="batch-section">
@@ -1025,12 +1033,23 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
         <div class="who-toggle"><button class="who-btn kyungeun" id="edit-who-kyungeun">🩷 경은</button><button class="who-btn dohun active" id="edit-who-dohun">💙 도훈</button></div>
       </div>
       <div class="row2">
-        <div><label class="form-label">💰 금액</label><input class="form-input" type="number" id="edit-amount" inputmode="numeric"></div>
+        <div id="edit-amount-cell"><label class="form-label">💰 금액</label><input class="form-input" type="number" id="edit-amount" inputmode="numeric"></div>
         <div><label class="form-label">📅 날짜</label><input class="form-input" type="date" id="edit-date"></div>
       </div>
       <div style="margin-bottom:10px"><label class="form-label">📝 내용</label><input class="form-input" type="text" id="edit-desc"></div>
       <div style="margin-bottom:10px"><label class="form-label">🏷️ 카테고리</label><div id="cat-chips-edit"></div></div>
       <div style="margin-bottom:14px"><label class="form-label">💬 메모</label><textarea class="form-textarea" id="edit-memo"></textarea></div>
+      <div id="edit-installment-wrap" style="display:none;margin-bottom:14px;padding:12px;background:var(--bg);border-radius:12px;border:1px dashed var(--rose-light)">
+        <div style="font-size:12px;font-weight:700;color:var(--rose);margin-bottom:8px">💳 할부 그룹 (총액으로 수정)</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input class="form-input" type="number" id="edit-installment-total" inputmode="numeric" placeholder="총 금액" style="flex:1">
+          <span style="font-size:12px;color:var(--brown3)">원 ÷</span>
+          <span id="edit-installment-months-label" style="font-size:13px;font-weight:700;color:var(--brown);min-width:40px;text-align:center"></span>
+          <span style="font-size:12px;color:var(--brown3)">개월</span>
+        </div>
+        <div id="edit-installment-hint" style="font-size:11px;color:var(--brown2);margin-top:6px"></div>
+        <div style="font-size:10px;color:var(--brown3);margin-top:4px">⚠️ 저장 시 그룹의 모든 회차 금액·내용·카테고리가 함께 갱신돼요</div>
+      </div>
       <button class="submit-btn" id="edit-save-btn">저장하기</button>
     </div>
   </div>
@@ -2232,6 +2251,25 @@ $('detail-close').addEventListener('click',()=>closeM('detail-modal'));
 $('detail-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('detail-modal');});
 
 // ── EDIT ──
+function getInstallmentGroup(gid){
+  return txs.filter(t=>t.installmentGroupId===gid).sort((a,b)=>(a.installmentIndex||0)-(b.installmentIndex||0));
+}
+function updateEditInstallmentHint(){
+  const wrap=$('edit-installment-wrap');
+  if(wrap.style.display==='none') return;
+  const total=parseInt($('edit-installment-total').value)||0;
+  const months=parseInt($('edit-installment-months-label').dataset.months)||1;
+  const hint=$('edit-installment-hint');
+  if(total>0&&months>=2){
+    const per=Math.floor(total/months);
+    const rem=total-per*months;
+    hint.textContent=rem===0
+      ?`월 ${per.toLocaleString('ko-KR')}원씩 ${months}개월`
+      :`${per.toLocaleString('ko-KR')}원 × ${months-1}회 + ${(per+rem).toLocaleString('ko-KR')}원 × 1회`;
+  }else{
+    hint.textContent='';
+  }
+}
 function openEdit(id){
   const tx=txs.find(t=>t.id===id);if(!tx)return;
   editId=id;eType=tx.type;eWho=tx.who||'dohun';eCat=tx.category;
@@ -2240,10 +2278,27 @@ function openEdit(id){
   $('edit-who-dohun').classList.toggle('active',eWho==='dohun');
   $('edit-who-kyungeun').classList.toggle('active',eWho==='kyungeun');
   $('edit-amount').value=tx.amount;$('edit-date').value=tx.date;
-  $('edit-desc').value=tx.desc;$('edit-memo').value=tx.memo||'';
+  $('edit-desc').value=stripInstallmentSuffix(tx.desc)||tx.desc;$('edit-memo').value=tx.memo||'';
   renderChips('cat-chips-edit',eType,eCat);
+  // 할부 그룹 처리
+  const wrap=$('edit-installment-wrap');
+  if(tx.installmentGroupId){
+    const group=getInstallmentGroup(tx.installmentGroupId);
+    const total=group.reduce((s,t)=>s+(t.amount||0),0);
+    const months=tx.installmentTotal||group.length||1;
+    wrap.style.display='block';
+    $('edit-amount-cell').style.display='none';
+    $('edit-installment-total').value=total;
+    const lbl=$('edit-installment-months-label');
+    lbl.textContent=months;lbl.dataset.months=months;
+    updateEditInstallmentHint();
+  }else{
+    wrap.style.display='none';
+    $('edit-amount-cell').style.display='';
+  }
   $('edit-modal').classList.add('open');
 }
+$('edit-installment-total').addEventListener('input',updateEditInstallmentHint);
 $('edit-close').addEventListener('click',()=>closeM('edit-modal'));
 $('edit-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM('edit-modal');});
 $('edit-btn-expense').addEventListener('click',()=>{ eType='expense';$('edit-btn-expense').classList.add('active');$('edit-btn-income').classList.remove('active');eCat=CATS.expense[0].items[0].k;renderChips('cat-chips-edit','expense',eCat); });
@@ -2251,16 +2306,54 @@ $('edit-btn-income').addEventListener('click',()=>{ eType='income';$('edit-btn-i
 $('edit-who-dohun').addEventListener('click',()=>{ eWho='dohun';$('edit-who-dohun').classList.add('active');$('edit-who-kyungeun').classList.remove('active'); });
 $('edit-who-kyungeun').addEventListener('click',()=>{ eWho='kyungeun';$('edit-who-kyungeun').classList.add('active');$('edit-who-dohun').classList.remove('active'); });
 $('edit-save-btn').addEventListener('click',async()=>{
-  const amount=parseInt($('edit-amount').value),date=$('edit-date').value,desc=$('edit-desc').value.trim(),memo=$('edit-memo').value.trim();
-  if(!amount||amount<=0)return toast('금액을 입력해주세요');
+  const editingTx=txs.find(t=>t.id===editId);
+  const isInstallment=!!(editingTx&&editingTx.installmentGroupId);
+  const date=$('edit-date').value,desc=$('edit-desc').value.trim(),memo=$('edit-memo').value.trim();
   if(!date)return toast('날짜를 선택해주세요');
   if(!desc)return toast('내용을 입력해주세요');
-  const reopenDay = _dayModalReopenDay || parseInt(date.split('-')[2]);
-  await updateDoc(doc(db,'transactions',editId),{type:eType,amount,date,desc,memo,category:eCat,who:eWho});
-  closeM('edit-modal'); toast('✅ 수정됐어요!');
-  _dayModalReopenDay = null;
-  // Firestore onSnapshot 콜백 후 재오픈 (데이터 업데이트 보장)
-  if(reopenDay && !isNaN(reopenDay)) _pendingReopenDay = reopenDay;
+  const reopenDay=_dayModalReopenDay||parseInt(date.split('-')[2]);
+  if(isInstallment){
+    const total=parseInt($('edit-installment-total').value)||0;
+    const months=parseInt($('edit-installment-months-label').dataset.months)||1;
+    if(!total||total<months)return toast('총 금액이 개월수보다 작아요');
+    const group=getInstallmentGroup(editingTx.installmentGroupId);
+    // 편집 행이 첫 회차가 아니어도 첫 회차 날짜를 기준으로 재계산 (사용자가 첫 회차 행에서 날짜를 바꾸면 그 날짜가 기준)
+    const firstDateBase=editingTx.installmentIndex===1?date:(group[0]?group[0].date:date);
+    const newRows=buildInstallmentRows({
+      type:eType,totalAmount:total,firstDate:firstDateBase,
+      desc,memo,category:eCat,who:eWho,
+      months,groupId:editingTx.installmentGroupId,
+    });
+    // 편집 행이 첫 회차가 아니면 해당 회차 날짜를 사용자가 바꾼 값으로 덮어씀
+    if(editingTx.installmentIndex&&editingTx.installmentIndex>1){
+      const idx=editingTx.installmentIndex-1;
+      if(newRows[idx]) newRows[idx].date=date;
+    }
+    // 기존 그룹 행에 1:1 매핑하여 update, 모자라거나 남으면 add/delete
+    const ops=[];
+    const existing=group.slice();
+    for(let i=0;i<newRows.length;i++){
+      if(existing[i]){
+        ops.push(updateDoc(doc(db,'transactions',existing[i].id),newRows[i]));
+      }else{
+        ops.push(addDoc(txCol,{...newRows[i],createdAt:new Date().toISOString()}));
+      }
+    }
+    for(let i=newRows.length;i<existing.length;i++){
+      ops.push(deleteDoc(doc(db,'transactions',existing[i].id)));
+    }
+    try{
+      await Promise.all(ops);
+      closeM('edit-modal');toast(`✅ 할부 ${months}회차 갱신됐어요!`);
+    }catch(e){return toast('오류: '+e.message);}
+  }else{
+    const amount=parseInt($('edit-amount').value);
+    if(!amount||amount<=0)return toast('금액을 입력해주세요');
+    await updateDoc(doc(db,'transactions',editId),{type:eType,amount,date,desc,memo,category:eCat,who:eWho});
+    closeM('edit-modal');toast('✅ 수정됐어요!');
+  }
+  _dayModalReopenDay=null;
+  if(reopenDay&&!isNaN(reopenDay)) _pendingReopenDay=reopenDay;
 });
 
 // ── ADD ──
@@ -2379,21 +2472,88 @@ document.querySelectorAll('.quick-chip:not(.op-chip)').forEach(b=>b.addEventList
 }));
 
 
+// ── 할부 헬퍼 ──
+function addMonthsToDate(dateStr,n){
+  const [y,m,d]=dateStr.split('-').map(Number);
+  const target=new Date(y,m-1+n,1);
+  const lastDay=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();
+  const day=Math.min(d,lastDay);
+  return `${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+}
+function stripInstallmentSuffix(desc){
+  return (desc||'').replace(/\s*\(할부\s*\d+\/\d+\)\s*$/,'').trim();
+}
+function newInstallmentGroupId(){
+  if(typeof crypto!=='undefined'&&crypto.randomUUID) return crypto.randomUUID();
+  return 'inst-'+Date.now()+'-'+Math.random().toString(36).slice(2,10);
+}
+function buildInstallmentRows({type,totalAmount,firstDate,desc,memo,category,who,months,groupId}){
+  const base=Math.floor(totalAmount/months);
+  const remainder=totalAmount-base*months;
+  const cleanDesc=stripInstallmentSuffix(desc);
+  const rows=[];
+  for(let i=0;i<months;i++){
+    const amt=base+(i===months-1?remainder:0);
+    rows.push({
+      type,amount:amt,
+      date:addMonthsToDate(firstDate,i),
+      desc:`${cleanDesc} (할부 ${i+1}/${months})`,
+      memo,category,who,
+      installmentGroupId:groupId,
+      installmentIndex:i+1,
+      installmentTotal:months,
+    });
+  }
+  return rows;
+}
+function expandForSave(item){
+  const n=item.installmentMonths||1;
+  if(n<=1){
+    const {installmentMonths,...rest}=item;
+    return [rest];
+  }
+  return buildInstallmentRows({
+    type:item.type,totalAmount:item.amount,firstDate:item.date,
+    desc:item.desc,memo:item.memo,category:item.category,who:item.who,
+    months:n,groupId:newInstallmentGroupId(),
+  });
+}
+function updateInstallmentHint(){
+  const months=parseInt($('inp-installment').value)||1;
+  const amt=finalizeCalc();
+  const hint=$('installment-hint');
+  if(months>=2&&amt>0){
+    const per=Math.floor(amt/months);
+    const rem=amt-per*months;
+    if(rem===0){
+      hint.textContent=`💳 월 ${per.toLocaleString('ko-KR')}원씩 ${months}개월 (총 ${amt.toLocaleString('ko-KR')}원)`;
+    }else{
+      hint.textContent=`💳 ${per.toLocaleString('ko-KR')}원 × ${months-1}회 + ${(per+rem).toLocaleString('ko-KR')}원 × 1회 (총 ${amt.toLocaleString('ko-KR')}원)`;
+    }
+  }else{
+    hint.textContent='';
+  }
+}
+
 // ── 일괄추가 로직 ──
 let batchList=[];
 
 function getBatchItem(){
   const amount=finalizeCalc();
   const date=$('inp-date').value,desc=$('inp-desc').value.trim(),memo=$('inp-memo').value.trim();
+  const installmentMonths=Math.max(1,parseInt($('inp-installment').value)||1);
   if(!amount||amount<=0){toast('금액을 입력해주세요');return null;}
   if(!date){toast('날짜를 선택해주세요');return null;}
   if(!desc){toast('내용을 입력해주세요');return null;}
-  return {type:cType,amount,date,desc,memo,category:aCat,who:cWho};
+  if(installmentMonths>1&&amount<installmentMonths){toast('할부 금액이 개월수보다 작아요');return null;}
+  return {type:cType,amount,date,desc,memo,category:aCat,who:cWho,installmentMonths};
 }
 
 function clearInputFields(){
   resetCalc();
   $('inp-desc').value='';$('inp-memo').value='';
+  $('inp-installment').value='1';
+  updateInstallmentHint();
 }
 
 function renderBatchList(){
@@ -2410,13 +2570,18 @@ function renderBatchList(){
     const typeLabel=it.type==='expense'?'지출':'수입';
     const color=it.type==='expense'?'var(--rose)':'var(--green)';
     const catE=getE(it.category);
+    const instBadge=(it.installmentMonths||1)>1?` <span style="font-size:9px;font-weight:800;color:white;background:var(--rose);padding:2px 6px;border-radius:99px">💳 ${it.installmentMonths}개월</span>`:'';
+    const perMonth=(it.installmentMonths||1)>1?`<div style="font-size:10px;color:var(--brown3);margin-top:2px">월 ${Math.floor(it.amount/it.installmentMonths).toLocaleString('ko-KR')}원</div>`:'';
     return `<div class="batch-item">
       <div class="batch-item-info">
-        <div class="batch-item-desc">${catE} ${it.desc}</div>
+        <div class="batch-item-desc">${catE} ${it.desc}${instBadge}</div>
         <div class="batch-item-sub">${it.date} · ${typeLabel} · ${whoLabel}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div class="batch-item-amt" style="color:${color}">${it.amount.toLocaleString('ko-KR')}원</div>
+        <div style="text-align:right">
+          <div class="batch-item-amt" style="color:${color}">${it.amount.toLocaleString('ko-KR')}원</div>
+          ${perMonth}
+        </div>
         <button class="batch-item-del" data-i="${i}">✕</button>
       </div>
     </div>`;
@@ -2446,8 +2611,9 @@ $('batch-save-btn').addEventListener('click',async()=>{
   $('batch-save-btn').textContent='저장 중...';
   $('batch-save-btn').disabled=true;
   try{
-    await Promise.all(batchList.map(it=>addDoc(txCol,{...it,createdAt:new Date().toISOString()})));
-    toast(`✅ ${batchList.length}건 저장됐어요!`);
+    const allRows=batchList.flatMap(expandForSave);
+    await Promise.all(allRows.map(it=>addDoc(txCol,{...it,createdAt:new Date().toISOString()})));
+    toast(`✅ ${allRows.length}건 저장됐어요!`);
     batchList=[];renderBatchList();
   }catch(e){toast('오류: '+e.message);}
   finally{$('batch-save-btn').textContent='💾 일괄 저장하기';$('batch-save-btn').disabled=false;}
@@ -2457,11 +2623,17 @@ $('submit-btn').addEventListener('click',async()=>{
   const item=getBatchItem();
   if(!item) return;
   try{
-    await addDoc(txCol,{...item,createdAt:new Date().toISOString()});
+    const rows=expandForSave(item);
+    await Promise.all(rows.map(it=>addDoc(txCol,{...it,createdAt:new Date().toISOString()})));
     clearInputFields();
-    toast('✅ 추가됐어요!');
+    toast(rows.length>1?`✅ 할부 ${rows.length}개월로 저장됐어요!`:'✅ 추가됐어요!');
   }catch(e){toast('오류: '+e.message);}
 });
+
+// 할부 입력/금액 변경 시 미리보기 갱신
+$('inp-installment').addEventListener('input',updateInstallmentHint);
+$('inp-amount').addEventListener('input',updateInstallmentHint);
+document.querySelectorAll('.quick-chip').forEach(b=>b.addEventListener('click',()=>{ setTimeout(updateInstallmentHint,0); }));
 
 // ── 카테고리 편집 MODAL ──
 $('open-cat-edit-btn').addEventListener('click',()=>{
