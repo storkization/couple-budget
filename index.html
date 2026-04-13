@@ -33,7 +33,17 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .hidden{display:none!important}
 
 /* LOGIN */
-#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(160deg,#fff4b8 0%,#ffe9c4 22%,#ffe0d4 48%,#ffd0e0 72%,#ffb8d1 100%)}
+#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(160deg,#fff0d6 0%,#ffdce6 16%,#ffc4d8 42%,#ffabc6 72%,#ff93b8 100%);position:relative;overflow:hidden}
+#login-screen>div{position:relative;z-index:1}
+.petal{position:absolute;top:-12%;pointer-events:none;animation:petal-fall linear infinite;opacity:0.85;z-index:0;will-change:transform;filter:drop-shadow(0 1px 2px rgba(255,120,150,0.25))}
+@keyframes petal-fall{
+  0%{transform:translate3d(0,-12vh,0) rotate(0deg)}
+  25%{transform:translate3d(18px,25vh,0) rotate(120deg)}
+  50%{transform:translate3d(-12px,55vh,0) rotate(225deg)}
+  75%{transform:translate3d(22px,80vh,0) rotate(315deg)}
+  100%{transform:translate3d(0,115vh,0) rotate(440deg)}
+}
+@media (prefers-reduced-motion:reduce){.petal{animation:none;display:none}}
 .couple-photo-wrap{width:130px;height:130px;border-radius:50%;overflow:hidden;margin-bottom:18px;border:4px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 2px rgba(255,255,255,0.15);animation:pulse 3s ease-in-out infinite}
 .couple-photo{width:100%;height:100%;object-fit:cover}
 .photo-fb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(135deg,var(--rose-light),var(--kyungeun-light))}
@@ -298,15 +308,27 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <!-- LOGIN -->
 <div id="login-screen">
+  <span class="petal" style="left:5%;font-size:14px;animation-duration:9s;animation-delay:0s">🌸</span>
+  <span class="petal" style="left:12%;font-size:20px;animation-duration:11s;animation-delay:1.5s">🌸</span>
+  <span class="petal" style="left:22%;font-size:16px;animation-duration:8s;animation-delay:0.5s">🌸</span>
+  <span class="petal" style="left:32%;font-size:22px;animation-duration:13s;animation-delay:3s">🌸</span>
+  <span class="petal" style="left:42%;font-size:14px;animation-duration:10s;animation-delay:2s">🌸</span>
+  <span class="petal" style="left:52%;font-size:18px;animation-duration:9s;animation-delay:0.8s">🌸</span>
+  <span class="petal" style="left:62%;font-size:24px;animation-duration:12s;animation-delay:4s">🌸</span>
+  <span class="petal" style="left:72%;font-size:14px;animation-duration:8s;animation-delay:1s">🌸</span>
+  <span class="petal" style="left:80%;font-size:20px;animation-duration:11s;animation-delay:2.5s">🌸</span>
+  <span class="petal" style="left:88%;font-size:16px;animation-duration:9s;animation-delay:0s">🌸</span>
+  <span class="petal" style="left:18%;font-size:18px;animation-duration:14s;animation-delay:5s">🌸</span>
+  <span class="petal" style="left:68%;font-size:14px;animation-duration:10s;animation-delay:6s">🌸</span>
   <div class="couple-photo-wrap">
     <img src="pic/introcouple.jpg" class="couple-photo" alt="도훈 & 경은"
          onerror="this.parentElement.innerHTML='<div class=\'photo-fb\'>❤️</div>'">
   </div>
   <div style="text-align:center;margin-bottom:20px">
-    <div style="font-size:10px;font-weight:700;letter-spacing:4px;color:#ffd580;text-transform:uppercase;margin-bottom:12px">✦ Our Money Diary ✦</div>
-    <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:8px;letter-spacing:0.5px">경은이와 도훈이의</div>
-    <div style="font-size:30px;font-weight:900;color:white;line-height:1.4;letter-spacing:-0.5px;text-shadow:0 2px 20px rgba(255,180,180,0.5)">부자되는<br>커플 가계부</div>
-    <div style="font-size:32px;margin-top:10px;animation:heartbeat 1.2s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(255,100,120,0.8))">💗</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:4px;color:#c9963a;text-transform:uppercase;margin-bottom:12px">✦ Our Money Diary ✦</div>
+    <div style="font-size:15px;font-weight:600;color:#7a5c4a;margin-bottom:8px;letter-spacing:0.5px">경은이와 도훈이의</div>
+    <div style="font-size:30px;font-weight:900;color:#c45c40;line-height:1.4;letter-spacing:-0.5px;text-shadow:0 2px 14px rgba(255,255,255,0.6)">부자되는<br>커플 가계부</div>
+    <div style="font-size:32px;margin-top:10px;animation:heartbeat 1.2s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(255,100,120,0.6))">💗</div>
   </div>
   <div class="login-notice">📱 팝업이 차단되면 브라우저에서 팝업을 허용해 주세요</div>
   <button class="google-btn" id="login-btn">
