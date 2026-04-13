@@ -2138,10 +2138,11 @@ function renderSummary(){
 function txH(tx){
   const wc=tx.who==='kyungeun'?'k':'d',wl=tx.who==='kyungeun'?'경은':'도훈';
   const sign=tx.type==='expense'?'-':'+';
+  const instBadge=tx.installmentGroupId?`<span style="display:inline-block;font-size:9px;font-weight:800;color:white;background:var(--rose);padding:2px 6px;border-radius:99px;margin-left:4px;vertical-align:middle">💳 ${tx.installmentIndex||'?'}/${tx.installmentTotal||'?'}</span>`:'';
   return `<div class="tx-item ${tx.type}" data-id="${tx.id}">
     <div class="tx-emoji ${tx.type}">${getE(tx.category)}</div>
     <div class="tx-mid">
-      <div class="tx-desc">${tx.desc}</div>
+      <div class="tx-desc">${stripInstallmentSuffix(tx.desc)||tx.desc}${instBadge}</div>
       <div class="tx-meta"><span class="tx-cat">${tx.category||''}</span><span class="tx-who ${wc}">${wl}</span></div>
       ${tx.memo?`<div class="tx-memo-lbl">💬 ${tx.memo}</div>`:''}
     </div>
@@ -2206,11 +2207,29 @@ function openDetail(id){
   const tx=txs.find(t=>t.id===id);if(!tx)return;
   const sign=tx.type==='expense'?'-':'+',color=tx.type==='expense'?'var(--rose)':'var(--green)';
   $('detail-title').textContent=`${getE(tx.category)} ${tx.desc}`;
+  // 할부 그룹 정보 블록
+  let installmentBlock='';
+  if(tx.installmentGroupId){
+    const group=getInstallmentGroup(tx.installmentGroupId);
+    const totalAmount=group.reduce((s,t)=>s+(t.amount||0),0);
+    const months=tx.installmentTotal||group.length||1;
+    const idx=tx.installmentIndex||'?';
+    const firstRow=group.find(t=>t.installmentIndex===1);
+    const firstDate=firstRow?firstRow.date:tx.date;
+    installmentBlock=`<div style="background:linear-gradient(135deg,var(--rose-light),var(--gold-light));border-radius:12px;padding:12px;margin-bottom:14px;border:1px solid var(--rose-light)">
+      <div style="font-size:11px;font-weight:800;color:var(--rose);margin-bottom:8px;letter-spacing:0.3px">💳 할부 ${months}개월 · ${idx}회차</div>
+      ${dr('📦 총 금액',fmtFull(totalAmount))}
+      ${dr('🗓️ 첫 회차',fmtDate(firstDate))}
+      ${dr('📊 진행',`${idx}/${months} (${group.length}건 등록됨)`)}
+    </div>`;
+  }
   $('detail-body').innerHTML=`
     <div style="text-align:center;margin-bottom:16px">
       <div style="font-size:36px;margin-bottom:6px">${getE(tx.category)}</div>
       <div style="font-size:26px;font-weight:800;color:${color}">${sign}${fmtFull(Number(tx.amount))}</div>
+      ${tx.installmentGroupId?`<div style="font-size:11px;color:var(--brown3);margin-top:4px">이번 달 회차 금액</div>`:''}
     </div>
+    ${installmentBlock}
     <div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:14px">
       ${dr('📅 날짜',fmtDate(tx.date))}${dr('🏷️ 카테고리',`${getE(tx.category)} ${tx.category}`)}${dr('👤 누가',tx.who==='kyungeun'?'🩷 경은':'💙 도훈')}${tx.memo?dr('💬 메모',tx.memo):''}
     </div>
