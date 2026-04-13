@@ -33,17 +33,16 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 .hidden{display:none!important}
 
 /* LOGIN */
-#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(160deg,#fff0d6 0%,#ffdce6 16%,#ffc4d8 42%,#ffabc6 72%,#ff93b8 100%);position:relative;overflow:hidden}
+#login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(160deg,#ffeaa0 0%,#fff0c0 8%,#ffe0d0 22%,#ffc8d8 48%,#ffb0c8 78%,#ff96bc 100%);position:relative;overflow:hidden}
 #login-screen>div{position:relative;z-index:1}
-.petal{position:absolute;top:-12%;pointer-events:none;animation:petal-fall linear infinite;opacity:0.85;z-index:0;will-change:transform;filter:drop-shadow(0 1px 2px rgba(255,120,150,0.25))}
+.petal{position:absolute;top:0;left:0;pointer-events:none;animation:petal-fall linear infinite;opacity:0.9;z-index:0;will-change:transform;filter:drop-shadow(0 1px 3px rgba(255,120,150,0.3))}
 @keyframes petal-fall{
-  0%{transform:translate3d(0,-12vh,0) rotate(0deg)}
-  25%{transform:translate3d(18px,25vh,0) rotate(120deg)}
-  50%{transform:translate3d(-12px,55vh,0) rotate(225deg)}
-  75%{transform:translate3d(22px,80vh,0) rotate(315deg)}
-  100%{transform:translate3d(0,115vh,0) rotate(440deg)}
+  0%{transform:translate3d(0,-15vh,0) rotate(0deg)}
+  25%{transform:translate3d(22px,28vh,0) rotate(120deg)}
+  50%{transform:translate3d(-18px,55vh,0) rotate(225deg)}
+  75%{transform:translate3d(26px,82vh,0) rotate(315deg)}
+  100%{transform:translate3d(0,118vh,0) rotate(440deg)}
 }
-@media (prefers-reduced-motion:reduce){.petal{animation:none;display:none}}
 .couple-photo-wrap{width:130px;height:130px;border-radius:50%;overflow:hidden;margin-bottom:18px;border:4px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 2px rgba(255,255,255,0.15);animation:pulse 3s ease-in-out infinite}
 .couple-photo{width:100%;height:100%;object-fit:cover}
 .photo-fb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(135deg,var(--rose-light),var(--kyungeun-light))}
@@ -308,18 +307,34 @@ body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--brown)
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <span class="petal" style="left:5%;font-size:14px;animation-duration:9s;animation-delay:0s">🌸</span>
-  <span class="petal" style="left:12%;font-size:20px;animation-duration:11s;animation-delay:1.5s">🌸</span>
-  <span class="petal" style="left:22%;font-size:16px;animation-duration:8s;animation-delay:0.5s">🌸</span>
-  <span class="petal" style="left:32%;font-size:22px;animation-duration:13s;animation-delay:3s">🌸</span>
-  <span class="petal" style="left:42%;font-size:14px;animation-duration:10s;animation-delay:2s">🌸</span>
-  <span class="petal" style="left:52%;font-size:18px;animation-duration:9s;animation-delay:0.8s">🌸</span>
-  <span class="petal" style="left:62%;font-size:24px;animation-duration:12s;animation-delay:4s">🌸</span>
-  <span class="petal" style="left:72%;font-size:14px;animation-duration:8s;animation-delay:1s">🌸</span>
-  <span class="petal" style="left:80%;font-size:20px;animation-duration:11s;animation-delay:2.5s">🌸</span>
-  <span class="petal" style="left:88%;font-size:16px;animation-duration:9s;animation-delay:0s">🌸</span>
-  <span class="petal" style="left:18%;font-size:18px;animation-duration:14s;animation-delay:5s">🌸</span>
-  <span class="petal" style="left:68%;font-size:14px;animation-duration:10s;animation-delay:6s">🌸</span>
+  <span class="petal" style="left:3%;font-size:18px;animation-duration:7s;animation-delay:-2s">🌸</span>
+  <span class="petal" style="left:8%;font-size:14px;animation-duration:9s;animation-delay:-5s">🌸</span>
+  <span class="petal" style="left:12%;font-size:24px;animation-duration:8s;animation-delay:-1s">🌸</span>
+  <span class="petal" style="left:16%;font-size:16px;animation-duration:10s;animation-delay:-7s">🌸</span>
+  <span class="petal" style="left:20%;font-size:20px;animation-duration:6s;animation-delay:-3s">🌸</span>
+  <span class="petal" style="left:24%;font-size:14px;animation-duration:11s;animation-delay:0s">🌸</span>
+  <span class="petal" style="left:28%;font-size:28px;animation-duration:9s;animation-delay:-4s">🌸</span>
+  <span class="petal" style="left:32%;font-size:16px;animation-duration:7s;animation-delay:-6s">🌸</span>
+  <span class="petal" style="left:36%;font-size:18px;animation-duration:10s;animation-delay:-1.5s">🌸</span>
+  <span class="petal" style="left:40%;font-size:22px;animation-duration:8s;animation-delay:-3.5s">🌸</span>
+  <span class="petal" style="left:44%;font-size:14px;animation-duration:11s;animation-delay:-8s">🌸</span>
+  <span class="petal" style="left:48%;font-size:26px;animation-duration:9s;animation-delay:-2.5s">🌸</span>
+  <span class="petal" style="left:52%;font-size:16px;animation-duration:6s;animation-delay:-0.5s">🌸</span>
+  <span class="petal" style="left:56%;font-size:20px;animation-duration:10s;animation-delay:-5.5s">🌸</span>
+  <span class="petal" style="left:60%;font-size:14px;animation-duration:8s;animation-delay:-1s">🌸</span>
+  <span class="petal" style="left:64%;font-size:24px;animation-duration:11s;animation-delay:-4.5s">🌸</span>
+  <span class="petal" style="left:68%;font-size:18px;animation-duration:7s;animation-delay:-2s">🌸</span>
+  <span class="petal" style="left:72%;font-size:16px;animation-duration:9s;animation-delay:-6.5s">🌸</span>
+  <span class="petal" style="left:76%;font-size:22px;animation-duration:10s;animation-delay:-3s">🌸</span>
+  <span class="petal" style="left:80%;font-size:14px;animation-duration:8s;animation-delay:-7.5s">🌸</span>
+  <span class="petal" style="left:84%;font-size:20px;animation-duration:11s;animation-delay:-1.5s">🌸</span>
+  <span class="petal" style="left:88%;font-size:16px;animation-duration:6s;animation-delay:-4s">🌸</span>
+  <span class="petal" style="left:92%;font-size:26px;animation-duration:9s;animation-delay:-0.5s">🌸</span>
+  <span class="petal" style="left:96%;font-size:14px;animation-duration:10s;animation-delay:-5s">🌸</span>
+  <span class="petal" style="left:14%;font-size:30px;animation-duration:12s;animation-delay:-3.5s">🌸</span>
+  <span class="petal" style="left:50%;font-size:32px;animation-duration:13s;animation-delay:-6s">🌸</span>
+  <span class="petal" style="left:78%;font-size:28px;animation-duration:11s;animation-delay:-8s">🌸</span>
+  <span class="petal" style="left:38%;font-size:24px;animation-duration:9s;animation-delay:-1s">🌸</span>
   <div class="couple-photo-wrap">
     <img src="pic/introcouple.jpg" class="couple-photo" alt="도훈 & 경은"
          onerror="this.parentElement.innerHTML='<div class=\'photo-fb\'>❤️</div>'">
