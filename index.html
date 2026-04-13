@@ -2185,12 +2185,27 @@ function openDetail(id){
   $('det-edit').onclick=()=>{closeM('detail-modal');openEdit(id);};
   $('det-del').onclick=async()=>{
     closeM('detail-modal');
-    if(!confirm('삭제할까요?'))return;
-    const reopenDay = _dayModalReopenDay;
-    await deleteDoc(doc(db,'transactions',id));
-    toast('🗑️ 삭제됐어요');
-    _dayModalReopenDay = null;
-    if(reopenDay && !isNaN(reopenDay)) _pendingReopenDay = reopenDay;
+    const tx=txs.find(t=>t.id===id);
+    const reopenDay=_dayModalReopenDay;
+    if(tx&&tx.installmentGroupId){
+      const group=txs.filter(t=>t.installmentGroupId===tx.installmentGroupId);
+      const n=group.length;
+      const all=confirm(`💳 이건 ${tx.installmentTotal||n}개월 할부의 ${tx.installmentIndex||'?'}회차예요.\n\n[확인] 할부 ${n}건 전체 삭제\n[취소] 다음 단계로`);
+      if(all){
+        await Promise.all(group.map(t=>deleteDoc(doc(db,'transactions',t.id))));
+        toast(`🗑️ 할부 ${n}건 모두 삭제됐어요`);
+      }else{
+        if(!confirm('이 한 건만 삭제할까요?\n(나머지 회차는 그대로 유지)'))return;
+        await deleteDoc(doc(db,'transactions',id));
+        toast('🗑️ 한 건만 삭제됐어요');
+      }
+    }else{
+      if(!confirm('삭제할까요?'))return;
+      await deleteDoc(doc(db,'transactions',id));
+      toast('🗑️ 삭제됐어요');
+    }
+    _dayModalReopenDay=null;
+    if(reopenDay&&!isNaN(reopenDay)) _pendingReopenDay=reopenDay;
   };
 }
 const dr=(l,v)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--brown3)">${l}</span><span style="font-size:12px;font-weight:600">${v}</span></div>`;
